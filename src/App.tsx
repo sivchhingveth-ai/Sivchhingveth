@@ -17,7 +17,7 @@ import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotifica
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('Overview');
-  const tabs = ['Overview', 'Savings', 'Schedule', 'Analytics'];
+  const tabs = ['Overview', 'Habits', 'Savings', 'Schedule', 'Analytics'];
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
@@ -326,6 +326,17 @@ export default function App() {
             onAddExpense={openAddExpense}
           />
         )}
+        {activeTab === 'Habits' && (
+          <Habits
+            habits={habits}
+            onToggleHabit={toggleHabit}
+            onDeleteHabit={confirmDeleteHabit}
+            onAddHabit={openAddHabit}
+            onEditHabit={openEditHabit}
+            currentMonth={viewDate}
+            onMonthChange={setViewDate}
+          />
+        )}
         {activeTab === 'Savings' && <Savings savings={savings} onDeleteGoal={confirmDeleteGoal} onAddGoal={openAddGoal} />}
         {activeTab === 'Schedule' && (
           <div className="flex flex-col">
@@ -339,17 +350,6 @@ export default function App() {
               onDeleteRoutine={confirmDeleteRoutine}
               onAddRoutine={openAddRoutine}
             />
-            <div className="mt-12 border-t border-[#2f3336] pt-12">
-              <Habits
-                habits={habits}
-                onToggleHabit={toggleHabit}
-                onDeleteHabit={confirmDeleteHabit}
-                onAddHabit={openAddHabit}
-                onEditHabit={openEditHabit}
-                currentMonth={viewDate}
-                onMonthChange={setViewDate}
-              />
-            </div>
           </div>
         )}
         {activeTab === 'Analytics' && <Analytics habits={habits} tasks={tasks} />}

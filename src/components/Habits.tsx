@@ -180,7 +180,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
           const style = getCategoryStyles(habit.category);
           
           return (
-            <div key={habit.id} className="bg-white/[0.02] border border-[#2f3336] rounded-2xl p-4 hover:bg-white/[0.04] transition-all group relative flex items-center overflow-hidden">
+            <div key={habit.id} className="bg-white/[0.02] border border-[#2f3336] rounded-2xl p-4 hover:bg-white/[0.04] transition-all group relative flex flex-col md:flex-row md:items-center overflow-hidden gap-4">
                {/* Background Water Fill Effect */}
                <div className="absolute inset-0 overflow-hidden pointer-events-none">
                  <div 
@@ -189,9 +189,8 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                  />
                </div>
 
-               <div className="relative z-10 flex items-center w-full">
-                  {/* LEFT SECTION: Identity */}
-                  <div className="flex items-center gap-4 w-[320px] shrink-0">
+               <div className="relative z-10 flex items-center justify-between md:justify-start md:w-[320px] shrink-0 gap-4">
+                  <div className="flex items-center gap-4 min-w-0">
                     <div className="relative w-12 h-12 shrink-0">
                       <svg className="w-full h-full -rotate-90">
                         <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
@@ -220,58 +219,80 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                       </h4>
                     </div>
                   </div>
+                  
+                  {/* Actions (visible on mobile next to identity) */}
+                  <div className="flex gap-0.5 md:hidden">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
+                      className="p-2 text-[#71767b] hover:text-x-blue transition-all"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
+                      className="p-2 text-[#71767b] hover:text-red-500 transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+               </div>
 
-                  {/* CENTER SECTION: Heatmap */}
-                  <div className="flex-1 hidden xl:flex justify-center px-10">
-                    <div className="flex gap-1.5 flex-wrap justify-center max-w-[500px]">
-                      {days.map(d => (
+               {/* CENTER SECTION: Heatmap (Hidden on small mobile) */}
+               <div className="flex-1 hidden md:flex justify-center px-4">
+                  <div className="flex gap-1.5 flex-wrap justify-center max-w-[500px]">
+                    {days.slice(-14).map(d => ( // Show last 14 days on smaller desktop/tablet
+                      <div key={d.dayNum} className="relative group/day">
+                        <div 
+                          className={`w-2.5 h-2.5 rounded-[1px] transition-all border
+                            ${habit.history[d.dateStr] ? 'border-transparent' : 'bg-transparent border-[#2f3336]'}`}
+                          style={habit.history[d.dateStr] ? { backgroundColor: style.hex, boxShadow: `0 0 8px ${style.hex}4d` } : {}}
+                        />
+                      </div>
+                    ))}
+                    {/* Full month on very large screens */}
+                    <div className="hidden lg:flex gap-1.5 ml-1.5 border-l border-[#2f3336]/30 pl-1.5">
+                       {days.slice(0, -14).map(d => (
                         <div key={d.dayNum} className="relative group/day">
                           <div 
                             className={`w-2.5 h-2.5 rounded-[1px] transition-all border
                               ${habit.history[d.dateStr] ? 'border-transparent' : 'bg-transparent border-[#2f3336]'}`}
                             style={habit.history[d.dateStr] ? { backgroundColor: style.hex, boxShadow: `0 0 8px ${style.hex}4d` } : {}}
                           />
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/day:flex flex-col items-center pointer-events-none z-50 animate-slide-up">
-                            <div className="px-2 py-1 bg-[#16181c] text-[#eff3f4] text-[9px] font-bold rounded border border-[#2f3336] shadow-2xl whitespace-nowrap">
-                              {d.label}: {habit.history[d.dateStr] ? 'Done' : 'Skip'}
-                            </div>
-                            <div className="w-1.5 h-1.5 bg-[#16181c] border-r border-b border-[#2f3336] rotate-45 -mt-[3px]" />
-                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
+               </div>
 
-                  {/* RIGHT SECTION: Stats & Actions */}
-                  <div className="flex items-center gap-6 ml-auto shrink-0">
-                    <div className="w-[120px] space-y-2">
-                      <div className="flex justify-between items-end">
-                        <span className="text-[16px] font-black text-[#eff3f4]">
-                          {totalMonthly}<span className="text-[11px] text-[#71767b]">/{target}</span>
-                        </span>
-                        <span className="text-[9px] font-black text-[#71767b] uppercase tracking-tighter">
-                          {habit.monthlyTarget ? 'Target' : 'Monthly'}
-                        </span>
-                      </div>
+               {/* RIGHT SECTION: Stats & Desktop Actions */}
+               <div className="flex items-center justify-between md:justify-end gap-6 md:ml-auto shrink-0 w-full md:w-auto">
+                  <div className="flex-1 md:w-[120px] space-y-2">
+                    <div className="flex justify-between items-end">
+                      <span className="text-[16px] font-black text-[#eff3f4]">
+                        {totalMonthly}<span className="text-[11px] text-[#71767b]">/{target}</span>
+                      </span>
+                      <span className="text-[9px] font-black text-[#71767b] uppercase tracking-tighter">
+                        {habit.monthlyTarget ? 'Target' : 'Monthly'}
+                      </span>
+                    </div>
                     <div className="w-full h-1.5 bg-white/[0.03] border border-white/20 rounded-full overflow-hidden">
                        <div className="h-full transition-all duration-1000" style={{ width: `${completionRate}%`, backgroundColor: style.hex }} />
                     </div>
-                    </div>
+                  </div>
 
-                    <div className="flex gap-0.5 border-l border-[#2f3336] pl-3">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
-                        className="p-2 text-[#71767b] hover:text-x-blue transition-all opacity-40 group-hover:opacity-100"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
-                        className="p-2 text-[#71767b] hover:text-red-500 transition-all opacity-40 group-hover:opacity-100"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                  <div className="hidden md:flex gap-0.5 border-l border-[#2f3336] pl-3">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
+                      className="p-2 text-[#71767b] hover:text-x-blue transition-all opacity-40 group-hover:opacity-100"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
+                      className="p-2 text-[#71767b] hover:text-red-500 transition-all opacity-40 group-hover:opacity-100"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                </div>
             </div>
