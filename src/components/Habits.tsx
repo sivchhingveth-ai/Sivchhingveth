@@ -211,9 +211,6 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                     </div>
 
                     <div className="overflow-hidden">
-                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md mb-1.5 inline-block ${style.bg} ${style.text}`}>
-                        {habit.category}
-                      </span>
                       <h4 className="text-[15px] font-black text-[#eff3f4] uppercase tracking-tight truncate leading-tight">
                         {habit.name}
                       </h4>

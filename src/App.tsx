@@ -17,7 +17,7 @@ import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotifica
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('Overview');
-  const tabs = ['Overview', 'Habits', 'Savings', 'Schedule', 'Analytics'];
+  const tabs = ['Overview', 'Schedule', 'Habits', 'Savings', 'Analytics'];
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);

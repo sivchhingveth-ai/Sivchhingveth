@@ -36,9 +36,6 @@ const TaskItem: React.FC<{
           <p className={`text-[17px] font-bold tracking-tight transition-colors ${isDone ? 'line-through text-[#71767b]' : 'text-[#eff3f4]'}`}>
             {habit.name}
           </p>
-          <span className={`text-[11px] font-black uppercase px-2 py-0.5 rounded border ${getCategoryStyles(habit.category).bg} ${getCategoryStyles(habit.category).text} ${getCategoryStyles(habit.category).border}`}>
-            {habit.category}
-          </span>
         </div>
       </div>
       <button 
