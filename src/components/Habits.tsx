@@ -153,12 +153,12 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
           <Activity className="w-4 h-4" />
           Activity Map (90 Days)
         </h3>
-        <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-6 pt-12 rounded-3xl overflow-visible relative">
-          <div className="flex flex-wrap gap-1.5 min-w-[300px] justify-start content-start">
+        <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-4 md:p-6 pt-10 md:pt-12 rounded-3xl relative" style={{ overflowX: 'clip', overflowY: 'visible' }}>
+          <div className="grid gap-[5px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(11px, 1fr))' }}>
             {heatmapData.map((d, i) => {
-              // Cells near the left edge need right-aligned tooltips to avoid clipping
-              const isNearLeftEdge = i % 30 < 3;
-              const isNearRightEdge = i % 30 > 26;
+              // Edge detection: first 3 and last 3 cells in any row
+              const isNearLeftEdge = i < 3;
+              const isNearRightEdge = i > 86;
               const tooltipPositionClass = isNearLeftEdge 
                 ? 'left-0' 
                 : isNearRightEdge 
@@ -175,7 +175,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                 <div 
                   key={i}
                   onClick={() => handleCellTap(i)}
-                  className={`w-[13px] h-[13px] rounded-[2px] transition-all cursor-pointer relative group border
+                  className={`aspect-square rounded-[2px] transition-all cursor-pointer relative group border
                     ${d.level === 0 ? 'bg-transparent border-[#2f3336]' : 
                       d.level < 0.3 ? 'bg-[#00ba7c]/20 border-[#00ba7c]/10' : 
                       d.level < 0.7 ? 'bg-[#00ba7c]/50 border-[#00ba7c]/20' : 
