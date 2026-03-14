@@ -98,8 +98,8 @@ export function Overview({
       <div className="p-6 border-b border-[#2f3336] hover:bg-white/[0.01] transition-colors group cursor-pointer" onClick={() => setActiveTab('Habits')}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[20px] font-black text-[#eff3f4]">Daily Habits</h2>
-          <div className="flex items-center gap-2 text-[#71767b] group-hover:text-[#1d9bf0] transition-colors">
-            <span className="text-[14px] font-bold">{completedHabits}/{habits.length} Completed</span>
+          <div className="flex items-center gap-2 text-[#8b98a5] group-hover:text-x-blue transition-colors">
+            <span className="text-[14px] font-black">{completedHabits}/{habits.length} Completed</span>
             <ChevronRight className="w-4 h-4" />
           </div>
         </div>
@@ -129,8 +129,8 @@ export function Overview({
       <div className="p-6 border-b border-[#2f3336] hover:bg-white/[0.01] transition-colors group cursor-pointer" onClick={() => setActiveTab('Schedule')}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[20px] font-black text-[#eff3f4]">Upcoming</h2>
-          <div className="flex items-center gap-2 text-[#71767b] group-hover:text-[#1d9bf0] transition-colors">
-            <span className="text-[14px] font-bold">View Schedule</span>
+          <div className="flex items-center gap-2 text-[#8b98a5] group-hover:text-x-blue transition-colors">
+            <span className="text-[14px] font-black">View Schedule</span>
             <ChevronRight className="w-4 h-4" />
           </div>
         </div>
@@ -155,14 +155,14 @@ export function Overview({
       <div className="p-6 hover:bg-white/[0.01] transition-colors group cursor-pointer" onClick={() => setActiveTab('Savings')}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[20px] font-black text-[#eff3f4]">Finances</h2>
-          <div className="flex items-center gap-2 text-[#71767b] group-hover:text-[#1d9bf0] transition-colors">
-            <span className="text-[14px] font-bold">Manage Wallet</span>
+          <div className="flex items-center gap-2 text-[#8b98a5] group-hover:text-x-blue transition-colors">
+            <span className="text-[14px] font-black">Manage Wallet</span>
             <ChevronRight className="w-4 h-4" />
           </div>
         </div>
         
         <div className="bg-white/[0.03] rounded-2xl p-5 border border-[#2f3336]">
-          <p className="text-[#71767b] text-[14px] font-bold uppercase tracking-tight">Total Balance</p>
+          <p className="text-[#8b98a5] text-[14px] font-black uppercase tracking-tight">Total Balance</p>
           <p className="text-4xl font-black text-[#eff3f4] mt-1 mb-6">${budgetStats.balance.toLocaleString()}</p>
           
           <div className="space-y-3">
@@ -170,7 +170,7 @@ export function Overview({
               <span className="text-[#71767b] text-[14px] font-bold">Monthly Budget</span>
               <span className="text-[#eff3f4] font-bold">${budgetStats.budgetLeft} / ${budgetStats.monthlyBudget}</span>
             </div>
-            <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-white/[0.03] border border-white/20 h-2.5 rounded-full overflow-hidden">
               <div 
                 className="bg-[#00ba7c] h-full transition-all duration-1000" 
                 style={{ width: `${(budgetStats.budgetLeft/budgetStats.monthlyBudget)*100}%` }} 

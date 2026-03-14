@@ -82,7 +82,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
               <Activity className="w-5 h-5 text-x-blue" />
               <span className="text-[16px] font-black text-[#eff3f4]">Productivity Heatmap</span>
             </div>
-            <span className="text-[12px] font-bold text-[#71767b] uppercase tracking-widest">{view} focus</span>
+            <span className="text-[12px] font-black text-[#8b98a5] uppercase tracking-widest">{view} focus</span>
           </div>
 
           <div className="h-[180px] flex items-end justify-between gap-2.5">
@@ -105,7 +105,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
                         style={{ height: `${Math.max(8, height)}%` }}
                       ></div>
                    </div>
-                   <span className="text-[10px] font-black text-[#71767b] uppercase tracking-tighter">
+                   <span className="text-[10px] font-black text-[#8b98a5] uppercase tracking-tighter">
                      {'day' in d ? d.day : 'hour' in d ? d.hour : d.label}
                    </span>
                 </div>
@@ -119,11 +119,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
           <div className="bg-white/[0.02] border border-[#2f3336] rounded-2xl p-5 hover:bg-white/[0.04] transition-colors">
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle2 className="w-4 h-4 text-[#00ba7c]" />
-              <span className="text-[12px] font-black text-[#71767b] uppercase">Habit Success</span>
+              <span className="text-[12px] font-black text-[#8b98a5] uppercase">Habit Success</span>
             </div>
             <p className="text-4xl font-black text-[#eff3f4]">{habitCompletionPct}<span className="text-xl text-[#71767b]">%</span></p>
             <div className="flex items-center gap-1.5 mt-2">
-               <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+               <div className="w-full h-1.5 bg-white/[0.03] border border-white/20 rounded-full overflow-hidden">
                  <div className="h-full bg-[#00ba7c]" style={{ width: `${habitCompletionPct}%` }} />
                </div>
             </div>
@@ -132,11 +132,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
           <div className="bg-white/[0.02] border border-[#2f3336] rounded-2xl p-5 hover:bg-white/[0.04] transition-colors">
             <div className="flex items-center gap-2 mb-4">
               <ListTodo className="w-4 h-4 text-x-blue" />
-              <span className="text-[12px] font-black text-[#71767b] uppercase">Task Focus</span>
+              <span className="text-[12px] font-black text-[#8b98a5] uppercase">Task Focus</span>
             </div>
             <p className="text-4xl font-black text-[#eff3f4]">{taskCompletionPct}<span className="text-xl text-[#71767b]">%</span></p>
             <div className="flex items-center gap-1.5 mt-2">
-               <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+               <div className="w-full h-1.5 bg-white/[0.03] border border-white/20 rounded-full overflow-hidden">
                  <div className="h-full bg-x-blue" style={{ width: `${taskCompletionPct}%` }} />
                </div>
             </div>
@@ -150,7 +150,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
                 <PieChart className="w-5 h-5 text-x-blue" />
                 <span className="text-[15px] font-black text-[#eff3f4]">Workload Summary</span>
              </div>
-             <Calendar className="w-4 h-4 text-[#71767b]" />
+             <Calendar className="w-4 h-4 text-[#8b98a5]" />
            </div>
            
            <div className="p-5 space-y-6">
@@ -161,14 +161,14 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
                   </div>
                   <div>
                     <p className="text-[14px] font-black text-[#eff3f4]">Estimated Effort</p>
-                    <p className="text-[12px] text-[#71767b]">Based on task distribution</p>
+                    <p className="text-[12px] text-[#8b98a5]">Based on task distribution</p>
                   </div>
                 </div>
                 <p className="text-xl font-black text-[#eff3f4]">6.5<span className="text-[13px] text-[#71767b]">h/day</span></p>
               </div>
 
               <div className="space-y-4">
-                 <p className="text-[12px] font-black text-[#71767b] uppercase tracking-widest">Efficiency by Category</p>
+                 <p className="text-[12px] font-black text-[#8b98a5] uppercase tracking-widest">Efficiency by Category</p>
                  {[
                    { label: 'Work', value: 85, icon: '⚡' },
                    { label: 'Health', value: 70, icon: '🥗' },
@@ -181,7 +181,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
                          <span className="text-[#eff3f4]">{item.label}</span>
                          <span className={`${getCategoryStyles(item.label).text}`}>{item.value}%</span>
                        </div>
-                       <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                       <div className="w-full bg-white/[0.03] border border-white/20 h-2.5 rounded-full overflow-hidden">
                          <div className="h-full transition-all duration-1000" style={{ width: `${item.value}%`, backgroundColor: getCategoryStyles(item.label).hex }} />
                        </div>
                      </div>
@@ -191,7 +191,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
            </div>
 
            <div className="p-4 bg-white/[0.03] text-center border-t border-[#2f3336]">
-             <p className="text-[12px] font-bold text-[#71767b]">
+             <p className="text-[12px] font-bold text-[#8b98a5]">
                Analysis updated {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · <span className="text-x-blue cursor-pointer hover:underline">Download Report</span>
              </p>
            </div>

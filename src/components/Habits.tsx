@@ -85,7 +85,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
             <TrendingUp className="w-8 h-8 text-[#00ba7c]" />
             Habit Consistency
           </h2>
-          <p className="text-[#71767b] text-sm font-bold uppercase tracking-widest mt-1">
+          <p className="text-[#8b98a5] text-[14px] font-black uppercase tracking-tight">
             Tracking {habits.length} daily goals
           </p>
         </div>
@@ -253,9 +253,9 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                           {habit.monthlyTarget ? 'Target' : 'Monthly'}
                         </span>
                       </div>
-                      <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                         <div className="h-full transition-all duration-1000" style={{ width: `${completionRate}%`, backgroundColor: style.hex }} />
-                      </div>
+                    <div className="w-full h-1.5 bg-white/[0.03] border border-white/20 rounded-full overflow-hidden">
+                       <div className="h-full transition-all duration-1000" style={{ width: `${completionRate}%`, backgroundColor: style.hex }} />
+                    </div>
                     </div>
 
                     <div className="flex gap-0.5 border-l border-[#2f3336] pl-3">
