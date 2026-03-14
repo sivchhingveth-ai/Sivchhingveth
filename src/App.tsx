@@ -294,9 +294,9 @@ export default function App() {
   const openAddRoutine = () => { setModalOpen('routine'); };
   const openAddExpense = () => { setModalOpen('expense'); setActiveTab('Savings'); };
 
-  const inputClass = "w-full bg-transparent border border-[#2f3336] px-4 py-4 rounded-lg text-lg text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-colors";
-  const labelClass = "text-[14px] font-bold text-[#eff3f4] mb-2 block px-1";
-  const submitClass = "w-full py-3.5 rounded-full bg-[#eff3f4] text-[#0f1419] text-[17px] font-bold hover:bg-[#d7dbdc] transition-colors active:scale-[0.98]";
+  const inputClass = "w-full bg-transparent border border-[#2f3336] px-4 py-3 rounded-lg text-lg text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-colors";
+  const labelClass = "text-[14px] font-bold text-[#eff3f4] mb-1.5 block px-1";
+  const submitClass = "w-full py-3 rounded-full bg-[#eff3f4] text-[#0f1419] text-[17px] font-bold hover:bg-[#d7dbdc] transition-colors active:scale-[0.98]";
 
   return (
     <div className="h-screen flex flex-col bg-black text-white font-sans antialiased overflow-hidden">
@@ -358,60 +358,41 @@ export default function App() {
 
       {/* Add Habit Modal */}
       <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Habit" : "New Habit"}>
-        <div className="space-y-4">
-          <div>
-            <label className={labelClass}>Quick Presets</label>
-            <div className="flex flex-wrap gap-2 mt-2 mb-4">
-              {[
-                { name: '💧 Drink Water', cat: 'HYGIENE' },
-                { name: '💪 Workout', cat: 'BODY' },
-                { name: '📚 Reading', cat: 'LEARNING' },
-                { name: '🧘 Meditation', cat: 'RECOVERY' },
-                { name: '🏃 Running', cat: 'BODY' },
-                { name: '🍳 Healthy Meal', cat: 'HEALTH' }
-              ].map(p => (
-                <button 
-                  key={p.name}
-                  onClick={() => { setNewHabitName(p.name); setNewHabitCategory(p.cat); }}
-                  className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5 text-[11px] font-black text-[#71767b] hover:text-x-blue hover:bg-x-blue/5 hover:border-x-blue/20 transition-all"
-                >
-                  {p.name}
-                </button>
-              ))}
-            </div>
-            <label className={labelClass}>Habit name</label>
-            <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="pb-10 space-y-4">
             <div>
-              <label className={labelClass}>Time (Optional)</label>
-              <input className={inputClass} type="time" value={newHabitTime} onChange={e => setNewHabitTime(e.target.value)} style={{ colorScheme: 'dark' }} />
+              <label className={labelClass}>Habit name</label>
+              <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus />
+            </div>
+            <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Time (Optional)</label>
+                <input className={inputClass} type="time" value={newHabitTime} onChange={e => setNewHabitTime(e.target.value)} style={{ colorScheme: 'dark' }} />
+              </div>
+              <div>
+                <label className={labelClass}>Monthly Target</label>
+                <input className={inputClass} type="number" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 10" value={newHabitMonthlyTarget} onChange={e => setNewHabitMonthlyTarget(e.target.value)} />
+              </div>
             </div>
             <div>
-              <label className={labelClass}>Monthly Target</label>
-              <input className={inputClass} type="number" placeholder="e.g. 10" value={newHabitMonthlyTarget} onChange={e => setNewHabitMonthlyTarget(e.target.value)} />
+              <label className={labelClass}>Category</label>
+              <div className="flex flex-wrap gap-2">
+                {['HEALTH', 'HYGIENE', 'RECOVERY', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
+                  <button 
+                    key={cat} 
+                    onClick={() => setNewHabitCategory(cat)}
+                    className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all border ${
+                      newHabitCategory === cat 
+                        ? 'bg-x-blue border-x-blue text-white' 
+                        : 'bg-white/[0.05] border-[#2f3336] text-[#71767b] hover:text-[#eff3f4]'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
+            <button onClick={saveHabit} className={submitClass}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
           </div>
-          <div>
-            <label className={labelClass}>Category</label>
-            <div className="flex flex-wrap gap-2">
-              {['HEALTH', 'HYGIENE', 'RECOVERY', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
-                <button 
-                  key={cat} 
-                  onClick={() => setNewHabitCategory(cat)}
-                  className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all border ${
-                    newHabitCategory === cat 
-                      ? 'bg-x-blue border-x-blue text-white' 
-                      : 'bg-white/[0.05] border-[#2f3336] text-[#71767b] hover:text-[#eff3f4]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button onClick={saveHabit} className={submitClass}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
-        </div>
       </Modal>
 
       {/* Add Goal Modal */}

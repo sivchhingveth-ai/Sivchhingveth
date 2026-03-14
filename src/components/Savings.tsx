@@ -62,7 +62,7 @@ export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGo
                 </button>
               </div>
               
-              <div className="w-full h-[8px] bg-white/5 rounded-full overflow-hidden mb-3">
+              <div className="w-full h-2 bg-white/[0.03] border border-white/20 rounded-full overflow-hidden mb-3">
                 <div 
                   className="h-full transition-all duration-1000" 
                   style={{ 

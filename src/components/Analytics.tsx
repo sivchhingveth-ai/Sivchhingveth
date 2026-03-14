@@ -51,12 +51,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
   const currentData = view === 'daily' ? dailyHourlyData : view === 'weekly' ? weeklyData : monthlyTrend;
 
   return (
-    <div className="max-w-[600px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
       
       {/* Header & Segments */}
-      <div className="sticky top-0 bg-black/80 backdrop-blur-md z-20 border-b border-[#2f3336]">
-        <div className="p-4 flex items-center justify-between">
-          <h2 className="text-[19px] font-black text-[#eff3f4]">Performance Analysis</h2>
+      <div className="sticky top-0 bg-black z-20 border-b border-[#2f3336]">
+        <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <h2 className="text-[24px] font-black text-[#eff3f4]">Performance Analysis</h2>
           <div className="flex bg-[#2f3336]/40 p-1 rounded-full border border-[#2f3336]">
             {(['daily', 'weekly', 'monthly'] as const).map((v) => (
               <button
