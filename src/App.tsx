@@ -367,6 +367,7 @@ export default function App() {
                 { name: '💪 Workout', cat: 'BODY' },
                 { name: '📚 Reading', cat: 'LEARNING' },
                 { name: '🧘 Meditation', cat: 'RECOVERY' },
+                { name: '🏃 Running', cat: 'BODY' },
                 { name: '🍳 Healthy Meal', cat: 'HEALTH' }
               ].map(p => (
                 <button 
