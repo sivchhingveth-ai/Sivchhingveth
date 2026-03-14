@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Habit } from '../types';
 import { Check, Trash2, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp, Edit2 } from 'lucide-react';
 import { getCategoryStyles } from '../utils/colors';
@@ -14,6 +14,28 @@ interface HabitsProps {
 }
 
 export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange }) => {
+  const [activeHeatmapCell, setActiveHeatmapCell] = useState<number | null>(null);
+  const heatmapRef = useRef<HTMLDivElement>(null);
+
+  // Dismiss tooltip when tapping outside the heatmap
+  useEffect(() => {
+    if (activeHeatmapCell === null) return;
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (heatmapRef.current && !heatmapRef.current.contains(e.target as Node)) {
+        setActiveHeatmapCell(null);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [activeHeatmapCell]);
+
+  const handleCellTap = useCallback((index: number) => {
+    setActiveHeatmapCell(prev => prev === index ? null : index);
+  }, []);
   // Get days in current month
   const daysInMonth = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -131,32 +153,50 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
           <Activity className="w-4 h-4" />
           Activity Map (90 Days)
         </h3>
-        <div className="bg-white/[0.02] border border-[#2f3336] p-6 pt-12 rounded-3xl overflow-x-auto relative">
+        <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-6 pt-12 rounded-3xl overflow-visible relative">
           <div className="flex flex-wrap gap-1.5 min-w-[300px] justify-start content-start">
-            {heatmapData.map((d, i) => (
-              <div 
-                key={i}
-                className={`w-[13px] h-[13px] rounded-[2px] transition-all cursor-pointer relative group border
-                  ${d.level === 0 ? 'bg-transparent border-[#2f3336]' : 
-                    d.level < 0.3 ? 'bg-[#00ba7c]/20 border-[#00ba7c]/10' : 
-                    d.level < 0.7 ? 'bg-[#00ba7c]/50 border-[#00ba7c]/20' : 
-                    'bg-[#00ba7c] border-transparent'
-                  }`}
-              >
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center pointer-events-none z-50 animate-slide-up">
-                  <div className="px-3 py-1.5 bg-[#16181c] text-[#eff3f4] text-[11px] font-bold rounded-lg border border-[#2f3336] shadow-2xl whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                       <span className="text-[#71767b]">
-                         {d.label}
-                       </span>
-                       <div className="w-1 h-1 rounded-full bg-[#2f3336]" />
-                       <span className="text-[#00ba7c] font-black">{d.count} done</span>
+            {heatmapData.map((d, i) => {
+              // Cells near the left edge need right-aligned tooltips to avoid clipping
+              const isNearLeftEdge = i % 30 < 3;
+              const isNearRightEdge = i % 30 > 26;
+              const tooltipPositionClass = isNearLeftEdge 
+                ? 'left-0' 
+                : isNearRightEdge 
+                  ? 'right-0'
+                  : 'left-1/2 -translate-x-1/2';
+              const arrowPositionClass = isNearLeftEdge
+                ? 'left-1.5'
+                : isNearRightEdge
+                  ? 'right-1.5'
+                  : 'left-1/2 -translate-x-1/2';
+              const isActive = activeHeatmapCell === i;
+              
+              return (
+                <div 
+                  key={i}
+                  onClick={() => handleCellTap(i)}
+                  className={`w-[13px] h-[13px] rounded-[2px] transition-all cursor-pointer relative group border
+                    ${d.level === 0 ? 'bg-transparent border-[#2f3336]' : 
+                      d.level < 0.3 ? 'bg-[#00ba7c]/20 border-[#00ba7c]/10' : 
+                      d.level < 0.7 ? 'bg-[#00ba7c]/50 border-[#00ba7c]/20' : 
+                      'bg-[#00ba7c] border-transparent'
+                    }`}
+                >
+                  <div className={`absolute bottom-full ${tooltipPositionClass} mb-2 ${isActive ? 'flex' : 'hidden group-hover:flex'} flex-col ${isNearLeftEdge ? 'items-start' : isNearRightEdge ? 'items-end' : 'items-center'} pointer-events-none z-50 animate-slide-up`}>
+                    <div className="px-3 py-1.5 bg-[#16181c] text-[#eff3f4] text-[11px] font-bold rounded-lg border border-[#2f3336] shadow-2xl whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                         <span className="text-[#71767b]">
+                           {d.label}
+                         </span>
+                         <div className="w-1 h-1 rounded-full bg-[#2f3336]" />
+                         <span className="text-[#00ba7c] font-black">{d.count} done</span>
+                      </div>
                     </div>
+                    <div className={`w-2 h-2 bg-[#16181c] border-r border-b border-[#2f3336] rotate-45 -mt-1 ${arrowPositionClass}`} />
                   </div>
-                  <div className="w-2 h-2 bg-[#16181c] border-r border-b border-[#2f3336] rotate-45 -mt-1" />
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-4 flex items-center justify-end gap-2 text-[10px] font-black text-[#71767b]">
             <span>Less</span>
@@ -235,10 +275,10 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                </div>
 
                {/* CENTER SECTION: Heatmap (Hidden on small mobile) */}
-               <div className="flex-1 hidden md:flex justify-center px-4">
-                  <div className="flex gap-1.5 flex-wrap justify-center max-w-[500px]">
-                    {days.slice(-14).map(d => ( // Show last 14 days on smaller desktop/tablet
-                      <div key={d.dayNum} className="relative group/day">
+               <div className="flex-1 hidden md:flex items-center px-4 overflow-hidden">
+                  <div className="flex gap-1 flex-nowrap justify-start w-full">
+                    {days.map(d => (
+                      <div key={d.dayNum} className="relative group/day shrink-0">
                         <div 
                           className={`w-2.5 h-2.5 rounded-[1px] transition-all border
                             ${habit.history[d.dateStr] ? 'border-transparent' : 'bg-transparent border-[#2f3336]'}`}
@@ -246,18 +286,6 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                         />
                       </div>
                     ))}
-                    {/* Full month on very large screens */}
-                    <div className="hidden lg:flex gap-1.5 ml-1.5 border-l border-[#2f3336]/30 pl-1.5">
-                       {days.slice(0, -14).map(d => (
-                        <div key={d.dayNum} className="relative group/day">
-                          <div 
-                            className={`w-2.5 h-2.5 rounded-[1px] transition-all border
-                              ${habit.history[d.dateStr] ? 'border-transparent' : 'bg-transparent border-[#2f3336]'}`}
-                            style={habit.history[d.dateStr] ? { backgroundColor: style.hex, boxShadow: `0 0 8px ${style.hex}4d` } : {}}
-                          />
-                        </div>
-                      ))}
-                    </div>
                   </div>
                </div>
 
