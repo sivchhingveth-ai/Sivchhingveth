@@ -9,7 +9,7 @@ interface TabsProps {
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange }) => {
   return (
     <div className="border-b border-[#2f3336] bg-black">
-      <div className="max-w-[1000px] mx-auto flex h-[53px]">
+      <div className="max-w-[1200px] mx-auto flex h-[53px]">
         {tabs.map((tab) => (
           <button
             key={tab}

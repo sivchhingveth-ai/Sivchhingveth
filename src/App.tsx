@@ -307,8 +307,8 @@ export default function App() {
       />
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
       
-      <main className={`flex-1 overflow-y-auto ${activeTab === 'Schedule' ? 'p-0' : 'p-8'}`}>
-        <div className={`${activeTab === 'Schedule' ? 'w-full' : 'max-w-5xl mx-auto'}`}>
+      <main className={`flex-1 overflow-y-auto ${activeTab === 'Schedule' ? 'p-0' : 'p-4 md:p-8'}`}>
+        <div className={`${activeTab === 'Schedule' ? 'w-full' : 'max-w-[1200px] mx-auto'}`}>
         {activeTab === 'Overview' && (
           <Overview 
             habits={habits}

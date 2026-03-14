@@ -14,7 +14,7 @@ export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGo
   const pct = totalGoal ? Math.round(totalSaved / totalGoal * 100) : 0;
 
   return (
-    <div className="max-w-[600px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
       
       {/* Header */}
       <div className="p-4 border-b border-[#2f3336] flex items-center justify-between">

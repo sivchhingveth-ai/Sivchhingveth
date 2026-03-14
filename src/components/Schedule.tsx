@@ -73,7 +73,7 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, routines, onToggleHa
   });
 
   return (
-    <div className="max-w-[600px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
       
       {/* Search/Filter style Header for Tasks */}
       <div className="p-6 border-b border-[#2f3336] flex items-center justify-between bg-black z-20">

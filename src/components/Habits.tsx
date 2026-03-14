@@ -180,7 +180,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
           const style = getCategoryStyles(habit.category);
           
           return (
-            <div key={habit.id} className="bg-white/[0.02] border border-[#2f3336] rounded-2xl p-4 hover:bg-white/[0.04] transition-all group relative flex flex-col md:flex-row md:items-center overflow-hidden gap-4">
+            <div key={habit.id} className="bg-white/[0.02] border border-[#2f3336] rounded-xl p-2 md:p-3.5 hover:bg-white/[0.04] transition-all group relative flex flex-col md:flex-row md:items-center overflow-hidden gap-1.5 md:gap-4">
                {/* Background Water Fill Effect */}
                <div className="absolute inset-0 overflow-hidden pointer-events-none">
                  <div 
@@ -189,10 +189,10 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                  />
                </div>
 
-               <div className="relative z-10 flex items-center justify-between md:justify-start md:w-[320px] shrink-0 gap-4">
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="relative w-12 h-12 shrink-0">
-                      <svg className="w-full h-full -rotate-90">
+               <div className="relative z-10 flex items-center justify-between md:justify-start md:w-[320px] shrink-0 gap-2 md:gap-4">
+                  <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                    <div className="relative w-10 md:w-12 h-10 md:h-12 shrink-0">
+                      <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
                         <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
                         <circle 
                           cx="24" cy="24" r="21" 
@@ -206,7 +206,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-[11px] font-black">{completionRate}%</span>
+                        <span className="text-[10px] md:text-[11px] font-black">{completionRate}%</span>
                       </div>
                     </div>
 
@@ -262,11 +262,11 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                </div>
 
                {/* RIGHT SECTION: Stats & Desktop Actions */}
-               <div className="flex items-center justify-between md:justify-end gap-6 md:ml-auto shrink-0 w-full md:w-auto">
-                  <div className="flex-1 md:w-[120px] space-y-2">
+                <div className="flex items-center justify-between md:justify-end gap-2 md:gap-6 md:ml-auto shrink-0 w-full md:w-auto mt-0 md:mt-0">
+                  <div className="flex-1 md:w-[120px] space-y-1">
                     <div className="flex justify-between items-end">
-                      <span className="text-[16px] font-black text-[#eff3f4]">
-                        {totalMonthly}<span className="text-[11px] text-[#71767b]">/{target}</span>
+                      <span className="text-[14px] md:text-[16px] font-black text-[#eff3f4]">
+                        {totalMonthly}<span className="text-[10px] md:text-[11px] text-[#71767b]">/{target}</span>
                       </span>
                       <span className="text-[9px] font-black text-[#71767b] uppercase tracking-tighter">
                         {habit.monthlyTarget ? 'Target' : 'Monthly'}
