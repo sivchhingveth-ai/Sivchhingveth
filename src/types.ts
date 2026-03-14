@@ -1,9 +1,11 @@
 export interface Habit {
   id: number;
   name: string;
+  category: string;
+  history: Record<string, boolean>; // date string "YYYY-MM-DD" -> boolean
   streak: number;
-  week: number[];
-  doneToday: boolean;
+  time?: string;
+  monthlyTarget?: number;
 }
 
 export interface SavingGoal {

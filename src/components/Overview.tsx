@@ -1,6 +1,7 @@
 import React from 'react';
 import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotification } from '../types';
-import { CheckCircle2, Circle, TrendingUp, Calendar, Wallet, ShoppingCart, Coffee, Car, Plus, Bell, Clock, ChevronRight } from 'lucide-react';
+import { CheckCircle2, Circle, TrendingUp, Calendar, Wallet, ShoppingCart, Coffee, Car, Plus, Bell, Clock, ChevronRight, Edit2 } from 'lucide-react';
+import { getCategoryStyles } from '../utils/colors';
 
 interface OverviewProps {
   habits: Habit[];
@@ -13,6 +14,7 @@ interface OverviewProps {
   notifications: AppNotification[];
   setActiveTab: (tab: string) => void;
   onAddHabit: () => void;
+  onEditHabit: (id: number) => void;
   onAddTask: () => void;
   onAddExpense: () => void;
 }
@@ -28,11 +30,25 @@ export function Overview({
   notifications,
   setActiveTab,
   onAddHabit,
+  onEditHabit,
   onAddTask,
   onAddExpense
 }: OverviewProps) {
 
-  const completedHabits = habits.filter(h => h.doneToday).length;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const currentDay = today.getDate();
+  const currentMonthDays = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+
+  const filteredHabits = habits.filter(h => {
+    if (h.history[todayStr]) return true;
+    if (!h.monthlyTarget) return true;
+    
+    const offset = h.id % currentMonthDays;
+    return ((currentDay - 1 + offset) * h.monthlyTarget) % currentMonthDays < h.monthlyTarget;
+  });
+
+  const completedHabits = habits.filter(h => h.history[todayStr]).length;
   
   const upcomingEvents = [...tasks, ...routines.map(r => ({ ...r, tag: 'routine' as const }))]
     .filter(item => !item.done)
@@ -89,17 +105,21 @@ export function Overview({
         </div>
         
         <div className="space-y-2">
-          {habits.slice(0, 4).map(habit => (
+          {filteredHabits.slice(0, 4).map(habit => (
             <div 
               key={habit.id} 
-              className="flex items-center justify-between p-4 rounded-xl border border-[#2f3336] bg-white/[0.02] hover:border-[#1d9bf0]/30 transition-all"
-              onClick={(e) => { e.stopPropagation(); onToggleHabit(habit.id); }}
+              className="flex items-center justify-between p-4 rounded-xl border border-[#2f3336] bg-white/[0.02] transition-all"
             >
               <div className="flex items-center gap-3">
-                {habit.doneToday ? <CheckCircle2 className="w-5 h-5 text-[#00ba7c]" /> : <Circle className="w-5 h-5 text-[#71767b]" />}
-                <span className={`font-bold ${habit.doneToday ? 'text-[#71767b] line-through font-medium' : 'text-[#eff3f4]'}`}>{habit.name}</span>
+                {habit.history[todayStr] ? <CheckCircle2 className="w-5 h-5 text-[#00ba7c]" /> : <Circle className="w-5 h-5 text-[#71767b]" />}
+                <span className={`font-bold ${habit.history[todayStr] ? 'text-[#71767b] line-through font-medium' : 'text-[#eff3f4]'}`}>{habit.name}</span>
               </div>
-              <span className="text-[13px] font-bold text-[#71767b]">{habit.streak}d streak</span>
+              <div className="flex items-center gap-3">
+                <div onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }} className="p-1 hover:text-x-blue transition-colors cursor-pointer opacity-40 hover:opacity-100">
+                  <Edit2 className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-[13px] font-bold text-[#71767b]">{habit.streak}d streak</span>
+              </div>
             </div>
           ))}
         </div>
@@ -122,8 +142,8 @@ export function Overview({
               <div className="flex-1">
                 <p className="text-[#eff3f4] font-bold">{event.name}</p>
                 <div className="flex items-center gap-1.5 mt-1">
-                  <div className={`w-2 h-2 rounded-full ${'tag' in event && event.tag === 'work' ? 'bg-[#1d9bf0]' : 'bg-[#7856ff]'}`} />
-                  <span className="text-[#71767b] text-[12px] font-bold uppercase tracking-wider">{'tag' in event ? event.tag : 'routine'}</span>
+                  <div className={`w-2 h-2 rounded-full ${getCategoryStyles('tag' in event ? event.tag : 'routine').hex}`} style={{ backgroundColor: getCategoryStyles('tag' in event ? event.tag : 'routine').hex }} />
+                  <span className={`text-[12px] font-bold uppercase tracking-wider ${getCategoryStyles('tag' in event ? event.tag : 'routine').text}`}>{'tag' in event ? event.tag : 'routine'}</span>
                 </div>
               </div>
             </div>
@@ -150,7 +170,7 @@ export function Overview({
               <span className="text-[#71767b] text-[14px] font-bold">Monthly Budget</span>
               <span className="text-[#eff3f4] font-bold">${budgetStats.budgetLeft} / ${budgetStats.monthlyBudget}</span>
             </div>
-            <div className="w-full bg-[#2f3336] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
               <div 
                 className="bg-[#00ba7c] h-full transition-all duration-1000" 
                 style={{ width: `${(budgetStats.budgetLeft/budgetStats.monthlyBudget)*100}%` }} 

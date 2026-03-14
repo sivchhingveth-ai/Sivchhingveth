@@ -55,14 +55,14 @@ export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGo
                   </p>
                 </div>
                 <button 
-                  onClick={() => { if(confirm('Delete this goal?')) onDeleteGoal(s.id); }}
+                  onClick={() => onDeleteGoal(s.id)}
                   className="text-[#71767b] opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all p-2"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
               </div>
               
-              <div className="w-full h-[8px] bg-[#2f3336] rounded-full overflow-hidden mb-3">
+              <div className="w-full h-[8px] bg-white/5 rounded-full overflow-hidden mb-3">
                 <div 
                   className="h-full transition-all duration-1000" 
                   style={{ 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Habit, Task } from '../types';
 import { TrendingUp, BarChart3, PieChart, Activity, Calendar, Clock, CheckCircle2, ListTodo } from 'lucide-react';
+import { getCategoryStyles } from '../utils/colors';
 
 interface AnalyticsProps {
   habits: Habit[];
@@ -11,7 +12,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
   const [view, setView] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
 
   // Real calculations
-  const totalCompletedHabits = habits.filter(h => h.doneToday).length;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const totalCompletedHabits = habits.filter(h => h.history[todayStr]).length;
   const habitCompletionPct = habits.length > 0 ? Math.round((totalCompletedHabits / habits.length) * 100) : 0;
   
   const completedTasks = tasks.filter(t => t.done).length;
@@ -52,7 +54,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
     <div className="max-w-[600px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
       
       {/* Header & Segments */}
-      <div className="sticky top-[53px] bg-black/80 backdrop-blur-md z-20 border-b border-[#2f3336]">
+      <div className="sticky top-0 bg-black/80 backdrop-blur-md z-20 border-b border-[#2f3336]">
         <div className="p-4 flex items-center justify-between">
           <h2 className="text-[19px] font-black text-[#eff3f4]">Performance Analysis</h2>
           <div className="flex bg-[#2f3336]/40 p-1 rounded-full border border-[#2f3336]">
@@ -74,7 +76,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
       <div className="p-6 space-y-6">
         
         {/* Productivity Summary Card */}
-        <div className="bg-white/[0.02] border border-[#2f3336] rounded-2xl p-6">
+        <div className="bg-white/[0.02] border border-[#2f3336] rounded-2xl p-6 pt-12">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Activity className="w-5 h-5 text-x-blue" />
@@ -90,8 +92,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
               return (
                 <div key={i} className="flex-1 flex flex-col items-center group gap-3 h-full justify-end">
                    <div className="relative w-full flex flex-col items-center justify-end h-full">
-                      <div className="absolute -top-10 px-2.5 py-1.5 bg-white text-black text-[10px] font-black rounded shadow-xl opacity-0 group-hover:opacity-100 transition-all transform scale-90 group-hover:scale-100 mb-2 pointer-events-none whitespace-nowrap z-30">
-                        {d.label || d.hint || `${val}%`}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center pointer-events-none z-50 animate-slide-up">
+                        <div className="px-3 py-1.5 bg-[#16181c] text-[#eff3f4] text-[11px] font-bold rounded-lg border border-[#2f3336] shadow-2xl whitespace-nowrap">
+                          {d.label || d.hint || `${val}%`}
+                        </div>
+                        <div className="w-2 h-2 bg-[#16181c] border-r border-b border-[#2f3336] rotate-45 -mt-1" />
                       </div>
                       <div 
                         className={`w-full max-w-[40px] rounded-t-lg transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
@@ -118,7 +123,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
             </div>
             <p className="text-4xl font-black text-[#eff3f4]">{habitCompletionPct}<span className="text-xl text-[#71767b]">%</span></p>
             <div className="flex items-center gap-1.5 mt-2">
-               <div className="w-full h-1 bg-[#2f3336] rounded-full overflow-hidden">
+               <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
                  <div className="h-full bg-[#00ba7c]" style={{ width: `${habitCompletionPct}%` }} />
                </div>
             </div>
@@ -131,7 +136,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
             </div>
             <p className="text-4xl font-black text-[#eff3f4]">{taskCompletionPct}<span className="text-xl text-[#71767b]">%</span></p>
             <div className="flex items-center gap-1.5 mt-2">
-               <div className="w-full h-1 bg-[#2f3336] rounded-full overflow-hidden">
+               <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
                  <div className="h-full bg-x-blue" style={{ width: `${taskCompletionPct}%` }} />
                </div>
             </div>
@@ -165,19 +170,19 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, tasks }) => {
               <div className="space-y-4">
                  <p className="text-[12px] font-black text-[#71767b] uppercase tracking-widest">Efficiency by Category</p>
                  {[
-                   { label: 'Deep Work', value: 85, color: '#1d9bf0', icon: '⚡' },
-                   { label: 'Health & Wellness', value: 70, color: '#f91880', icon: '🥗' },
-                   { label: 'Personal Growth', value: 45, color: '#00ba7c', icon: '🌱' },
+                   { label: 'Work', value: 85, icon: '⚡' },
+                   { label: 'Health', value: 70, icon: '🥗' },
+                   { label: 'Learning', value: 45, icon: '🌱' },
                  ].map((item, i) => (
                    <div key={i} className="flex items-center gap-4">
                      <span className="text-lg w-6">{item.icon}</span>
                      <div className="flex-1 space-y-1.5">
                        <div className="flex justify-between items-center text-[13px] font-black">
                          <span className="text-[#eff3f4]">{item.label}</span>
-                         <span className="text-x-blue">{item.value}%</span>
+                         <span className={`${getCategoryStyles(item.label).text}`}>{item.value}%</span>
                        </div>
-                       <div className="w-full h-1.5 bg-[#2f3336] rounded-full overflow-hidden">
-                         <div className="h-full transition-all duration-1000" style={{ width: `${item.value}%`, backgroundColor: item.color }} />
+                       <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                         <div className="h-full transition-all duration-1000" style={{ width: `${item.value}%`, backgroundColor: getCategoryStyles(item.label).hex }} />
                        </div>
                      </div>
                    </div>

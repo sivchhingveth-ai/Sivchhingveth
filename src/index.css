@@ -1,8 +1,29 @@
 @import "tailwindcss";
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2f3336;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3e4144;
+}
+
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scrollbar-width: thin;
+  scrollbar-color: #2f3336 transparent;
 }
 
 body {
@@ -54,8 +75,15 @@ button:active {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+@keyframes slide-down {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
 .animate-slide-up {
   animation: slide-up 0.25s cubic-bezier(0.2, 0, 0, 1.0);
+}
+.animate-slide-down {
+  animation: slide-down 0.2s cubic-bezier(0.2, 0, 0, 1.0);
 }
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;

@@ -12,33 +12,94 @@ import { Savings } from './components/Savings';
 import { Schedule } from './components/Schedule';
 import { Analytics } from './components/Analytics';
 import { Modal } from './components/Modal';
+import { ConfirmModal } from './components/ConfirmModal';
 import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotification } from './types';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('Overview');
-  const tabs = ['Overview', 'Habits', 'Savings', 'Schedule', 'Analytics'];
+  const tabs = ['Overview', 'Savings', 'Schedule', 'Analytics'];
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
+  const [viewDate, setViewDate] = useState(new Date());
 
   // Form state
   const [newHabitName, setNewHabitName] = useState('');
+  const [newHabitCategory, setNewHabitCategory] = useState('OTHER');
   const [newGoalName, setNewGoalName] = useState('');
   const [newGoalAmount, setNewGoalAmount] = useState('');
-  const [newTaskName, setNewTaskName] = useState('');
-  const [newTaskTime, setNewTaskTime] = useState('');
-  const [newTaskTag, setNewTaskTag] = useState<'work' | 'personal' | 'health'>('personal');
+  const [newHabitTime, setNewHabitTime] = useState('');
+  const [newHabitMonthlyTarget, setNewHabitMonthlyTarget] = useState('');
   const [newRoutineName, setNewRoutineName] = useState('');
   const [newRoutineTime, setNewRoutineTime] = useState('');
   const [newRoutineIcon, setNewRoutineIcon] = useState('⭐');
   const [newExpenseName, setNewExpenseName] = useState('');
   const [newExpenseAmount, setNewExpenseAmount] = useState('');
 
+  // Confirmation state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+  const [editingHabitId, setEditingHabitId] = useState<number | null>(null);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const generateHistory = (days: number) => {
+    const history: Record<string, boolean> = {};
+    for (let i = 1; i <= days; i++) {
+      const date = `2026-03-${i.toString().padStart(2, '0')}`;
+      history[date] = true;
+    }
+    return history;
+  };
+
   const [habits, setHabits] = useState<Habit[]>([
-    { id: 1, name: "Exercise", streak: 7, week: [1, 1, 1, 0, 1, 1, 0], doneToday: false },
-    { id: 2, name: "Read 20 min", streak: 3, week: [1, 0, 1, 1, 0, 1, 0], doneToday: true },
-    { id: 3, name: "Drink water", streak: 12, week: [1, 1, 1, 1, 1, 1, 0], doneToday: true },
-    { id: 4, name: "Meditate", streak: 2, week: [1, 0, 1, 0, 0, 1, 0], doneToday: false },
+    // HEALTH
+    { id: 1, name: "3L DRINKING WATER", category: "HEALTH", history: generateHistory(15), streak: 15 }, // 50% roughly
+    { id: 2, name: "2X EATING LUNCH AND EVENING", category: "HEALTH", history: generateHistory(28), streak: 28 }, // ~90%
+    { id: 3, name: "NO SUGARS", category: "HEALTH", history: {}, streak: 0 },
+    { id: 4, name: "NO JUNK / SPICY FOOD", category: "HEALTH", history: {}, streak: 0 },
+    
+    // HYGIENE
+    { id: 5, name: "SKINCARE MORNING / NIGHT", category: "HYGIENE", history: {}, streak: 0 },
+    { id: 6, name: "3X SHOWER MORNING / AFTERNOON / EVENING", category: "HYGIENE", history: {}, streak: 0 },
+    { id: 7, name: "PREPARE AND ORGANIZE BED", category: "HYGIENE", history: generateHistory(31), streak: 31, time: "05:10" }, // 100%
+    { id: 8, name: "DRESS WELL", category: "HYGIENE", history: {}, streak: 0, time: "06:30" },
+    { id: 9, name: "2X CLEAN FACE", category: "HYGIENE", history: {}, streak: 0 },
+
+    // RECOVERY
+    { id: 10, name: "SLEEP AT 12 AM", category: "RECOVERY", history: {}, streak: 0, time: "00:00" },
+    { id: 11, name: "WAKE AT 5 AM", category: "RECOVERY", history: {}, streak: 0, time: "05:00" },
+    { id: 12, name: "5 MINS STILLNESS", category: "RECOVERY", history: {}, streak: 0, time: "05:20" },
+    { id: 13, name: "15 MINS POWER NAP", category: "RECOVERY", history: {}, streak: 0, time: "17:00" },
+    { id: 14, name: "30 MINS NO PHONE", category: "RECOVERY", history: {}, streak: 0, time: "23:00" },
+
+    // BODY
+    { id: 15, name: "20 MINS MORNING RUNNING", category: "BODY", history: generateHistory(8), streak: 8, time: "05:30" }, // ~25%
+    { id: 16, name: "10 MINS HEIGHT UNLOCK WORKOUT", category: "BODY", history: {}, streak: 0, time: "06:00" },
+    { id: 17, name: "10 MINS ABS CIRCUIT", category: "BODY", history: {}, streak: 0, time: "06:15" },
+
+    // FINANCE
+    { id: 18, name: "NO GAMING", category: "FINANCE", history: {}, streak: 0 },
+    { id: 19, name: "NO PORN / GOONING", category: "FINANCE", history: {}, streak: 0 },
+    { id: 20, name: "NO BAD WORD TO SELF / BF", category: "FINANCE", history: {}, streak: 0 },
+    { id: 21, name: "NO DELAY", category: "FINANCE", history: {}, streak: 0 },
+    { id: 22, name: "NO DISTRACTION", category: "FINANCE", history: {}, streak: 0 },
+    { id: 23, name: "SPEND LESS THAN 50000", category: "FINANCE", history: generateHistory(9), monthlyTarget: 10, streak: 9 },
+
+    // LEARNING
+    { id: 24, name: "20 PAGES READING", category: "LEARNING", history: {}, streak: 0, time: "22:00" },
+    { id: 25, name: "4H LEARN TRADING (PM)", category: "LEARNING", history: {}, streak: 0, time: "13:00" },
+    { id: 26, name: "1H MEMORIZE / REVIEW RESEARCH (AM)", category: "LEARNING", history: {}, streak: 0, time: "07:00" },
+    { id: 27, name: "1H LEARN ABOUT AI (PM)", category: "LEARNING", history: {}, streak: 0, time: "17:30" },
   ]);
 
   const [savings, setSavings] = useState<SavingGoal[]>([
@@ -47,19 +108,12 @@ export default function App() {
     { id: 3, name: "New laptop", goal: 200, saved: 60, color: "#ff9500" },
   ]);
 
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, name: "Review project proposal", time: "09:00", tag: "work", done: false },
-    { id: 2, name: "Buy groceries", time: "12:00", tag: "personal", done: true },
-    { id: 3, name: "Call mom", time: "15:00", tag: "personal", done: false },
-    { id: 4, name: "Gym session", time: "18:00", tag: "health", done: false },
-    { id: 5, name: "Read before bed", time: "21:00", tag: "personal", done: false },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   const [routines, setRoutines] = useState<Routine[]>([
-    { id: 1, name: "Morning stretch", time: "07:00 AM", icon: "🌅", color: "#ff9500", done: false },
-    { id: 2, name: "Take vitamins", time: "08:00 AM", icon: "💊", color: "#ff3b30", done: true },
-    { id: 3, name: "Evening walk", time: "07:00 PM", icon: "🌿", color: "#34c759", done: false },
-    { id: 4, name: "Journal", time: "08:30 PM", icon: "📓", color: "#af52de", done: false },
+    { id: 1, name: "Morning Ritual", time: "05:00 AM", icon: "🌅", color: "#ff9500", done: false },
+    { id: 2, name: "Deep Focus Mode", time: "01:00 PM", icon: "🧠", color: "#5ac8fa", done: false },
+    { id: 3, name: "Evening Reset", time: "10:00 PM", icon: "🌙", color: "#af52de", done: false },
   ]);
 
   const [transactions, setTransactions] = useState<Transaction[]>([
@@ -78,16 +132,33 @@ export default function App() {
   ]);
 
   // Toggle functions
-  const toggleHabit = (id: number) => {
-    setHabits(prev => prev.map(h => h.id === id ? { ...h, doneToday: !h.doneToday } : h));
+  const toggleHabit = (id: number, dateStr: string = todayStr) => {
+    setHabits(prev => prev.map(h => {
+      if (h.id === id) {
+        const newHistory = { ...h.history };
+        newHistory[dateStr] = !newHistory[dateStr];
+        return { ...h, history: newHistory };
+      }
+      return h;
+    }));
   };
 
   const toggleTask = (id: number) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
+    toggleHabit(id);
   };
 
   const toggleRoutine = (id: number) => {
-    setRoutines(prev => prev.map(r => r.id === id ? { ...r, done: !r.done } : r));
+    setRoutines(prev => {
+      const routine = prev.find(r => r.id === id);
+      if (routine) {
+        // Find matching habit by name
+        const matchingHabit = habits.find(h => h.name.toLowerCase() === routine.name.toLowerCase());
+        if (matchingHabit) {
+          toggleHabit(matchingHabit.id);
+        }
+      }
+      return prev.map(r => r.id === id ? { ...r, done: !r.done } : r);
+    });
   };
 
   // Delete functions
@@ -95,25 +166,74 @@ export default function App() {
     setHabits(prev => prev.filter(h => h.id !== id));
   };
 
+  const confirmDeleteHabit = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Habit',
+      message: 'This will permanently delete this habit and all its history. This action cannot be undone.',
+      onConfirm: () => deleteHabit(id)
+    });
+  };
+
   const deleteGoal = (id: number) => {
     setSavings(prev => prev.filter(s => s.id !== id));
   };
 
+  const confirmDeleteGoal = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Goal',
+      message: 'Are you sure you want to delete this saving goal?',
+      onConfirm: () => deleteGoal(id)
+    });
+  };
+
   const deleteTask = (id: number) => {
-    setTasks(prev => prev.filter(t => t.id !== id));
+    // Habits are deleted via onDeleteHabit prop in components
   };
 
   const deleteRoutine = (id: number) => {
     setRoutines(prev => prev.filter(r => r.id !== id));
   };
 
+  const confirmDeleteRoutine = (id: number) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Routine',
+      message: 'Are you sure you want to delete this routine?',
+      onConfirm: () => deleteRoutine(id)
+    });
+  };
+
   // Add functions
-  const addHabit = () => {
-    if (!newHabitName.trim()) return;
-    const newId = Math.max(0, ...habits.map(h => h.id)) + 1;
-    setHabits(prev => [...prev, { id: newId, name: newHabitName.trim(), streak: 0, week: [0, 0, 0, 0, 0, 0, 0], doneToday: false }]);
-    setNewHabitName('');
-    setModalOpen(null);
+  const saveHabit = () => {
+    if (newHabitName.trim()) {
+      if (editingHabitId) {
+        setHabits(prev => prev.map(h => h.id === editingHabitId ? {
+          ...h,
+          name: newHabitName,
+          category: newHabitCategory,
+          time: newHabitTime || undefined,
+          monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : undefined
+        } : h));
+      } else {
+        const newHabit: Habit = {
+          id: Date.now(),
+          name: newHabitName,
+          category: newHabitCategory,
+          history: {},
+          streak: 0,
+          time: newHabitTime || undefined,
+          monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : undefined
+        };
+        setHabits([...habits, newHabit]);
+      }
+      setNewHabitName('');
+      setNewHabitTime('');
+      setNewHabitMonthlyTarget('');
+      setEditingHabitId(null);
+      setModalOpen(null);
+    }
   };
 
   const addGoal = () => {
@@ -126,15 +246,6 @@ export default function App() {
     setModalOpen(null);
   };
 
-  const addTask = () => {
-    if (!newTaskName.trim() || !newTaskTime) return;
-    const newId = Math.max(0, ...tasks.map(t => t.id)) + 1;
-    setTasks(prev => [...prev, { id: newId, name: newTaskName.trim(), time: newTaskTime, tag: newTaskTag, done: false }]);
-    setNewTaskName('');
-    setNewTaskTime('');
-    setNewTaskTag('personal');
-    setModalOpen(null);
-  };
 
   const addRoutine = () => {
     if (!newRoutineName.trim() || !newRoutineTime) return;
@@ -159,9 +270,27 @@ export default function App() {
   };
 
   // Open modal helpers
-  const openAddHabit = () => { setModalOpen('habit'); };
+  const openAddHabit = () => { 
+    setEditingHabitId(null);
+    setNewHabitName('');
+    setNewHabitTime('');
+    setNewHabitMonthlyTarget('');
+    setNewHabitCategory('OTHER');
+    setModalOpen('habit'); 
+  };
+  const openEditHabit = (id: number) => {
+    const habit = habits.find(h => h.id === id);
+    if (habit) {
+      setEditingHabitId(id);
+      setNewHabitName(habit.name);
+      setNewHabitTime(habit.time || '');
+      setNewHabitMonthlyTarget(habit.monthlyTarget?.toString() || '');
+      setNewHabitCategory(habit.category);
+      setModalOpen('habit');
+    }
+  };
   const openAddGoal = () => { setModalOpen('goal'); };
-  const openAddTask = () => { setModalOpen('task'); setActiveTab('Schedule'); };
+  const openAddTask = () => { setModalOpen('habit'); setActiveTab('Schedule'); };
   const openAddRoutine = () => { setModalOpen('routine'); };
   const openAddExpense = () => { setModalOpen('expense'); setActiveTab('Savings'); };
 
@@ -170,7 +299,7 @@ export default function App() {
   const submitClass = "w-full py-3.5 rounded-full bg-[#eff3f4] text-[#0f1419] text-[17px] font-bold hover:bg-[#d7dbdc] transition-colors active:scale-[0.98]";
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans antialiased">
+    <div className="h-screen flex flex-col bg-black text-white font-sans antialiased overflow-hidden">
       <Header 
         title="My Dashboard" 
         date="Friday, March 14, 2026" 
@@ -178,7 +307,8 @@ export default function App() {
       />
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
       
-      <main className="p-8 max-w-5xl mx-auto">
+      <main className={`flex-1 overflow-y-auto ${activeTab === 'Schedule' ? 'p-0' : 'p-8'}`}>
+        <div className={`${activeTab === 'Schedule' ? 'w-full' : 'max-w-5xl mx-auto'}`}>
         {activeTab === 'Overview' && (
           <Overview 
             habits={habits}
@@ -191,24 +321,95 @@ export default function App() {
             notifications={notifications}
             setActiveTab={setActiveTab}
             onAddHabit={openAddHabit}
+            onEditHabit={openEditHabit}
             onAddTask={openAddTask}
             onAddExpense={openAddExpense}
           />
         )}
-        {activeTab === 'Habits' && <Habits habits={habits} onToggleHabit={toggleHabit} onDeleteHabit={deleteHabit} onAddHabit={openAddHabit} />}
-        {activeTab === 'Savings' && <Savings savings={savings} onDeleteGoal={deleteGoal} onAddGoal={openAddGoal} />}
-        {activeTab === 'Schedule' && <Schedule tasks={tasks} routines={routines} onToggleTask={toggleTask} onToggleRoutine={toggleRoutine} onDeleteTask={deleteTask} onDeleteRoutine={deleteRoutine} onAddTask={openAddTask} onAddRoutine={openAddRoutine} />}
+        {activeTab === 'Savings' && <Savings savings={savings} onDeleteGoal={confirmDeleteGoal} onAddGoal={openAddGoal} />}
+        {activeTab === 'Schedule' && (
+          <div className="flex flex-col">
+            <Schedule
+              habits={habits}
+              onToggleHabit={toggleHabit}
+              onDeleteHabit={confirmDeleteHabit}
+              onAddTask={openAddHabit}
+              routines={routines}
+              onToggleRoutine={toggleRoutine}
+              onDeleteRoutine={confirmDeleteRoutine}
+              onAddRoutine={openAddRoutine}
+            />
+            <div className="mt-12 border-t border-[#2f3336] pt-12">
+              <Habits
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                onDeleteHabit={confirmDeleteHabit}
+                onAddHabit={openAddHabit}
+                onEditHabit={openEditHabit}
+                currentMonth={viewDate}
+                onMonthChange={setViewDate}
+              />
+            </div>
+          </div>
+        )}
         {activeTab === 'Analytics' && <Analytics habits={habits} tasks={tasks} />}
+        </div>
       </main>
 
       {/* Add Habit Modal */}
-      <Modal isOpen={modalOpen === 'habit'} onClose={() => setModalOpen(null)} title="New Habit">
+      <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Habit" : "New Habit"}>
         <div className="space-y-4">
           <div>
+            <label className={labelClass}>Quick Presets</label>
+            <div className="flex flex-wrap gap-2 mt-2 mb-4">
+              {[
+                { name: '💧 Drink Water', cat: 'HYGIENE' },
+                { name: '💪 Workout', cat: 'BODY' },
+                { name: '📚 Reading', cat: 'LEARNING' },
+                { name: '🧘 Meditation', cat: 'RECOVERY' },
+                { name: '🍳 Healthy Meal', cat: 'HEALTH' }
+              ].map(p => (
+                <button 
+                  key={p.name}
+                  onClick={() => { setNewHabitName(p.name); setNewHabitCategory(p.cat); }}
+                  className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5 text-[11px] font-black text-[#71767b] hover:text-x-blue hover:bg-x-blue/5 hover:border-x-blue/20 transition-all"
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
             <label className={labelClass}>Habit name</label>
             <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus />
           </div>
-          <button onClick={addHabit} className={submitClass}>Add Habit</button>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Time (Optional)</label>
+              <input className={inputClass} type="time" value={newHabitTime} onChange={e => setNewHabitTime(e.target.value)} style={{ colorScheme: 'dark' }} />
+            </div>
+            <div>
+              <label className={labelClass}>Monthly Target</label>
+              <input className={inputClass} type="number" placeholder="e.g. 10" value={newHabitMonthlyTarget} onChange={e => setNewHabitMonthlyTarget(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Category</label>
+            <div className="flex flex-wrap gap-2">
+              {['HEALTH', 'HYGIENE', 'RECOVERY', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
+                <button 
+                  key={cat} 
+                  onClick={() => setNewHabitCategory(cat)}
+                  className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all border ${
+                    newHabitCategory === cat 
+                      ? 'bg-x-blue border-x-blue text-white' 
+                      : 'bg-white/[0.05] border-[#2f3336] text-[#71767b] hover:text-[#eff3f4]'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button onClick={saveHabit} className={submitClass}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
         </div>
       </Modal>
 
@@ -227,30 +428,6 @@ export default function App() {
         </div>
       </Modal>
 
-      {/* Add Task Modal */}
-      <Modal isOpen={modalOpen === 'task'} onClose={() => setModalOpen(null)} title="New Task">
-        <div className="space-y-4">
-          <div>
-            <label className={labelClass}>Task name</label>
-            <input className={inputClass} placeholder="e.g. Review report" value={newTaskName} onChange={e => setNewTaskName(e.target.value)} autoFocus />
-          </div>
-          <div>
-            <label className={labelClass}>Time</label>
-            <input className={inputClass} type="time" value={newTaskTime} onChange={e => setNewTaskTime(e.target.value)} style={{ colorScheme: 'dark' }} />
-          </div>
-          <div>
-            <label className={labelClass}>Category</label>
-            <div className="flex gap-2">
-              {(['work', 'personal', 'health'] as const).map(tag => (
-                <button key={tag} onClick={() => setNewTaskTag(tag)}
-                  className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold capitalize transition-all border border-white/5 ${newTaskTag === tag ? 'bg-[#007aff] text-white' : 'bg-white/[0.06] text-white/40'}`}
-                >{tag}</button>
-              ))}
-            </div>
-          </div>
-          <button onClick={addTask} className={submitClass}>Add Task</button>
-        </div>
-      </Modal>
 
       {/* Add Routine Modal */}
       <Modal isOpen={modalOpen === 'routine'} onClose={() => setModalOpen(null)} title="New Routine">
@@ -291,6 +468,14 @@ export default function App() {
           <button onClick={addExpense} className={submitClass}>Add Expense</button>
         </div>
       </Modal>
+
+      <ConfirmModal 
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal(prev => ({...prev, isOpen: false}))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+      />
     </div>
   );
 }
