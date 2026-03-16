@@ -66,6 +66,14 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
     onMonthChange(newDate);
   };
 
+  const handleMonthSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.value) return;
+    const parts = e.target.value.split('-').map(Number);
+    if (parts.length === 2 && !parts.some(isNaN)) {
+      onMonthChange(new Date(parts[0], parts[1] - 1, 1));
+    }
+  };
+
   // Group habits by category
   const categories = useMemo(() => {
     const groups: Record<string, Habit[]> = {};
@@ -101,45 +109,53 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
     <div className="w-full bg-black text-[#eff3f4] p-6 space-y-6 pb-20">
       
       {/* Visual Header / Summary */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-[#2f3336] pb-8">
-        <div>
-          <h2 className="text-[28px] font-black leading-tight">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 border-b border-[#2f3336] pb-6 md:pb-8">
+        <div className="text-center md:text-left">
+          <h2 className="text-[22px] md:text-[28px] font-black leading-tight">
             Habit Consistency
           </h2>
-          <p className="text-[#8b98a5] text-[14px] font-black uppercase tracking-tight">
+          <p className="text-[#8b98a5] text-[11px] md:text-[14px] font-black uppercase tracking-tight">
             Tracking {habits.length} daily goals
           </p>
         </div>
         
-        <div className="flex items-center gap-2 bg-white/[0.03] p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
+        <div className="flex items-center gap-1 md:gap-2 bg-white/[0.03] p-1 md:p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
           <button 
             onClick={() => changeMonth(-1)}
-            className="p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
+            className="p-1.5 md:p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </button>
           <button 
             onClick={() => onMonthChange(new Date())}
-            className="px-3 py-1.5 rounded-xl transition-all text-[11px] font-black text-[#71767b] hover:text-[#eff3f4] bg-white/[0.05] border border-white/5 uppercase"
+            className="px-2 md:px-3 py-1 md:py-1.5 rounded-xl transition-all text-[9px] md:text-[11px] font-black text-[#71767b] hover:text-[#eff3f4] bg-white/[0.05] border border-white/5 uppercase"
           >
             TODAY
           </button>
-          <div className="text-center min-w-[140px]">
-            <span className="block text-[13px] font-black uppercase tracking-[0.2em] whitespace-nowrap">
-              {monthYearLabel}
-            </span>
+          <div className="relative group/month">
+            <input 
+              type="month" 
+              className="absolute inset-0 opacity-0 cursor-pointer z-10"
+              value={`${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`}
+              onChange={handleMonthSelect}
+            />
+            <div className="text-center min-w-[110px] md:min-w-[140px] px-2 md:px-4 py-1 md:py-1.5 rounded-xl group-hover/month:bg-white/5 transition-colors cursor-pointer border border-transparent group-hover/month:border-white/10">
+              <span className="block text-[11px] md:text-[13px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] whitespace-nowrap">
+                {monthYearLabel}
+              </span>
+            </div>
           </div>
           <button 
             onClick={() => changeMonth(1)}
-            className="p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
+            className="p-1.5 md:p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
 
         <button 
           onClick={onAddHabit} 
-          className="x-button-primary"
+          className="x-button-primary w-full md:w-auto text-[14px] md:text-[15px]"
         >
           <Plus className="w-4 h-4" strokeWidth={3} />
           Add Habit
@@ -325,15 +341,6 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
 
 
 
-      {/* Footer Info */}
-      <div className="p-8 bg-[#16181c] rounded-[40px] border border-[#2f3336] text-center space-y-4">
-        <Activity className="w-10 h-10 text-x-blue mx-auto mb-2 animate-pulse" />
-        <h3 className="text-xl font-black text-[#eff3f4]">Systemized Growth</h3>
-        <p className="max-w-md mx-auto text-[#71767b] text-sm leading-relaxed font-bold">
-          Your consistency is tracked automatically from your daily actions. 
-          Keep your schedule green to fill your streaks.
-        </p>
-      </div>
     </div>
   );
 };

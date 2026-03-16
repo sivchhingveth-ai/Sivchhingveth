@@ -75,7 +75,7 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDel
   });
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black">
       
       {/* Search/Filter style Header for Tasks */}
       <div className="px-4 py-3 md:p-6 border-b border-[#2f3336] flex items-center justify-between bg-black/90 backdrop-blur-sm z-20 sticky top-0 md:relative">
@@ -97,9 +97,9 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDel
         <section className="bg-white/[0.02] border border-[#2f3336] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
           <div className="p-2 md:p-4 bg-[#f97316]/10 flex items-center justify-between border-b border-[#2f3336]">
              <div className="flex items-center gap-2">
-                <h3 className="text-[#f97316] font-black text-[11px] md:text-[14px] uppercase tracking-widest">Phase 1: Morning (5 AM – 12 PM)</h3>
+                <h3 className="text-[#f97316] font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Phase 1: Morning (5 AM – 12 PM)</h3>
              </div>
-             <span className="text-[#f97316] text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#f97316]/10 border border-[#f97316]/30 uppercase tracking-tighter">Crucial</span>
+             <span className="text-[#f97316] text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#f97316]/10 border border-[#f97316]/30 uppercase tracking-tight">Crucial</span>
           </div>
           <div className="divide-y divide-[#2f3336]">
             {scheduledHabits.filter(h => h.time! >= "05:00" && h.time! < "12:00").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (
@@ -112,9 +112,9 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDel
         <section className="bg-white/[0.02] border border-[#2f3336] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
           <div className="p-2 md:p-4 bg-[#ffd400]/10 flex items-center justify-between border-b border-[#2f3336]">
              <div className="flex items-center gap-2">
-                <h3 className="text-[#ffd400] font-black text-[11px] md:text-[14px] uppercase tracking-widest">Phase 2: Afternoon (12 PM – 6 PM)</h3>
+                <h3 className="text-[#ffd400] font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Phase 2: Afternoon (12 PM – 6 PM)</h3>
              </div>
-             <span className="text-[#ffd400] text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#ffd400]/10 border border-[#ffd400]/30 uppercase tracking-tighter">Focused</span>
+             <span className="text-[#ffd400] text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#ffd400]/10 border border-[#ffd400]/30 uppercase tracking-tight">Focused</span>
           </div>
           <div className="divide-y divide-[#2f3336]">
             {scheduledHabits.filter(h => h.time! >= "12:00" && h.time! < "18:00").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (
@@ -127,9 +127,9 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDel
         <section className="bg-white/[0.02] border border-[#2f3336] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
           <div className="p-2 md:p-4 bg-[#7856ff]/10 flex items-center justify-between border-b border-[#2f3336]">
              <div className="flex items-center gap-2">
-                <h3 className="text-[#7856ff] font-black text-[11px] md:text-[14px] uppercase tracking-widest">Phase 3: Night (6 PM – 12 AM)</h3>
+                <h3 className="text-[#7856ff] font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Phase 3: Night (6 PM – 12 AM)</h3>
              </div>
-             <span className="text-[#7856ff] text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#7856ff]/10 border border-[#7856ff]/30 uppercase tracking-tighter">Reset</span>
+             <span className="text-[#7856ff] text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#7856ff]/10 border border-[#7856ff]/30 uppercase tracking-tight">Today</span>
           </div>
           <div className="divide-y divide-[#2f3336]">
             {scheduledHabits.filter(h => h.time! >= "18:00" && h.time! <= "23:59").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (
@@ -142,9 +142,9 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDel
         <section className="bg-white/[0.02] border border-[#2f3336] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
           <div className="p-2 md:p-4 bg-[#22c55e]/10 flex items-center justify-between border-b border-[#2f3336]">
              <div className="flex items-center gap-2">
-                <h3 className="text-[#22c55e] font-black text-[11px] md:text-[14px] uppercase tracking-widest">Phase 4: Midnight (12 AM – 5 AM)</h3>
+                <h3 className="text-[#22c55e] font-bold text-[11px] md:text-[14px] uppercase tracking-wider">Phase 4: Midnight (12 AM – 5 AM)</h3>
              </div>
-             <span className="text-[#22c55e] text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#22c55e]/10 border border-[#22c55e]/30 uppercase tracking-tighter">Quiet</span>
+             <span className="text-[#22c55e] text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#22c55e]/10 border border-[#22c55e]/30 uppercase tracking-tight">Quiet</span>
           </div>
           <div className="divide-y divide-[#2f3336]">
             {scheduledHabits.filter(h => h.time! >= "00:00" && h.time! < "05:00").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (

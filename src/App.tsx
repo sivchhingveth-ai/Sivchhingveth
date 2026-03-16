@@ -17,7 +17,7 @@ import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotifica
 export default function App() {
   const todayStr = new Date().toISOString().split('T')[0];
   const [activeTab, setActiveTab] = useState('Schedule');
-  const tabs = ['Schedule', 'Habits', 'Savings'];
+  const tabs = ['Schedule', 'Manual habit', 'Savings'];
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
@@ -113,7 +113,7 @@ export default function App() {
   const [routines, setRoutines] = useState<Routine[]>([
     { id: 1, name: "Morning Ritual", time: "05:00 AM", icon: "🌅", color: "#f97316", done: false },
     { id: 2, name: "Afternoon Focus", time: "01:00 PM", icon: "🧠", color: "#ffd400", done: false },
-    { id: 3, name: "Night Reset", time: "10:00 PM", icon: "🌙", color: "#7856ff", done: false },
+    { id: 3, name: "Night Today", time: "10:00 PM", icon: "🌙", color: "#7856ff", done: false },
     { id: 4, name: "Midnight Calm", time: "12:00 AM", icon: "🌌", color: "#22c55e", done: false },
   ]);
 
@@ -321,7 +321,11 @@ export default function App() {
       setModalOpen('habit');
     }
   };
-  const openAddGoal = () => { setModalOpen('goal'); };
+  const openAddGoal = () => { 
+    setNewGoalStartDate(todayStr);
+    setNewGoalTargetDate(todayStr);
+    setModalOpen('goal'); 
+  };
   const openAddTask = () => { setModalOpen('habit'); setActiveTab('Schedule'); };
   const openAddRoutine = () => {
     setPreviousModal(modalOpen);
@@ -330,22 +334,22 @@ export default function App() {
   const openAddExpense = () => { setModalOpen('expense'); setActiveTab('Savings'); };
 
   const inputClass = "w-full bg-transparent border border-[#2f3336] px-4 py-3 rounded-lg text-lg text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-colors";
-  const labelClass = "text-[14px] font-bold text-[#eff3f4] mb-1.5 block px-1";
+  const labelClass = "text-[14px] font-bold text-[#eff3f4] mb-1.5 block";
   const submitClass = "x-button-primary w-full py-3 text-[17px]";
 
   return (
-    <div className="h-screen flex flex-col bg-black text-white font-sans antialiased overflow-hidden">
-      <Header
-        title="My Dashboard"
-        date="Friday, March 14, 2026"
-        quote="Progress over perfection."
-      />
+    <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative">
+      {/* Premium Background Ambiance */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#1d9bf0]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7856ff]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-[#22c55e]/5 rounded-full blur-[100px] pointer-events-none" />
+
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <main className={`flex-1 overflow-y-auto scroll-smooth ${activeTab === 'Schedule' ? 'p-0' : 'p-4 md:p-8'}`}>
-        <div className={`${activeTab === 'Schedule' ? 'w-full' : 'max-w-[1200px] mx-auto'}`}>
+      <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain">
+        <div className="w-full">
 
-          {activeTab === 'Habits' && (
+          {activeTab === 'Manual habit' && (
             <Habits
               habits={habits}
               onToggleHabit={toggleHabit}
@@ -376,7 +380,7 @@ export default function App() {
         <div className="pb-6 space-y-4">
           <div>
             <label className={labelClass}>Habit name</label>
-            <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus />
+            <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
             <div>
@@ -410,7 +414,7 @@ export default function App() {
           {/* Extra Routines Section - Moved inside modal */}
           <div className="mt-4 pt-4 border-t border-[#2f3336] space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-[18px] font-black text-[#eff3f4]">
+              <h3 className="text-[18px] font-bold text-[#eff3f4]">
                 Time Range
               </h3>
               <button
@@ -441,7 +445,7 @@ export default function App() {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="text-[15px] font-bold text-[#eff3f4]">{routine.name}</p>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter" style={{ backgroundColor: `${phase.color}20`, color: phase.color, border: `1px solid ${phase.color}40` }}>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider" style={{ backgroundColor: `${phase.color}20`, color: phase.color, border: `1px solid ${phase.color}40` }}>
                             {phase.name}
                           </span>
                         </div>
@@ -472,7 +476,7 @@ export default function App() {
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Goal name</label>
-            <input className={inputClass} placeholder="e.g. New Phone" value={newGoalName} onChange={e => setNewGoalName(e.target.value)} autoFocus />
+            <input className={inputClass} placeholder="e.g. New Phone" value={newGoalName} onChange={e => setNewGoalName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div>
             <label className={labelClass}>Target amount ($)</label>
@@ -509,7 +513,7 @@ export default function App() {
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Routine name</label>
-            <input className={inputClass} placeholder="e.g. Morning yoga" value={newRoutineName} onChange={e => setNewRoutineName(e.target.value)} autoFocus />
+            <input className={inputClass} placeholder="e.g. Morning yoga" value={newRoutineName} onChange={e => setNewRoutineName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div>
             <label className={labelClass}>Time</label>
@@ -524,7 +528,7 @@ export default function App() {
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Expense name</label>
-            <input className={inputClass} placeholder="e.g. Uber ride" value={newExpenseName} onChange={e => setNewExpenseName(e.target.value)} autoFocus />
+            <input className={inputClass} placeholder="e.g. Uber ride" value={newExpenseName} onChange={e => setNewExpenseName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div>
             <label className={labelClass}>Amount ($)</label>

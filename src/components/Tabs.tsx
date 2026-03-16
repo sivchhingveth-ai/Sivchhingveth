@@ -17,8 +17,8 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange }) => {
             className="flex-1 min-w-0 px-4 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors"
           >
             <div className="flex flex-col items-center justify-center h-full relative">
-              <span className={`text-[15px] transition-all font-medium whitespace-nowrap ${
-                activeTab === tab ? 'text-[#e7e9ea] font-bold' : 'text-[#71767b]'
+              <span className={`text-[15px] transition-all font-black whitespace-nowrap ${
+                activeTab === tab ? 'text-[#e7e9ea]' : 'text-[#71767b]'
               }`}>
                 {tab}
               </span>
