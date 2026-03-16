@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Tabs } from './components/Tabs';
 import { Habits } from './components/Habits';
@@ -11,18 +11,52 @@ import { Savings } from './components/Savings';
 import { Schedule } from './components/Schedule';
 import { Modal } from './components/Modal';
 import { ConfirmModal } from './components/ConfirmModal';
-import { Plus } from 'lucide-react';
+import { Auth } from './components/Auth';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { Plus, LogOut, Loader2, ShieldAlert } from 'lucide-react';
 import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotification } from './types';
 
 export default function App() {
   const todayStr = new Date().toISOString().split('T')[0];
   const [activeTab, setActiveTab] = useState('Schedule');
+  const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   const tabs = ['Schedule', 'Manual habit', 'Savings'];
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
   const [previousModal, setPreviousModal] = useState<string | null>(null);
   const [viewDate, setViewDate] = useState(new Date());
+
+  // Auth & Session management
+  useEffect(() => {
+    const checkSession = async () => {
+      // Safety timeout
+      const timer = setTimeout(() => {
+        if (isLoading) setLoadingTimeout(true);
+      }, 8000);
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setIsLoading(false);
+        clearTimeout(timer);
+      } catch (err) {
+        console.error('Session check failed:', err);
+        setIsLoading(false);
+        clearTimeout(timer);
+      }
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Form state
   const [newHabitName, setNewHabitName] = useState('');
@@ -50,63 +84,52 @@ export default function App() {
     message: '',
     onConfirm: () => { },
   });
-  const [editingHabitId, setEditingHabitId] = useState<number | null>(null);
+  const [editingHabitId, setEditingHabitId] = useState<any | null>(null);
 
-  const generateHistory = (days: number) => {
-    const history: Record<string, boolean> = {};
-    for (let i = 1; i <= days; i++) {
-      const date = `2026-03-${i.toString().padStart(2, '0')}`;
-      history[date] = true;
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [savings, setSavings] = useState<SavingGoal[]>([]);
+
+  // Fetch data from Supabase
+  useEffect(() => {
+    if (session?.user) {
+      fetchData();
     }
-    return history;
+  }, [session]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const { data: habitsData, error: habitsError } = await supabase
+        .from('habits')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (habitsData) setHabits(habitsData.map(h => ({
+         ...h,
+         history: h.history || {},
+         id: h.id, // Using supabase UUIDs
+         monthlyTarget: h.monthly_target // Map snake_case to camelCase
+      })) as any);
+
+      const { data: savingsData, error: savingsError } = await supabase
+        .from('saving_goals')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (savingsData) setSavings(savingsData.map(s => ({
+        ...s,
+        history: s.history || {},
+        id: s.id,
+        startDate: s.start_date,
+        targetDate: s.target_date
+      })) as any);
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const [habits, setHabits] = useState<Habit[]>([
-    // HEALTH
-    { id: 1, name: "3L DRINKING WATER", category: "HEALTH", history: generateHistory(15), streak: 15 }, // 50% roughly
-    { id: 2, name: "2X EATING LUNCH AND EVENING", category: "HEALTH", history: generateHistory(28), streak: 28 }, // ~90%
-    { id: 3, name: "NO SUGARS", category: "HEALTH", history: {}, streak: 0 },
-    { id: 4, name: "NO JUNK / SPICY FOOD", category: "HEALTH", history: {}, streak: 0 },
-
-    // HYGIENE
-    { id: 5, name: "SKINCARE MORNING / NIGHT", category: "HYGIENE", history: {}, streak: 0 },
-    { id: 6, name: "3X SHOWER MORNING / AFTERNOON / EVENING", category: "HYGIENE", history: {}, streak: 0 },
-    { id: 7, name: "PREPARE AND ORGANIZE BED", category: "HYGIENE", history: generateHistory(31), streak: 31, time: "05:10" }, // 100%
-    { id: 8, name: "DRESS WELL", category: "HYGIENE", history: {}, streak: 0, time: "06:30" },
-    { id: 9, name: "2X CLEAN FACE", category: "HYGIENE", history: {}, streak: 0 },
-
-    // RECOVERY
-    { id: 10, name: "SLEEP AT 12 AM", category: "RECOVERY", history: {}, streak: 0, time: "00:00" },
-    { id: 11, name: "WAKE AT 5 AM", category: "RECOVERY", history: {}, streak: 0, time: "05:00" },
-    { id: 12, name: "5 MINS STILLNESS", category: "RECOVERY", history: {}, streak: 0, time: "05:20" },
-    { id: 13, name: "15 MINS POWER NAP", category: "RECOVERY", history: {}, streak: 0, time: "17:00" },
-    { id: 14, name: "30 MINS NO PHONE", category: "RECOVERY", history: {}, streak: 0, time: "23:00" },
-
-    // BODY
-    { id: 15, name: "20 MINS MORNING RUNNING", category: "BODY", history: generateHistory(8), streak: 8, time: "05:30" }, // ~25%
-    { id: 16, name: "10 MINS HEIGHT UNLOCK WORKOUT", category: "BODY", history: {}, streak: 0, time: "06:00" },
-    { id: 17, name: "10 MINS ABS CIRCUIT", category: "BODY", history: {}, streak: 0, time: "06:15" },
-
-    // FINANCE
-    { id: 18, name: "NO GAMING", category: "FINANCE", history: {}, streak: 0 },
-    { id: 19, name: "NO PORN / GOONING", category: "FINANCE", history: {}, streak: 0 },
-    { id: 20, name: "NO BAD WORD TO SELF / BF", category: "FINANCE", history: {}, streak: 0 },
-    { id: 21, name: "NO DELAY", category: "FINANCE", history: {}, streak: 0 },
-    { id: 22, name: "NO DISTRACTION", category: "FINANCE", history: {}, streak: 0 },
-    { id: 23, name: "SPEND LESS THAN 50000", category: "FINANCE", history: generateHistory(9), monthlyTarget: 10, streak: 9 },
-
-    // LEARNING
-    { id: 24, name: "20 PAGES READING", category: "LEARNING", history: {}, streak: 0, time: "22:00" },
-    { id: 25, name: "4H LEARN TRADING (PM)", category: "LEARNING", history: {}, streak: 0, time: "13:00" },
-    { id: 26, name: "1H MEMORIZE / REVIEW RESEARCH (AM)", category: "LEARNING", history: {}, streak: 0, time: "07:00" },
-    { id: 27, name: "1H LEARN ABOUT AI (PM)", category: "LEARNING", history: {}, streak: 0, time: "17:30" },
-  ]);
-
-  const [savings, setSavings] = useState<SavingGoal[]>([
-    { id: 1, name: "Emergency fund", goal: 500, saved: 310, color: "#34c759", startDate: "2026-03-01", targetDate: "2026-06-01", history: { "2026-03-01": 50, "2026-03-10": 100, "2026-03-15": 160 } },
-    { id: 2, name: "Vacation", goal: 300, saved: 180, color: "#007aff", startDate: "2026-03-10", targetDate: "2026-08-15", history: { "2026-03-10": 100, "2026-03-12": 80 } },
-    { id: 3, name: "New laptop", goal: 200, saved: 60, color: "#ff9500", startDate: "2026-03-15", targetDate: "2026-04-15", history: { "2026-03-15": 60 } },
-  ]);
 
   const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -133,16 +156,24 @@ export default function App() {
   ]);
 
   // Toggle functions
-  const toggleHabit = (id: number, dateStr: string = todayStr) => {
+  const toggleHabit = React.useCallback(async (id: any, dateStr: string = todayStr) => {
+    let updatedHistory: any = {};
     setHabits(prev => prev.map(h => {
       if (h.id === id) {
-        const newHistory = { ...h.history };
-        newHistory[dateStr] = !newHistory[dateStr];
-        return { ...h, history: newHistory };
+        updatedHistory = { ...h.history };
+        updatedHistory[dateStr] = !updatedHistory[dateStr];
+        return { ...h, history: updatedHistory };
       }
       return h;
     }));
-  };
+
+    if (session?.user) {
+      await supabase
+        .from('habits')
+        .update({ history: updatedHistory })
+        .eq('id', id);
+    }
+  }, [session?.user, todayStr]);
 
   const toggleTask = (id: number) => {
     toggleHabit(id);
@@ -163,11 +194,14 @@ export default function App() {
   };
 
   // Delete functions
-  const deleteHabit = (id: number) => {
+  const deleteHabit = async (id: any) => {
     setHabits(prev => prev.filter(h => h.id !== id));
+    if (session?.user) {
+      await supabase.from('habits').delete().eq('id', id);
+    }
   };
 
-  const confirmDeleteHabit = (id: number) => {
+  const confirmDeleteHabit = (id: any) => {
     setConfirmModal({
       isOpen: true,
       title: 'Delete Habit',
@@ -176,11 +210,14 @@ export default function App() {
     });
   };
 
-  const deleteGoal = (id: number) => {
+  const deleteGoal = async (id: any) => {
     setSavings(prev => prev.filter(s => s.id !== id));
+    if (session?.user) {
+      await supabase.from('saving_goals').delete().eq('id', id);
+    }
   };
 
-  const confirmDeleteGoal = (id: number) => {
+  const confirmDeleteGoal = (id: any) => {
     setConfirmModal({
       isOpen: true,
       title: 'Delete Goal',
@@ -189,15 +226,15 @@ export default function App() {
     });
   };
 
-  const deleteTask = (id: number) => {
+  const deleteTask = (id: any) => {
     // Habits are deleted via onDeleteHabit prop in components
   };
 
-  const deleteRoutine = (id: number) => {
+  const deleteRoutine = (id: any) => {
     setRoutines(prev => prev.filter(r => r.id !== id));
   };
 
-  const confirmDeleteRoutine = (id: number) => {
+  const confirmDeleteRoutine = (id: any) => {
     setConfirmModal({
       isOpen: true,
       title: 'Delete Routine',
@@ -207,27 +244,35 @@ export default function App() {
   };
 
   // Add functions
-  const saveHabit = () => {
-    if (newHabitName.trim()) {
+  const saveHabit = async () => {
+    if (newHabitName.trim() && session?.user) {
       if (editingHabitId) {
-        setHabits(prev => prev.map(h => h.id === editingHabitId ? {
-          ...h,
+        const updatedHabit = {
           name: newHabitName,
           category: newHabitCategory,
-          time: newHabitTime || undefined,
-          monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : undefined
-        } : h));
+          time: newHabitTime || null,
+          monthly_target: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+        };
+
+        const { error } = await supabase
+          .from('habits')
+          .update(updatedHabit)
+          .eq('id', editingHabitId);
+
+        if (!error) fetchData();
       } else {
-        const newHabit: Habit = {
-          id: Date.now(),
+        const newHabit = {
+          user_id: session.user.id,
           name: newHabitName,
           category: newHabitCategory,
           history: {},
           streak: 0,
-          time: newHabitTime || undefined,
-          monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : undefined
+          time: newHabitTime || null,
+          monthly_target: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
         };
-        setHabits([...habits, newHabit]);
+
+        const { error } = await supabase.from('habits').insert([newHabit]);
+        if (!error) fetchData();
       }
       setNewHabitName('');
       setNewHabitTime('');
@@ -237,20 +282,24 @@ export default function App() {
     }
   };
 
-  const addGoal = () => {
-    if (!newGoalName.trim() || !newGoalAmount) return;
+  const addGoal = async () => {
+    if (!newGoalName.trim() || !newGoalAmount || !session?.user) return;
     const colors = ['#34c759', '#007aff', '#ff9500', '#ff3b30', '#af52de', '#5ac8fa'];
-    const newId = Math.max(0, ...savings.map(s => s.id)) + 1;
-    setSavings(prev => [...prev, {
-      id: newId,
+    
+    const newGoal = {
+      user_id: session.user.id,
       name: newGoalName.trim(),
       goal: parseFloat(newGoalAmount),
       saved: 0,
-      color: colors[newId % colors.length],
-      startDate: newGoalStartDate,
-      targetDate: newGoalTargetDate,
+      color: colors[savings.length % colors.length],
+      start_date: newGoalStartDate,
+      target_date: newGoalTargetDate,
       history: {}
-    }]);
+    };
+
+    const { error } = await supabase.from('saving_goals').insert([newGoal]);
+    if (!error) fetchData();
+
     setNewGoalName('');
     setNewGoalAmount('');
     setNewGoalStartDate(todayStr);
@@ -258,18 +307,21 @@ export default function App() {
     setModalOpen(null);
   };
 
-  const addDailySaving = (goalId: number, amount: number, date: string) => {
-    setSavings(prev => prev.map(s => {
-      if (s.id === goalId) {
-        const newHistory = { ...s.history, [date]: (s.history[date] || 0) + amount };
-        return {
-          ...s,
-          saved: s.saved + amount,
-          history: newHistory
-        };
-      }
-      return s;
-    }));
+  const addDailySaving = async (goalId: any, amount: number, date: string) => {
+    const goal = savings.find(s => s.id === goalId);
+    if (!goal) return;
+
+    const newHistory = { ...goal.history, [date]: (goal.history[date] || 0) + amount };
+    const newSaved = goal.saved + (amount || 0);
+
+    setSavings(prev => prev.map(s => s.id === goalId ? { ...s, saved: newSaved, history: newHistory } : s));
+
+    if (session?.user) {
+      await supabase
+        .from('saving_goals')
+        .update({ saved: newSaved, history: newHistory })
+        .eq('id', goalId);
+    }
   };
 
 
@@ -310,7 +362,7 @@ export default function App() {
     setNewHabitCategory('OTHER');
     setModalOpen('habit');
   };
-  const openEditHabit = (id: number) => {
+  const openEditHabit = (id: any) => {
     const habit = habits.find(h => h.id === id);
     if (habit) {
       setEditingHabitId(id);
@@ -333,12 +385,95 @@ export default function App() {
   };
   const openAddExpense = () => { setModalOpen('expense'); setActiveTab('Savings'); };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="h-[100dvh] bg-black flex flex-col items-center justify-center p-8 text-center gap-8 relative overflow-hidden">
+        {/* Glow effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
+        
+        <div className="w-20 h-20 bg-red-500/10 rounded-[2rem] flex items-center justify-center border border-red-500/20 relative z-10">
+          <ShieldAlert className="w-10 h-10 text-red-500" />
+        </div>
+        
+        <div className="space-y-4 relative z-10">
+          <h1 className="text-2xl md:text-3xl font-black text-[#eff3f4] uppercase tracking-tight">Configuration Link Needed</h1>
+          <p className="text-[#71767b] max-w-md font-bold text-sm md:text-base leading-relaxed">
+            Your secure database is ready on Supabase, but your app hasn't been linked to it yet. 
+            <br/><br/>
+            Please add <code className="text-[#eff3f4] bg-white/5 px-1.5 py-0.5 rounded">VITE_SUPABASE_URL</code> and <code className="text-[#eff3f4] bg-white/5 px-1.5 py-0.5 rounded">VITE_SUPABASE_ANON_KEY</code> to your environment variables.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3 w-full max-w-xs relative z-10">
+           <a 
+             href="https://vercel.com/dashboard" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             className="x-button-primary py-4 rounded-2xl flex items-center justify-center gap-2"
+           >
+             <span>Go to Vercel Dashboard</span>
+           </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-[100dvh] bg-black flex flex-col items-center justify-center gap-6 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#1d9bf0]/10 rounded-full blur-[80px] pointer-events-none" />
+        <div className="relative">
+          <Loader2 className="w-12 h-12 text-[#1d9bf0] animate-spin" />
+          <div className="absolute inset-0 blur-xl bg-[#1d9bf0]/20 animate-pulse" />
+        </div>
+        <div className="text-center space-y-3 relative z-10 px-6">
+          <div className="space-y-1">
+            <p className="text-[#71767b] font-black animate-pulse uppercase tracking-[0.2em] text-[10px]">Establishing Secure Link</p>
+            <p className="text-[#eff3f4] font-bold text-sm">Loading your habits...</p>
+          </div>
+          
+          {loadingTimeout && (
+            <div className="pt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+              <p className="text-red-400 text-xs font-bold mb-3 max-w-[200px] mx-auto">
+                Connection is slow. Check your internet or ad-blocker.
+              </p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="bg-white/10 hover:bg-white/20 text-[#eff3f4] px-4 py-2 rounded-full text-xs font-bold border border-white/10 transition-all"
+              >
+                Retry Connection
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
+
   const inputClass = "w-full bg-transparent border border-[#2f3336] px-4 py-3 rounded-lg text-lg text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-colors";
   const labelClass = "text-[14px] font-bold text-[#eff3f4] mb-1.5 block";
   const submitClass = "x-button-primary w-full py-3 text-[17px]";
 
   return (
     <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative">
+      {/* Logout Button */}
+      <div className="absolute top-4 right-4 z-[100]">
+        <button 
+          onClick={handleLogout}
+          className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-[#71767b] hover:text-red-500 hover:bg-red-500/10 transition-all group"
+          title="Sign Out"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
+      </div>
       {/* Premium Background Ambiance */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#1d9bf0]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7856ff]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
@@ -384,8 +519,26 @@ export default function App() {
           </div>
           <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Time (Optional)</label>
-              <input className={inputClass} type="time" value={newHabitTime} onChange={e => setNewHabitTime(e.target.value)} style={{ colorScheme: 'dark' }} />
+              <label className={labelClass}>Time Phase (Optional)</label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {[
+                  { name: 'Morning', time: '08:00' },
+                  { name: 'Afternoon', time: '14:00' },
+                  { name: 'Night', time: '20:00' },
+                  { name: 'Midnight', time: '02:00' }
+                ].map(phase => (
+                  <button
+                    key={phase.name}
+                    onClick={(e) => { e.preventDefault(); setNewHabitTime(phase.time); }}
+                    className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all border ${newHabitTime === phase.time
+                      ? 'bg-white border-white text-black'
+                      : 'bg-white/[0.05] border-white/10 text-[#71767b] hover:bg-white/[0.1] hover:text-[#eff3f4]'
+                      }`}
+                  >
+                    {phase.name}
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
               <label className={labelClass}>Monthly Target</label>
@@ -411,63 +564,6 @@ export default function App() {
           </div>
           <button onClick={saveHabit} className={submitClass}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
 
-          {/* Extra Routines Section - Moved inside modal */}
-          <div className="mt-4 pt-4 border-t border-[#2f3336] space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[18px] font-bold text-[#eff3f4]">
-                Time Range
-              </h3>
-              <button
-                onClick={(e) => { e.preventDefault(); openAddRoutine(); }}
-                className="x-button-glass py-1.5 text-[14px]"
-              >
-                <Plus className="w-4 h-4" /> Add Routine
-              </button>
-            </div>
-
-            <div className="divide-y divide-[#2f3336]">
-              {routines.map(routine => {
-                const getPhase = (timeStr: string) => {
-                  const [timePart, modifier] = timeStr.trim().split(' ');
-                  let [hours] = timePart.split(':').map(Number);
-                  if (modifier === 'PM' && hours < 12) hours += 12;
-                  if (modifier === 'AM' && hours === 12) hours = 0;
-                  if (hours >= 0 && hours < 5) return { name: 'Midnight', color: '#22c55e' };
-                  if (hours >= 5 && hours < 12) return { name: 'Morning', color: '#f97316' };
-                  if (hours >= 12 && hours < 18) return { name: 'Afternoon', color: '#ffd400' };
-                  return { name: 'Night', color: '#7856ff' };
-                };
-                const phase = getPhase(routine.time);
-
-                return (
-                  <div key={routine.id} className="py-3 flex items-center justify-between group">
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-[15px] font-bold text-[#eff3f4]">{routine.name}</p>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider" style={{ backgroundColor: `${phase.color}20`, color: phase.color, border: `1px solid ${phase.color}40` }}>
-                            {phase.name}
-                          </span>
-                        </div>
-                        <p className="text-[12px] text-[#71767b]">{routine.time}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => { e.preventDefault(); deleteRoutine(routine.id); }}
-                        className="p-1.5 text-[#71767b] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                      >
-                        <span className="text-[14px]">Delete</span>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-              {routines.length === 0 && (
-                <p className="text-center py-4 text-[#71767b] text-sm">No extra routines yet.</p>
-              )}
-            </div>
-          </div>
         </div>
       </Modal>
 

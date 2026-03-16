@@ -4,15 +4,15 @@ import { Plus, Trash2, Calendar, ChevronDown, ChevronUp, ArrowUpRight } from 'lu
 
 interface SavingsProps {
   savings: SavingGoal[];
-  onDeleteGoal: (id: number) => void;
+  onDeleteGoal: (id: any) => void;
   onAddGoal: () => void;
-  onAddSaving: (id: number, amount: number, date: string) => void;
+  onAddSaving: (id: any, amount: number, date: string) => void;
 }
 
 const SavingItem: React.FC<{
   s: SavingGoal;
-  onDelete: (id: number) => void;
-  onAddSaving: (id: number, amount: number, date: string) => void;
+  onDelete: (id: any) => void;
+  onAddSaving: (id: any, amount: number, date: string) => void;
 }> = ({ s, onDelete, onAddSaving }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAddSaving, setShowAddSaving] = useState(false);
@@ -119,7 +119,7 @@ const SavingItem: React.FC<{
             </div>
             <button 
               onClick={handleAddSaving}
-              className="w-full py-2.5 bg-[#eff3f4] text-black font-bold text-[10px] md:text-sm rounded-xl hover:bg-white transition-all uppercase tracking-wider active:scale-[0.98]"
+              className="w-full py-2.5 bg-[#eff3f4] text-black font-extrabold text-[13px] md:text-sm rounded-xl hover:bg-white transition-all uppercase tracking-wider active:scale-[0.95]"
             >
               Record Saving
             </button>
@@ -216,9 +216,9 @@ export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGo
             {currentTime.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} • {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </p>
         </div>
-        <button onClick={onAddGoal} className="x-button-glass py-1.5 px-4 text-[12px] md:text-[14px]">
+        <button onClick={onAddGoal} className="x-button-glass py-1.5 px-3 md:px-4 text-[12px] md:text-[14px] shrink-0">
           <Plus className="w-3.5 h-3.5" />
-          <span className="hidden md:inline ml-2">Add Goal</span>
+          <span className="ml-1.5 md:ml-2">Goal</span>
         </button>
       </div>
 

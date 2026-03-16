@@ -5,10 +5,10 @@ import { getCategoryStyles } from '../utils/colors';
 
 interface HabitsProps {
   habits: Habit[];
-  onToggleHabit: (id: number, dateStr: string) => void;
-  onDeleteHabit: (id: number) => void;
+  onToggleHabit: (id: any, dateStr: string) => void;
+  onDeleteHabit: (id: any) => void;
   onAddHabit: () => void;
-  onEditHabit: (id: number) => void;
+  onEditHabit: (id: any) => void;
   currentMonth: Date;
   onMonthChange: (date: Date) => void;
 }

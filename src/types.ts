@@ -1,5 +1,5 @@
 export interface Habit {
-  id: number;
+  id: any;
   name: string;
   category: string;
   history: Record<string, boolean>; // date string "YYYY-MM-DD" -> boolean
@@ -9,7 +9,7 @@ export interface Habit {
 }
 
 export interface SavingGoal {
-  id: number;
+  id: any;
   name: string;
   goal: number;
   saved: number;
@@ -20,7 +20,7 @@ export interface SavingGoal {
 }
 
 export interface Task {
-  id: number;
+  id: any;
   name: string;
   time: string;
   tag: 'work' | 'personal' | 'health' | 'routine';
@@ -28,7 +28,7 @@ export interface Task {
 }
 
 export interface Routine {
-  id: number;
+  id: any;
   name: string;
   time: string;
   icon: string;
@@ -37,7 +37,7 @@ export interface Routine {
 }
 
 export interface Transaction {
-  id: number;
+  id: any;
   name: string;
   amount: number;
   category: string;
@@ -54,7 +54,7 @@ export interface BudgetStats {
 }
 
 export interface AppNotification {
-  id: number;
+  id: any;
   message: string;
   type: 'info' | 'reminder' | 'alert' | 'success';
 }

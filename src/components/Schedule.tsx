@@ -5,16 +5,16 @@ import { getCategoryStyles } from '../utils/colors';
 
 interface ScheduleProps {
   habits: Habit[];
-  onToggleHabit: (id: number) => void;
-  onDeleteHabit: (id: number) => void;
+  onToggleHabit: (id: any) => void;
+  onDeleteHabit: (id: any) => void;
   onAddTask: () => void;
 }
 
-const TaskItem: React.FC<{ 
+const TaskItem = React.memo<{ 
   habit: Habit; 
-  onToggle: (id: number) => void; 
-  onDelete: (id: number) => void;
-}> = ({ habit, onToggle, onDelete }) => {
+  onToggle: (id: any) => void; 
+  onDelete: (id: any) => void;
+}>(({ habit, onToggle, onDelete }) => {
   const todayStr = new Date().toISOString().split('T')[0];
   const isDone = habit.history[todayStr];
 
@@ -22,9 +22,13 @@ const TaskItem: React.FC<{
     <div className="p-2 md:p-3 flex gap-3 md:gap-4 hover:bg-white/[0.02] transition-colors group">
       <span className="text-[12px] md:text-[13px] font-bold text-[#71767b] w-9 md:w-12 shrink-0 pt-1">{habit.time}</span>
       <button 
-        onClick={() => onToggle(habit.id)}
-        className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
+        onClick={(e) => {
+          e.preventDefault();
+          onToggle(habit.id);
+        }}
+        className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all active:scale-90
           ${isDone ? 'bg-[#00ba7c] border-[#00ba7c] text-white shadow-lg shadow-[#00ba7c]/20' : 'border-white/20 hover:border-white/40 bg-white/[0.03]'}`}
+        style={{ touchAction: 'manipulation' }}
       >
         {isDone && <Check className="w-3.5 h-3.5" strokeWidth={4} />}
       </button>
@@ -41,7 +45,7 @@ const TaskItem: React.FC<{
       </button>
     </div>
   );
-};
+});
 
 export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDeleteHabit, onAddTask }) => {
 
@@ -79,7 +83,7 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDel
       
       {/* Search/Filter style Header for Tasks */}
       <div className="px-4 py-3 md:p-6 border-b border-[#2f3336] flex items-center justify-between bg-black/90 backdrop-blur-sm z-20 sticky top-0 md:relative">
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full text-center md:text-left">
           <h2 className="text-[16px] md:text-[20px] font-black text-[#eff3f4]">
             Daily Habits
           </h2>
@@ -87,9 +91,6 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDel
             {currentTime.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} • {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </p>
         </div>
-        <button onClick={onAddTask} className="x-button-glass py-1.5 text-[14px]">
-          Add Task
-        </button>
       </div>
 
       <div className="p-2 md:p-4 space-y-3 md:space-y-6">
