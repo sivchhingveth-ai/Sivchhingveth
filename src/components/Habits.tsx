@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Habit } from '../types';
-import { Check, Trash2, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp, Edit2 } from 'lucide-react';
+import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp } from 'lucide-react';
 import { getCategoryStyles } from '../utils/colors';
 
 interface HabitsProps {
@@ -103,8 +103,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
       {/* Visual Header / Summary */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-[#2f3336] pb-8">
         <div>
-          <h2 className="text-[28px] font-black leading-tight flex items-center gap-3">
-            <TrendingUp className="w-8 h-8 text-[#00ba7c]" />
+          <h2 className="text-[28px] font-black leading-tight">
             Habit Consistency
           </h2>
           <p className="text-[#8b98a5] text-[14px] font-black uppercase tracking-tight">
@@ -112,7 +111,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
           </p>
         </div>
         
-        <div className="flex items-center gap-2 bg-white/[0.05] p-1.5 rounded-2xl border border-[#2f3336]">
+        <div className="flex items-center gap-2 bg-white/[0.03] p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
           <button 
             onClick={() => changeMonth(-1)}
             className="p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
@@ -121,7 +120,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
           </button>
           <button 
             onClick={() => onMonthChange(new Date())}
-            className="px-3 py-1.5 hover:bg-white/10 rounded-xl transition-all text-[11px] font-black text-[#71767b] hover:text-x-blue border border-white/5"
+            className="px-3 py-1.5 rounded-xl transition-all text-[11px] font-black text-[#71767b] hover:text-[#eff3f4] bg-white/[0.05] border border-white/5 uppercase"
           >
             TODAY
           </button>
@@ -140,17 +139,16 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
 
         <button 
           onClick={onAddHabit} 
-          className="bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-black px-8 py-3 rounded-full text-[15px] transition-all flex items-center gap-2 shadow-xl shadow-[#1d9bf0]/20"
+          className="x-button-primary"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 h-4" strokeWidth={3} />
           Add Habit
         </button>
       </div>
 
       {/* Yearly Heatmap (GitHub Style) */}
       <section className="space-y-4">
-        <h3 className="text-[12px] font-black text-[#71767b] uppercase tracking-[0.3em] flex items-center gap-2 px-1">
-          <Activity className="w-4 h-4" />
+        <h3 className="text-[12px] font-black text-[#71767b] uppercase tracking-[0.3em] px-1">
           Activity Map (90 Days)
         </h3>
         <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-4 md:p-6 pt-10 md:pt-12 rounded-3xl relative" style={{ overflowX: 'clip', overflowY: 'visible' }}>
@@ -324,6 +322,8 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
           );
         })}
       </div>
+
+
 
       {/* Footer Info */}
       <div className="p-8 bg-[#16181c] rounded-[40px] border border-[#2f3336] text-center space-y-4">

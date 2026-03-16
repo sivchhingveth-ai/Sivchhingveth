@@ -35,17 +35,17 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               onConfirm();
               onClose();
             }}
-            className={`w-full py-3 rounded-full text-[15px] font-black transition-all active:scale-[0.98] ${
+            className={`w-full py-4 text-[17px] font-black transition-all rounded-2xl ${
               isDestructive 
                 ? 'bg-[#f4212e] text-white hover:bg-[#d71e28]' 
-                : 'bg-[#eff3f4] text-[#0f1419] hover:bg-[#d7dbdc]'
+                : 'x-button-primary'
             }`}
           >
             {confirmText}
           </button>
           <button
             onClick={onClose}
-            className="w-full py-3 rounded-full border border-[#536471] text-[#eff3f4] text-[15px] font-black hover:bg-white/5 transition-all"
+            className="w-full py-4 text-[17px] font-bold x-button-glass justify-center"
           >
             {cancelText}
           </button>

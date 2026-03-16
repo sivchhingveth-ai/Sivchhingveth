@@ -14,7 +14,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange }) => {
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
-            className="flex-1 min-w-0 px-4 relative flex items-center justify-center hover:bg-white/[0.03] transition-colors"
+            className="flex-1 min-w-0 px-4 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors"
           >
             <div className="flex flex-col items-center justify-center h-full relative">
               <span className={`text-[15px] transition-all font-medium whitespace-nowrap ${

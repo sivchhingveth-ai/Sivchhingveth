@@ -6,21 +6,22 @@
 import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { Tabs } from './components/Tabs';
-import { Overview } from './components/Overview';
 import { Habits } from './components/Habits';
 import { Savings } from './components/Savings';
 import { Schedule } from './components/Schedule';
-import { Analytics } from './components/Analytics';
 import { Modal } from './components/Modal';
 import { ConfirmModal } from './components/ConfirmModal';
+import { Plus } from 'lucide-react';
 import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotification } from './types';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('Overview');
-  const tabs = ['Overview', 'Schedule', 'Habits', 'Savings', 'Analytics'];
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [activeTab, setActiveTab] = useState('Schedule');
+  const tabs = ['Schedule', 'Habits', 'Savings'];
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
+  const [previousModal, setPreviousModal] = useState<string | null>(null);
   const [viewDate, setViewDate] = useState(new Date());
 
   // Form state
@@ -28,11 +29,12 @@ export default function App() {
   const [newHabitCategory, setNewHabitCategory] = useState('OTHER');
   const [newGoalName, setNewGoalName] = useState('');
   const [newGoalAmount, setNewGoalAmount] = useState('');
+  const [newGoalStartDate, setNewGoalStartDate] = useState(todayStr);
+  const [newGoalTargetDate, setNewGoalTargetDate] = useState(todayStr);
   const [newHabitTime, setNewHabitTime] = useState('');
   const [newHabitMonthlyTarget, setNewHabitMonthlyTarget] = useState('');
   const [newRoutineName, setNewRoutineName] = useState('');
   const [newRoutineTime, setNewRoutineTime] = useState('');
-  const [newRoutineIcon, setNewRoutineIcon] = useState('⭐');
   const [newExpenseName, setNewExpenseName] = useState('');
   const [newExpenseAmount, setNewExpenseAmount] = useState('');
 
@@ -46,11 +48,9 @@ export default function App() {
     isOpen: false,
     title: '',
     message: '',
-    onConfirm: () => {},
+    onConfirm: () => { },
   });
   const [editingHabitId, setEditingHabitId] = useState<number | null>(null);
-
-  const todayStr = new Date().toISOString().split('T')[0];
 
   const generateHistory = (days: number) => {
     const history: Record<string, boolean> = {};
@@ -67,7 +67,7 @@ export default function App() {
     { id: 2, name: "2X EATING LUNCH AND EVENING", category: "HEALTH", history: generateHistory(28), streak: 28 }, // ~90%
     { id: 3, name: "NO SUGARS", category: "HEALTH", history: {}, streak: 0 },
     { id: 4, name: "NO JUNK / SPICY FOOD", category: "HEALTH", history: {}, streak: 0 },
-    
+
     // HYGIENE
     { id: 5, name: "SKINCARE MORNING / NIGHT", category: "HYGIENE", history: {}, streak: 0 },
     { id: 6, name: "3X SHOWER MORNING / AFTERNOON / EVENING", category: "HYGIENE", history: {}, streak: 0 },
@@ -103,17 +103,18 @@ export default function App() {
   ]);
 
   const [savings, setSavings] = useState<SavingGoal[]>([
-    { id: 1, name: "Emergency fund", goal: 500, saved: 310, color: "#34c759" },
-    { id: 2, name: "Vacation", goal: 300, saved: 180, color: "#007aff" },
-    { id: 3, name: "New laptop", goal: 200, saved: 60, color: "#ff9500" },
+    { id: 1, name: "Emergency fund", goal: 500, saved: 310, color: "#34c759", startDate: "2026-03-01", targetDate: "2026-06-01", history: { "2026-03-01": 50, "2026-03-10": 100, "2026-03-15": 160 } },
+    { id: 2, name: "Vacation", goal: 300, saved: 180, color: "#007aff", startDate: "2026-03-10", targetDate: "2026-08-15", history: { "2026-03-10": 100, "2026-03-12": 80 } },
+    { id: 3, name: "New laptop", goal: 200, saved: 60, color: "#ff9500", startDate: "2026-03-15", targetDate: "2026-04-15", history: { "2026-03-15": 60 } },
   ]);
 
   const [tasks, setTasks] = useState<Task[]>([]);
 
   const [routines, setRoutines] = useState<Routine[]>([
-    { id: 1, name: "Morning Ritual", time: "05:00 AM", icon: "🌅", color: "#ff9500", done: false },
-    { id: 2, name: "Deep Focus Mode", time: "01:00 PM", icon: "🧠", color: "#5ac8fa", done: false },
-    { id: 3, name: "Evening Reset", time: "10:00 PM", icon: "🌙", color: "#af52de", done: false },
+    { id: 1, name: "Morning Ritual", time: "05:00 AM", icon: "🌅", color: "#f97316", done: false },
+    { id: 2, name: "Afternoon Focus", time: "01:00 PM", icon: "🧠", color: "#ffd400", done: false },
+    { id: 3, name: "Night Reset", time: "10:00 PM", icon: "🌙", color: "#7856ff", done: false },
+    { id: 4, name: "Midnight Calm", time: "12:00 AM", icon: "🌌", color: "#22c55e", done: false },
   ]);
 
   const [transactions, setTransactions] = useState<Transaction[]>([
@@ -240,10 +241,35 @@ export default function App() {
     if (!newGoalName.trim() || !newGoalAmount) return;
     const colors = ['#34c759', '#007aff', '#ff9500', '#ff3b30', '#af52de', '#5ac8fa'];
     const newId = Math.max(0, ...savings.map(s => s.id)) + 1;
-    setSavings(prev => [...prev, { id: newId, name: newGoalName.trim(), goal: parseFloat(newGoalAmount), saved: 0, color: colors[newId % colors.length] }]);
+    setSavings(prev => [...prev, {
+      id: newId,
+      name: newGoalName.trim(),
+      goal: parseFloat(newGoalAmount),
+      saved: 0,
+      color: colors[newId % colors.length],
+      startDate: newGoalStartDate,
+      targetDate: newGoalTargetDate,
+      history: {}
+    }]);
     setNewGoalName('');
     setNewGoalAmount('');
+    setNewGoalStartDate(todayStr);
+    setNewGoalTargetDate(todayStr);
     setModalOpen(null);
+  };
+
+  const addDailySaving = (goalId: number, amount: number, date: string) => {
+    setSavings(prev => prev.map(s => {
+      if (s.id === goalId) {
+        const newHistory = { ...s.history, [date]: (s.history[date] || 0) + amount };
+        return {
+          ...s,
+          saved: s.saved + amount,
+          history: newHistory
+        };
+      }
+      return s;
+    }));
   };
 
 
@@ -251,11 +277,17 @@ export default function App() {
     if (!newRoutineName.trim() || !newRoutineTime) return;
     const colors = ['#ff9500', '#ff3b30', '#34c759', '#5856d6', '#007aff', '#ffcc00'];
     const newId = Math.max(0, ...routines.map(r => r.id)) + 1;
-    setRoutines(prev => [...prev, { id: newId, name: newRoutineName.trim(), time: newRoutineTime, icon: newRoutineIcon, color: colors[newId % colors.length], done: false }]);
+    setRoutines(prev => [...prev, { id: newId, name: newRoutineName.trim(), time: newRoutineTime, icon: "⭐", color: colors[newId % colors.length], done: false }]);
     setNewRoutineName('');
     setNewRoutineTime('');
-    setNewRoutineIcon('⭐');
-    setModalOpen(null);
+
+    // Return to previous modal if any, otherwise close
+    if (previousModal) {
+      setModalOpen(previousModal);
+      setPreviousModal(null);
+    } else {
+      setModalOpen(null);
+    }
   };
 
   const addExpense = () => {
@@ -270,13 +302,13 @@ export default function App() {
   };
 
   // Open modal helpers
-  const openAddHabit = () => { 
+  const openAddHabit = () => {
     setEditingHabitId(null);
     setNewHabitName('');
     setNewHabitTime('');
     setNewHabitMonthlyTarget('');
     setNewHabitCategory('OTHER');
-    setModalOpen('habit'); 
+    setModalOpen('habit');
   };
   const openEditHabit = (id: number) => {
     const habit = habits.find(h => h.id === id);
@@ -291,108 +323,148 @@ export default function App() {
   };
   const openAddGoal = () => { setModalOpen('goal'); };
   const openAddTask = () => { setModalOpen('habit'); setActiveTab('Schedule'); };
-  const openAddRoutine = () => { setModalOpen('routine'); };
+  const openAddRoutine = () => {
+    setPreviousModal(modalOpen);
+    setModalOpen('routine');
+  };
   const openAddExpense = () => { setModalOpen('expense'); setActiveTab('Savings'); };
 
   const inputClass = "w-full bg-transparent border border-[#2f3336] px-4 py-3 rounded-lg text-lg text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-colors";
   const labelClass = "text-[14px] font-bold text-[#eff3f4] mb-1.5 block px-1";
-  const submitClass = "w-full py-3 rounded-full bg-[#eff3f4] text-[#0f1419] text-[17px] font-bold hover:bg-[#d7dbdc] transition-colors active:scale-[0.98]";
+  const submitClass = "x-button-primary w-full py-3 text-[17px]";
 
   return (
     <div className="h-screen flex flex-col bg-black text-white font-sans antialiased overflow-hidden">
-      <Header 
-        title="My Dashboard" 
-        date="Friday, March 14, 2026" 
-        quote="Progress over perfection." 
+      <Header
+        title="My Dashboard"
+        date="Friday, March 14, 2026"
+        quote="Progress over perfection."
       />
       <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-      
-      <main className={`flex-1 overflow-y-auto ${activeTab === 'Schedule' ? 'p-0' : 'p-4 md:p-8'}`}>
+
+      <main className={`flex-1 overflow-y-auto scroll-smooth ${activeTab === 'Schedule' ? 'p-0' : 'p-4 md:p-8'}`}>
         <div className={`${activeTab === 'Schedule' ? 'w-full' : 'max-w-[1200px] mx-auto'}`}>
-        {activeTab === 'Overview' && (
-          <Overview 
-            habits={habits}
-            onToggleHabit={toggleHabit}
-            tasks={tasks}
-            routines={routines}
-            savings={savings}
-            transactions={transactions}
-            budgetStats={budgetStats}
-            notifications={notifications}
-            setActiveTab={setActiveTab}
-            onAddHabit={openAddHabit}
-            onEditHabit={openEditHabit}
-            onAddTask={openAddTask}
-            onAddExpense={openAddExpense}
-          />
-        )}
-        {activeTab === 'Habits' && (
-          <Habits
-            habits={habits}
-            onToggleHabit={toggleHabit}
-            onDeleteHabit={confirmDeleteHabit}
-            onAddHabit={openAddHabit}
-            onEditHabit={openEditHabit}
-            currentMonth={viewDate}
-            onMonthChange={setViewDate}
-          />
-        )}
-        {activeTab === 'Savings' && <Savings savings={savings} onDeleteGoal={confirmDeleteGoal} onAddGoal={openAddGoal} />}
-        {activeTab === 'Schedule' && (
-          <div className="flex flex-col">
-            <Schedule
+
+          {activeTab === 'Habits' && (
+            <Habits
               habits={habits}
               onToggleHabit={toggleHabit}
               onDeleteHabit={confirmDeleteHabit}
-              onAddTask={openAddHabit}
-              routines={routines}
-              onToggleRoutine={toggleRoutine}
-              onDeleteRoutine={confirmDeleteRoutine}
-              onAddRoutine={openAddRoutine}
+              onAddHabit={openAddHabit}
+              onEditHabit={openEditHabit}
+              currentMonth={viewDate}
+              onMonthChange={setViewDate}
             />
-          </div>
-        )}
-        {activeTab === 'Analytics' && <Analytics habits={habits} tasks={tasks} />}
+          )}
+          {activeTab === 'Savings' && <Savings savings={savings} onDeleteGoal={confirmDeleteGoal} onAddGoal={openAddGoal} onAddSaving={addDailySaving} />}
+          {activeTab === 'Schedule' && (
+            <div className="flex flex-col">
+              <Schedule
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                onDeleteHabit={confirmDeleteHabit}
+                onAddTask={openAddHabit}
+              />
+            </div>
+          )}
+
         </div>
       </main>
 
       {/* Add Habit Modal */}
       <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Habit" : "New Habit"}>
-          <div className="pb-10 space-y-4">
-            <div>
-              <label className={labelClass}>Habit name</label>
-              <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus />
-            </div>
-            <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Time (Optional)</label>
-                <input className={inputClass} type="time" value={newHabitTime} onChange={e => setNewHabitTime(e.target.value)} style={{ colorScheme: 'dark' }} />
-              </div>
-              <div>
-                <label className={labelClass}>Monthly Target</label>
-                <input className={inputClass} type="number" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 10" value={newHabitMonthlyTarget} onChange={e => setNewHabitMonthlyTarget(e.target.value)} />
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>Category</label>
-              <div className="flex flex-wrap gap-2">
-                {['HEALTH', 'HYGIENE', 'RECOVERY', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
-                  <button 
-                    key={cat} 
-                    onClick={() => setNewHabitCategory(cat)}
-                    className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all border ${
-                      newHabitCategory === cat 
-                        ? 'bg-x-blue border-x-blue text-white' 
-                        : 'bg-white/[0.05] border-[#2f3336] text-[#71767b] hover:text-[#eff3f4]'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button onClick={saveHabit} className={submitClass}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
+        <div className="pb-6 space-y-4">
+          <div>
+            <label className={labelClass}>Habit name</label>
+            <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus />
           </div>
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Time (Optional)</label>
+              <input className={inputClass} type="time" value={newHabitTime} onChange={e => setNewHabitTime(e.target.value)} style={{ colorScheme: 'dark' }} />
+            </div>
+            <div>
+              <label className={labelClass}>Monthly Target</label>
+              <input className={inputClass} type="number" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 10" value={newHabitMonthlyTarget} onChange={e => setNewHabitMonthlyTarget(e.target.value)} />
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>Category</label>
+            <div className="flex flex-wrap gap-2">
+              {['HEALTH', 'HYGIENE', 'RECOVERY', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setNewHabitCategory(cat)}
+                  className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all border ${newHabitCategory === cat
+                    ? 'bg-white border-white text-black'
+                    : 'bg-white/[0.05] border-white/10 text-[#71767b] hover:bg-white/[0.1] hover:text-[#eff3f4]'
+                    }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button onClick={saveHabit} className={submitClass}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
+
+          {/* Extra Routines Section - Moved inside modal */}
+          <div className="mt-4 pt-4 border-t border-[#2f3336] space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[18px] font-black text-[#eff3f4]">
+                Time Range
+              </h3>
+              <button
+                onClick={(e) => { e.preventDefault(); openAddRoutine(); }}
+                className="x-button-glass py-1.5 text-[14px]"
+              >
+                <Plus className="w-4 h-4" /> Add Routine
+              </button>
+            </div>
+
+            <div className="divide-y divide-[#2f3336]">
+              {routines.map(routine => {
+                const getPhase = (timeStr: string) => {
+                  const [timePart, modifier] = timeStr.trim().split(' ');
+                  let [hours] = timePart.split(':').map(Number);
+                  if (modifier === 'PM' && hours < 12) hours += 12;
+                  if (modifier === 'AM' && hours === 12) hours = 0;
+                  if (hours >= 0 && hours < 5) return { name: 'Midnight', color: '#22c55e' };
+                  if (hours >= 5 && hours < 12) return { name: 'Morning', color: '#f97316' };
+                  if (hours >= 12 && hours < 18) return { name: 'Afternoon', color: '#ffd400' };
+                  return { name: 'Night', color: '#7856ff' };
+                };
+                const phase = getPhase(routine.time);
+
+                return (
+                  <div key={routine.id} className="py-3 flex items-center justify-between group">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[15px] font-bold text-[#eff3f4]">{routine.name}</p>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter" style={{ backgroundColor: `${phase.color}20`, color: phase.color, border: `1px solid ${phase.color}40` }}>
+                            {phase.name}
+                          </span>
+                        </div>
+                        <p className="text-[12px] text-[#71767b]">{routine.time}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => { e.preventDefault(); deleteRoutine(routine.id); }}
+                        className="p-1.5 text-[#71767b] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <span className="text-[14px]">Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              {routines.length === 0 && (
+                <p className="text-center py-4 text-[#71767b] text-sm">No extra routines yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
       </Modal>
 
       {/* Add Goal Modal */}
@@ -406,13 +478,34 @@ export default function App() {
             <label className={labelClass}>Target amount ($)</label>
             <input className={inputClass} type="number" placeholder="500" value={newGoalAmount} onChange={e => setNewGoalAmount(e.target.value)} />
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Start Date</label>
+              <input className={inputClass} type="date" value={newGoalStartDate} onChange={e => setNewGoalStartDate(e.target.value)} style={{ colorScheme: 'dark' }} />
+            </div>
+            <div>
+              <label className={labelClass}>Target Date</label>
+              <input className={inputClass} type="date" value={newGoalTargetDate} onChange={e => setNewGoalTargetDate(e.target.value)} style={{ colorScheme: 'dark' }} />
+            </div>
+          </div>
           <button onClick={addGoal} className={submitClass}>Add Goal</button>
         </div>
       </Modal>
 
 
       {/* Add Routine Modal */}
-      <Modal isOpen={modalOpen === 'routine'} onClose={() => setModalOpen(null)} title="New Routine">
+      <Modal
+        isOpen={modalOpen === 'routine'}
+        onClose={() => {
+          if (previousModal) {
+            setModalOpen(previousModal);
+            setPreviousModal(null);
+          } else {
+            setModalOpen(null);
+          }
+        }}
+        title="New Routine"
+      >
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Routine name</label>
@@ -421,16 +514,6 @@ export default function App() {
           <div>
             <label className={labelClass}>Time</label>
             <input className={inputClass} placeholder="e.g. 07:00 AM" value={newRoutineTime} onChange={e => setNewRoutineTime(e.target.value)} />
-          </div>
-          <div>
-            <label className={labelClass}>Icon</label>
-            <div className="flex gap-2 flex-wrap">
-              {['⭐', '🧘', '📚', '🏃', '💪', '🎵', '🍎', '💧', '🌙', '☀️', '🧠', '✍️'].map(icon => (
-                <button key={icon} onClick={() => setNewRoutineIcon(icon)}
-                  className={`w-11 h-11 rounded-xl text-[20px] flex items-center justify-center transition-all border border-white/5 ${newRoutineIcon === icon ? 'bg-[#007aff] shadow-lg scale-110' : 'bg-white/[0.06] opacity-60'}`}
-                >{icon}</button>
-              ))}
-            </div>
           </div>
           <button onClick={addRoutine} className={submitClass}>Add Routine</button>
         </div>
@@ -451,9 +534,9 @@ export default function App() {
         </div>
       </Modal>
 
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal(prev => ({...prev, isOpen: false}))}
+        onClose={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
         onConfirm={confirmModal.onConfirm}
         title={confirmModal.title}
         message={confirmModal.message}

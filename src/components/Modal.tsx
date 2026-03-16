@@ -19,9 +19,9 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         <div className="px-4 h-[53px] flex items-center gap-8 border-b border-[#2f3336]">
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.08] border border-white/10 hover:bg-white/[0.15] transition-all active:scale-95"
           >
-            <CloseIcon className="w-[20px] h-[20px] text-[#eff3f4]" />
+            <CloseIcon className="w-[18px] h-[18px] text-[#eff3f4]" />
           </button>
           <h2 className="text-xl font-bold text-[#eff3f4]">{title}</h2>
         </div>

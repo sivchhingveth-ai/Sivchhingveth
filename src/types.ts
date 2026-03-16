@@ -14,6 +14,9 @@ export interface SavingGoal {
   goal: number;
   saved: number;
   color: string;
+  startDate: string;
+  targetDate: string;
+  history: Record<string, number>;
 }
 
 export interface Task {

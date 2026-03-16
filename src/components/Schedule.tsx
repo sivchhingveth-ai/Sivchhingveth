@@ -5,12 +5,9 @@ import { getCategoryStyles } from '../utils/colors';
 
 interface ScheduleProps {
   habits: Habit[];
-  routines: Routine[];
   onToggleHabit: (id: number) => void;
-  onToggleRoutine: (id: number) => void;
-  onDeleteRoutine: (id: number) => void;
+  onDeleteHabit: (id: number) => void;
   onAddTask: () => void;
-  onAddRoutine: () => void;
 }
 
 const TaskItem: React.FC<{ 
@@ -22,33 +19,38 @@ const TaskItem: React.FC<{
   const isDone = habit.history[todayStr];
 
   return (
-    <div className="p-4 flex gap-4 hover:bg-white/[0.02] transition-colors group">
-      <span className="text-[14px] font-bold text-[#71767b] w-12 shrink-0 pt-1.5">{habit.time}</span>
+    <div className="p-2 md:p-3 flex gap-3 md:gap-4 hover:bg-white/[0.02] transition-colors group">
+      <span className="text-[12px] md:text-[13px] font-bold text-[#71767b] w-9 md:w-12 shrink-0 pt-1">{habit.time}</span>
       <button 
         onClick={() => onToggle(habit.id)}
-        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all mt-0.5
-          ${isDone ? 'bg-[#00ba7c] border-[#00ba7c] text-white' : 'border-[#536471] hover:border-x-blue bg-transparent'}`}
+        className={`w-6 h-6 md:w-7 md:h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
+          ${isDone ? 'bg-[#00ba7c] border-[#00ba7c] text-white shadow-lg shadow-[#00ba7c]/20' : 'border-white/20 hover:border-white/40 bg-white/[0.03]'}`}
       >
-        {isDone && <Check className="w-4 h-4" strokeWidth={3} />}
+        {isDone && <Check className="w-3.5 h-3.5" strokeWidth={4} />}
       </button>
       <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className={`text-[17px] font-bold tracking-tight transition-colors ${isDone ? 'line-through text-[#71767b]' : 'text-[#eff3f4]'}`}>
-            {habit.name}
-          </p>
-        </div>
+        <p className={`text-[14px] md:text-[16px] font-bold tracking-tight leading-tight transition-colors ${isDone ? 'line-through text-[#71767b]' : 'text-[#eff3f4]'}`}>
+          {habit.name}
+        </p>
       </div>
       <button 
         onClick={() => onDelete(habit.id)}
-        className="text-[#71767b] opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all p-2"
+        className="text-[#71767b] opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-red-500 transition-all p-1"
       >
-        <Trash2 className="w-4 h-4" />
+        <Trash2 className="w-3.5 h-3.5" />
       </button>
     </div>
   );
 };
 
-export const Schedule: React.FC<ScheduleProps> = ({ habits, routines, onToggleHabit, onToggleRoutine, onDeleteHabit, onDeleteRoutine, onAddTask, onAddRoutine }) => {
+export const Schedule: React.FC<ScheduleProps> = ({ habits, onToggleHabit, onDeleteHabit, onAddTask }) => {
+
+  const [currentTime, setCurrentTime] = React.useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const today = new Date();
   const currentDay = today.getDate();
@@ -76,22 +78,28 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, routines, onToggleHa
     <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-screen bg-black">
       
       {/* Search/Filter style Header for Tasks */}
-      <div className="p-6 border-b border-[#2f3336] flex items-center justify-between bg-black z-20">
-        <h2 className="text-[22px] font-black text-[#eff3f4] flex items-center gap-2">
-          <Clock className="w-6 h-6 text-x-blue" />
-          Today's Schedule
-        </h2>
+      <div className="px-4 py-3 md:p-6 border-b border-[#2f3336] flex items-center justify-between bg-black/90 backdrop-blur-sm z-20 sticky top-0 md:relative">
+        <div className="flex flex-col">
+          <h2 className="text-[16px] md:text-[20px] font-black text-[#eff3f4]">
+            Daily Habits
+          </h2>
+          <p className="text-[12px] md:text-[14px] font-bold text-[#71767b]">
+            {currentTime.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} • {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          </p>
+        </div>
+        <button onClick={onAddTask} className="x-button-glass py-1.5 text-[14px]">
+          Add Task
+        </button>
       </div>
 
-      <div className="p-4 space-y-8">
-        {/* Phase 1: The Morning Launch */}
-        <section className="bg-white/[0.02] border border-[#2f3336] rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-4 bg-[#1d9bf0]/10 flex items-center justify-between border-b border-[#2f3336]">
+      <div className="p-2 md:p-4 space-y-3 md:space-y-6">
+        {/* Phase 1: Morning */}
+        <section className="bg-white/[0.02] border border-[#2f3336] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-2 md:p-4 bg-[#f97316]/10 flex items-center justify-between border-b border-[#2f3336]">
              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-x-blue animate-pulse" />
-                <h3 className="text-x-blue font-black text-[14px] uppercase tracking-widest">Phase 1: The Morning Launch (5 AM – 8 AM)</h3>
+                <h3 className="text-[#f97316] font-black text-[11px] md:text-[14px] uppercase tracking-widest">Phase 1: Morning (5 AM – 12 PM)</h3>
              </div>
-             <span className="text-x-blue text-[10px] font-black px-2.5 py-1 rounded-md bg-x-blue/10 border border-x-blue/30 uppercase tracking-tighter">Crucial</span>
+             <span className="text-[#f97316] text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#f97316]/10 border border-[#f97316]/30 uppercase tracking-tighter">Crucial</span>
           </div>
           <div className="divide-y divide-[#2f3336]">
             {scheduledHabits.filter(h => h.time! >= "05:00" && h.time! < "12:00").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (
@@ -100,87 +108,53 @@ export const Schedule: React.FC<ScheduleProps> = ({ habits, routines, onToggleHa
           </div>
         </section>
 
-        {/* Phase 2: The Deep Work Zone */}
-        <section className="bg-white/[0.02] border border-[#2f3336] rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-4 bg-[#f91880]/10 flex items-center justify-between border-b border-[#2f3336]">
+        {/* Phase 2: Afternoon */}
+        <section className="bg-white/[0.02] border border-[#2f3336] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-2 md:p-4 bg-[#ffd400]/10 flex items-center justify-between border-b border-[#2f3336]">
              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#f91880]" />
-                <h3 className="text-[#f91880] font-black text-[14px] uppercase tracking-widest">Phase 2: The Deep Work Zone (PM)</h3>
+                <h3 className="text-[#ffd400] font-black text-[11px] md:text-[14px] uppercase tracking-widest">Phase 2: Afternoon (12 PM – 6 PM)</h3>
              </div>
-             <span className="text-[#f91880] text-[10px] font-black px-2.5 py-1 rounded-md bg-[#f91880]/10 border border-[#f91880]/30 uppercase tracking-tighter">Focused</span>
+             <span className="text-[#ffd400] text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#ffd400]/10 border border-[#ffd400]/30 uppercase tracking-tighter">Focused</span>
           </div>
           <div className="divide-y divide-[#2f3336]">
-            {scheduledHabits.filter(h => h.time! >= "12:00" && h.time! < "20:00").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (
+            {scheduledHabits.filter(h => h.time! >= "12:00" && h.time! < "18:00").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (
               <TaskItem key={habit.id} habit={habit} onToggle={onToggleHabit} onDelete={onDeleteHabit} />
             ))}
           </div>
         </section>
 
-        {/* Phase 3: The Evening Wind-down */}
-        <section className="bg-white/[0.02] border border-[#2f3336] rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-4 bg-[#7856ff]/10 flex items-center justify-between border-b border-[#2f3336]">
+        {/* Phase 3: Night */}
+        <section className="bg-white/[0.02] border border-[#2f3336] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-2 md:p-4 bg-[#7856ff]/10 flex items-center justify-between border-b border-[#2f3336]">
              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#7856ff]" />
-                <h3 className="text-[#7856ff] font-black text-[14px] uppercase tracking-widest">Phase 3: The Evening Wind-down</h3>
+                <h3 className="text-[#7856ff] font-black text-[11px] md:text-[14px] uppercase tracking-widest">Phase 3: Night (6 PM – 12 AM)</h3>
              </div>
-             <span className="text-[#7856ff] text-[10px] font-black px-2.5 py-1 rounded-md bg-[#7856ff]/10 border border-[#7856ff]/30 uppercase tracking-tighter">Reset</span>
+             <span className="text-[#7856ff] text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#7856ff]/10 border border-[#7856ff]/30 uppercase tracking-tighter">Reset</span>
           </div>
           <div className="divide-y divide-[#2f3336]">
-            {scheduledHabits.filter(h => (h.time! >= "20:00" || h.time! < "05:00")).sort((a,b) => {
-              if (a.time!.substring(0,2) < "05" && b.time!.substring(0,2) >= "20") return 1;
-              if (a.time!.substring(0,2) >= "20" && b.time!.substring(0,2) < "05") return -1;
-              return a.time!.localeCompare(b.time!);
-            }).map(habit => (
+            {scheduledHabits.filter(h => h.time! >= "18:00" && h.time! <= "23:59").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (
+              <TaskItem key={habit.id} habit={habit} onToggle={onToggleHabit} onDelete={onDeleteHabit} />
+            ))}
+          </div>
+        </section>
+
+        {/* Phase 4: Midnight */}
+        <section className="bg-white/[0.02] border border-[#2f3336] rounded-xl md:rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-2 md:p-4 bg-[#22c55e]/10 flex items-center justify-between border-b border-[#2f3336]">
+             <div className="flex items-center gap-2">
+                <h3 className="text-[#22c55e] font-black text-[11px] md:text-[14px] uppercase tracking-widest">Phase 4: Midnight (12 AM – 5 AM)</h3>
+             </div>
+             <span className="text-[#22c55e] text-[8px] md:text-[10px] font-black px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-md bg-[#22c55e]/10 border border-[#22c55e]/30 uppercase tracking-tighter">Quiet</span>
+          </div>
+          <div className="divide-y divide-[#2f3336]">
+            {scheduledHabits.filter(h => h.time! >= "00:00" && h.time! < "05:00").sort((a,b) => a.time!.localeCompare(b.time!)).map(habit => (
               <TaskItem key={habit.id} habit={habit} onToggle={onToggleHabit} onDelete={onDeleteHabit} />
             ))}
           </div>
         </section>
       </div>
 
-      {/* Routine Section */}
-       <div className="p-6 border-y border-[#2f3336] flex items-center justify-between bg-black mt-8">
-        <h2 className="text-[22px] font-black text-[#eff3f4] flex items-center gap-2">
-          <LayoutGrid className="w-6 h-6 text-[#7856ff]" />
-          Extra Routines
-        </h2>
-        <button onClick={onAddRoutine} className="border border-[#536471] text-[#eff3f4] font-bold px-5 py-2 rounded-full text-[14px] hover:bg-white/10 transition-colors">
-          Add Routine
-        </button>
-      </div>
 
-      <div className="divide-y divide-[#2f3336]">
-        {routines.map(routine => (
-          <div key={routine.id} className="p-4 flex gap-4 hover:bg-white/[0.02] transition-colors group">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[22px] bg-[#2f3336]/40 border border-[#2f3336] shrink-0">
-              {routine.icon}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className={`text-[17px] font-bold ${routine.done ? 'text-[#71767b] line-through' : 'text-[#eff3f4]'}`}>{routine.name}</h3>
-                  <p className="text-[13px] text-[#71767b] font-medium">{routine.time}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                   <button 
-                    onClick={() => onDeleteRoutine(routine.id)}
-                    className="text-[#71767b] opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all p-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => onToggleRoutine(routine.id)}
-                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all
-                      ${routine.done ? 'bg-[#00ba7c] border-[#00ba7c] text-white' : 'border-[#536471] hover:border-x-blue bg-transparent'}`}
-                  >
-                    {routine.done && <Check className="w-4 h-4" strokeWidth={3} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
 
     </div>
   );
