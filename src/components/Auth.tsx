@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import React, { useState } from 'react';
+import { useAuthActions } from "@convex-dev/auth/react";
 import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export const Auth: React.FC = () => {
+  const { signIn } = useAuthActions();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,7 +14,7 @@ export const Auth: React.FC = () => {
   const [isSignUp, setIsSignUp] = useState(false);
 
   // Load remembered email
-  useEffect(() => {
+  React.useEffect(() => {
     const savedEmail = localStorage.getItem('remembered_email');
     if (savedEmail) {
       setEmail(savedEmail);
@@ -25,55 +26,36 @@ export const Auth: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setMessage(null);
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ 
-          email: email.trim(), 
-          password 
-        });
-        if (error) throw error;
-        setMessage('Check your email for the confirmation link!');
+      const formData = new FormData();
+      formData.set("email", email.trim());
+      formData.set("password", password);
+      formData.set("flow", isSignUp ? "signUp" : "signIn");
+
+      await signIn("password", formData);
+
+      if (rememberMe) {
+        localStorage.setItem('remembered_email', email);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ 
-          email: email.trim(), 
-          password 
-        });
-        if (error) throw error;
-        
-        if (rememberMe) {
-          localStorage.setItem('remembered_email', email);
-        } else {
-          localStorage.removeItem('remembered_email');
-        }
+        localStorage.removeItem('remembered_email');
+      }
+
+      if (isSignUp) {
+        setMessage('Account created successfully!');
       }
     } catch (err: any) {
       console.error('Auth error:', err);
-      if (err.message.toLowerCase().includes('fetch') || err.name === 'TypeError') {
-        setError('Connection Error: Could not reach the database. This usually means your Supabase project is paused or the project ID is incorrect. Please check your Supabase Dashboard.');
+      const msg = err?.message || String(err);
+      if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials')) {
+        setError('Invalid email or password. Please try again.');
+      } else if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('exist')) {
+        setError('An account with this email already exists. Try signing in instead.');
+      } else if (msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('network')) {
+        setError('Connection Error: Could not reach the server. Please check your internet connection.');
       } else {
-        setError(err.message || 'An error occurred during authentication');
+        setError(msg || 'An error occurred during authentication');
       }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setError('Please enter your email first to recover password');
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin,
-      });
-      if (error) throw error;
-      setMessage('Password reset link sent to your email!');
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -114,15 +96,6 @@ export const Auth: React.FC = () => {
                     <div>
                         <div className="flex justify-between items-center mb-1.5">
                             <label className="text-[14px] font-bold text-[#eff3f4]">Password</label>
-                            {!isSignUp && (
-                                <button 
-                                    type="button"
-                                    onClick={handleForgotPassword}
-                                    className="text-[12px] font-bold text-[#1d9bf0] hover:underline"
-                                >
-                                    Forgot password?
-                                </button>
-                            )}
                         </div>
                         <div className="relative">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#71767b]" />
@@ -163,16 +136,6 @@ export const Auth: React.FC = () => {
                     {error && (
                         <div className="text-red-500 text-sm font-bold bg-red-500/10 p-4 rounded-xl border border-red-500/20 space-y-2">
                             <p>{error}</p>
-                            {(error.toLowerCase().includes('supabase') || error.toLowerCase().includes('database')) && (
-                                <a 
-                                    href="https://supabase.com/dashboard" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="block text-[#1d9bf0] hover:underline"
-                                >
-                                    Go to Supabase Dashboard →
-                                </a>
-                            )}
                         </div>
                     )}
 
@@ -199,7 +162,7 @@ export const Auth: React.FC = () => {
 
                 <div className="mt-8 text-center">
                     <button 
-                        onClick={() => setIsSignUp(!isSignUp)}
+                        onClick={() => { setIsSignUp(!isSignUp); setError(null); setMessage(null); }}
                         className="text-[#1d9bf0] font-bold hover:underline transition-all"
                     >
                         {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
@@ -208,7 +171,7 @@ export const Auth: React.FC = () => {
             </div>
 
             <p className="text-center mt-8 text-[#71767b] text-sm">
-                Securely synced with Supabase
+                Securely synced with Convex
             </p>
         </div>
     </div>

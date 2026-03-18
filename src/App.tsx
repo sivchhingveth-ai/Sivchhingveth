@@ -4,60 +4,49 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation } from "convex/react";
+import { useConvexAuth } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { api } from "../convex/_generated/api";
+import { Id } from "../convex/_generated/dataModel";
 import { Header } from './components/Header';
 import { Tabs } from './components/Tabs';
 import { Habits } from './components/Habits';
 import { Savings } from './components/Savings';
 import { Schedule } from './components/Schedule';
+import { Overview } from './components/Overview';
+import { Analytics } from './components/Analytics';
 import { Modal } from './components/Modal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { Auth } from './components/Auth';
-import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { Plus, Loader2, ShieldAlert } from 'lucide-react';
 import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotification } from './types';
 
 export default function App() {
   const todayStr = new Date().toISOString().split('T')[0];
-  const [activeTab, setActiveTab] = useState('Schedule');
-  const [session, setSession] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('Overview');
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['Schedule', 'Manual habit', 'Savings'];
+  const tabs = ['Overview', 'Schedule', 'Manual habit', 'Savings', 'Analytics'];
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
   const [previousModal, setPreviousModal] = useState<string | null>(null);
   const [viewDate, setViewDate] = useState(new Date());
 
-  // Auth & Session management
+  // Loading timeout
   useEffect(() => {
-    const checkSession = async () => {
-      // Safety timeout
+    if (isLoading) {
       const timer = setTimeout(() => {
-        if (isLoading) setLoadingTimeout(true);
+        setLoadingTimeout(true);
       }, 8000);
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setIsLoading(false);
-        clearTimeout(timer);
-      } catch (err) {
-        console.error('Session check failed:', err);
-        setIsLoading(false);
-        clearTimeout(timer);
-      }
-    };
-
-    checkSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+      return () => clearTimeout(timer);
+    } else {
+      setLoadingTimeout(false);
+    }
+  }, [isLoading]);
 
   // Form state
   const [newHabitName, setNewHabitName] = useState('');
@@ -85,54 +74,41 @@ export default function App() {
     message: '',
     onConfirm: () => { },
   });
-  const [editingHabitId, setEditingHabitId] = useState<any | null>(null);
+  const [editingHabitId, setEditingHabitId] = useState<Id<"habits"> | null>(null);
 
-  const [habits, setHabits] = useState<Habit[]>([]);
-  const [savings, setSavings] = useState<SavingGoal[]>([]);
+  // Convex queries — only run when authenticated
+  const rawHabits = useQuery(api.habits.list, isAuthenticated ? {} : "skip");
+  const rawSavings = useQuery(api.savingGoals.list, isAuthenticated ? {} : "skip");
 
-  // Fetch data from Supabase
-  useEffect(() => {
-    if (session?.user) {
-      fetchData();
-    }
-  }, [session]);
+  // Convex mutations
+  const createHabit = useMutation(api.habits.create);
+  const updateHabit = useMutation(api.habits.update);
+  const removeHabit = useMutation(api.habits.remove);
+  const createGoal = useMutation(api.savingGoals.create);
+  const updateGoal = useMutation(api.savingGoals.update);
+  const removeGoal = useMutation(api.savingGoals.remove);
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const { data: habitsData, error: habitsError } = await supabase
-        .from('habits')
-        .select('*')
-        .order('created_at', { ascending: true });
+  // Map Convex data to app types
+  const habits: Habit[] = (rawHabits || []).map(h => ({
+    id: h._id,
+    name: h.name,
+    category: h.category,
+    history: h.history || {},
+    streak: h.streak,
+    time: h.time ?? undefined,
+    monthlyTarget: h.monthlyTarget ?? undefined,
+  }));
 
-      if (habitsData) setHabits(habitsData.map(h => ({
-         ...h,
-         history: h.history || {},
-         id: h.id, // Using supabase UUIDs
-         monthlyTarget: h.monthly_target // Map snake_case to camelCase
-      })) as any);
-
-      const { data: savingsData, error: savingsError } = await supabase
-        .from('saving_goals')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (savingsData) setSavings(savingsData.map(s => ({
-        ...s,
-        history: s.history || {},
-        id: s.id,
-        startDate: s.start_date,
-        targetDate: s.target_date
-      })) as any);
-
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const savings: SavingGoal[] = (rawSavings || []).map(s => ({
+    id: s._id,
+    name: s.name,
+    goal: s.goal,
+    saved: s.saved,
+    color: s.color,
+    startDate: s.startDate,
+    targetDate: s.targetDate,
+    history: s.history || {},
+  }));
 
   const [routines, setRoutines] = useState<Routine[]>([
     { id: 1, name: "Morning Ritual", time: "05:00 AM", icon: "🌅", color: "#f97316", done: false },
@@ -153,28 +129,25 @@ export default function App() {
   });
 
   const [notifications, setNotifications] = useState<AppNotification[]>([
-    { id: 1, message: "Don't forget to review the project proposal before 10 AM", type: "reminder" },
+    { id: 1, message: "Don't forget to review the project proposal before 10 AM", type: 'reminder' },
   ]);
+
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   // Toggle functions
   const toggleHabit = React.useCallback(async (id: any, dateStr: string = todayStr) => {
-    let updatedHistory: any = {};
-    setHabits(prev => prev.map(h => {
-      if (h.id === id) {
-        updatedHistory = { ...h.history };
-        updatedHistory[dateStr] = !updatedHistory[dateStr];
-        return { ...h, history: updatedHistory };
-      }
-      return h;
-    }));
+    if (!isAuthenticated) return;
+    const habit = habits.find(h => h.id === id);
+    if (!habit) return;
 
-    if (session?.user) {
-      await supabase
-        .from('habits')
-        .update({ history: updatedHistory })
-        .eq('id', id);
-    }
-  }, [session?.user, todayStr]);
+    const updatedHistory = { ...habit.history };
+    updatedHistory[dateStr] = !updatedHistory[dateStr];
+
+    await updateHabit({
+      id: id as Id<"habits">,
+      history: updatedHistory,
+    });
+  }, [isAuthenticated, habits, todayStr, updateHabit]);
 
   const toggleTask = (id: number) => {
     toggleHabit(id);
@@ -184,7 +157,6 @@ export default function App() {
     setRoutines(prev => {
       const routine = prev.find(r => r.id === id);
       if (routine) {
-        // Find matching habit by name
         const matchingHabit = habits.find(h => h.name.toLowerCase() === routine.name.toLowerCase());
         if (matchingHabit) {
           toggleHabit(matchingHabit.id);
@@ -196,10 +168,8 @@ export default function App() {
 
   // Delete functions
   const deleteHabit = async (id: any) => {
-    setHabits(prev => prev.filter(h => h.id !== id));
-    if (session?.user) {
-      await supabase.from('habits').delete().eq('id', id);
-    }
+    if (!isAuthenticated) return;
+    await removeHabit({ id: id as Id<"habits"> });
   };
 
   const confirmDeleteHabit = (id: any) => {
@@ -212,10 +182,8 @@ export default function App() {
   };
 
   const deleteGoal = async (id: any) => {
-    setSavings(prev => prev.filter(s => s.id !== id));
-    if (session?.user) {
-      await supabase.from('saving_goals').delete().eq('id', id);
-    }
+    if (!isAuthenticated) return;
+    await removeGoal({ id: id as Id<"savingGoals"> });
   };
 
   const confirmDeleteGoal = (id: any) => {
@@ -246,34 +214,22 @@ export default function App() {
 
   // Add functions
   const saveHabit = async () => {
-    if (newHabitName.trim() && session?.user) {
+    if (newHabitName.trim() && isAuthenticated) {
       if (editingHabitId) {
-        const updatedHabit = {
+        await updateHabit({
+          id: editingHabitId,
           name: newHabitName,
           category: newHabitCategory,
           time: newHabitTime || null,
-          monthly_target: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-        };
-
-        const { error } = await supabase
-          .from('habits')
-          .update(updatedHabit)
-          .eq('id', editingHabitId);
-
-        if (!error) fetchData();
+          monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+        });
       } else {
-        const newHabit = {
-          user_id: session.user.id,
+        await createHabit({
           name: newHabitName,
           category: newHabitCategory,
-          history: {},
-          streak: 0,
           time: newHabitTime || null,
-          monthly_target: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-        };
-
-        const { error } = await supabase.from('habits').insert([newHabit]);
-        if (!error) fetchData();
+          monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+        });
       }
       setNewHabitName('');
       setNewHabitTime('');
@@ -284,22 +240,16 @@ export default function App() {
   };
 
   const addGoal = async () => {
-    if (!newGoalName.trim() || !newGoalAmount || !session?.user) return;
+    if (!newGoalName.trim() || !newGoalAmount || !isAuthenticated) return;
     const colors = ['#34c759', '#007aff', '#ff9500', '#ff3b30', '#af52de', '#5ac8fa'];
     
-    const newGoal = {
-      user_id: session.user.id,
+    await createGoal({
       name: newGoalName.trim(),
       goal: parseFloat(newGoalAmount),
-      saved: 0,
       color: colors[savings.length % colors.length],
-      start_date: newGoalStartDate,
-      target_date: newGoalTargetDate,
-      history: {}
-    };
-
-    const { error } = await supabase.from('saving_goals').insert([newGoal]);
-    if (!error) fetchData();
+      startDate: newGoalStartDate,
+      targetDate: newGoalTargetDate,
+    });
 
     setNewGoalName('');
     setNewGoalAmount('');
@@ -315,14 +265,11 @@ export default function App() {
     const newHistory = { ...goal.history, [date]: (goal.history[date] || 0) + amount };
     const newSaved = goal.saved + (amount || 0);
 
-    setSavings(prev => prev.map(s => s.id === goalId ? { ...s, saved: newSaved, history: newHistory } : s));
-
-    if (session?.user) {
-      await supabase
-        .from('saving_goals')
-        .update({ saved: newSaved, history: newHistory })
-        .eq('id', goalId);
-    }
+    await updateGoal({
+      id: goalId as Id<"savingGoals">,
+      saved: newSaved,
+      history: newHistory,
+    });
   };
 
 
@@ -389,46 +336,13 @@ export default function App() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await supabase.auth.signOut();
+      await signOut();
     } catch (err) {
       console.error('Logout failed:', err);
     } finally {
       setIsLoggingOut(false);
     }
   };
-
-  if (!isSupabaseConfigured) {
-    return (
-      <div className="h-[100dvh] bg-black flex flex-col items-center justify-center p-8 text-center gap-8 relative overflow-hidden">
-        {/* Glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
-        
-        <div className="w-20 h-20 bg-red-500/10 rounded-[2rem] flex items-center justify-center border border-red-500/20 relative z-10">
-          <ShieldAlert className="w-10 h-10 text-red-500" />
-        </div>
-        
-        <div className="space-y-4 relative z-10">
-          <h1 className="text-2xl md:text-3xl font-black text-[#eff3f4] uppercase tracking-tight">Configuration Link Needed</h1>
-          <p className="text-[#71767b] max-w-md font-bold text-sm md:text-base leading-relaxed">
-            Your secure database is ready on Supabase, but your app hasn't been linked to it yet. 
-            <br/><br/>
-            Please add <code className="text-[#eff3f4] bg-white/5 px-1.5 py-0.5 rounded">VITE_SUPABASE_URL</code> and <code className="text-[#eff3f4] bg-white/5 px-1.5 py-0.5 rounded">VITE_SUPABASE_ANON_KEY</code> to your environment variables.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3 w-full max-w-xs relative z-10">
-           <a 
-             href="https://vercel.com/dashboard" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             className="x-button-primary py-4 rounded-2xl flex items-center justify-center gap-2"
-           >
-             <span>Go to Vercel Dashboard</span>
-           </a>
-        </div>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -447,7 +361,7 @@ export default function App() {
           {loadingTimeout && (
             <div className="pt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
               <p className="text-red-400 text-xs font-bold mb-3 max-w-[200px] mx-auto">
-                Database connection taking too long. Your Supabase project may be paused.
+                Connection is taking longer than expected. Please check your internet.
               </p>
               <button 
                 onClick={() => window.location.reload()}
@@ -462,7 +376,7 @@ export default function App() {
     );
   }
 
-  if (!session) {
+  if (!isAuthenticated) {
     return <Auth />;
   }
 
@@ -482,6 +396,24 @@ export default function App() {
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain">
         <div className="w-full">
 
+
+          {activeTab === 'Overview' && (
+            <Overview
+              habits={habits}
+              onToggleHabit={toggleHabit}
+              tasks={tasks}
+              routines={routines}
+              savings={savings}
+              transactions={transactions}
+              budgetStats={budgetStats}
+              notifications={notifications}
+              setActiveTab={setActiveTab}
+              onAddHabit={openAddHabit}
+              onEditHabit={openEditHabit}
+              onAddTask={openAddHabit}
+              onAddExpense={openAddExpense}
+            />
+          )}
           {activeTab === 'Manual habit' && (
             <Habits
               habits={habits}
@@ -503,6 +435,12 @@ export default function App() {
                 onAddTask={openAddHabit}
               />
             </div>
+          )}
+          {activeTab === 'Analytics' && (
+            <Analytics
+              habits={habits}
+              tasks={tasks}
+            />
           )}
 
         </div>
