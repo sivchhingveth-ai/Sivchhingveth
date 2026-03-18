@@ -13,7 +13,7 @@ import { Modal } from './components/Modal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { Auth } from './components/Auth';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
-import { Plus, LogOut, Loader2, ShieldAlert } from 'lucide-react';
+import { Plus, Loader2, ShieldAlert } from 'lucide-react';
 import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotification } from './types';
 
 export default function App() {
@@ -21,6 +21,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('Schedule');
   const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const tabs = ['Schedule', 'Manual habit', 'Savings'];
 
@@ -386,7 +387,14 @@ export default function App() {
   const openAddExpense = () => { setModalOpen('expense'); setActiveTab('Savings'); };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    setIsLoggingOut(true);
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Logout failed:', err);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   if (!isSupabaseConfigured) {
@@ -439,7 +447,7 @@ export default function App() {
           {loadingTimeout && (
             <div className="pt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
               <p className="text-red-400 text-xs font-bold mb-3 max-w-[200px] mx-auto">
-                Connection is slow. Check your internet or ad-blocker.
+                Database connection taking too long. Your Supabase project may be paused.
               </p>
               <button 
                 onClick={() => window.location.reload()}
@@ -464,22 +472,12 @@ export default function App() {
 
   return (
     <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative">
-      {/* Logout Button */}
-      <div className="absolute top-4 right-4 z-[100]">
-        <button 
-          onClick={handleLogout}
-          className="p-2.5 bg-white/5 border border-white/10 rounded-xl text-[#71767b] hover:text-red-500 hover:bg-red-500/10 transition-all group"
-          title="Sign Out"
-        >
-          <LogOut className="w-5 h-5" />
-        </button>
-      </div>
       {/* Premium Background Ambiance */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#1d9bf0]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7856ff]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-[#22c55e]/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} isLoggingOut={isLoggingOut} />
 
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain">
         <div className="w-full">

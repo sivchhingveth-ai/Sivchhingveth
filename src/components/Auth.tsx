@@ -48,8 +48,8 @@ export const Auth: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Auth error:', err);
-      if (err.message === 'Failed to fetch') {
-        setError('Network Error: Could not connect to the database. Check your internet or ad-blocker.');
+      if (err.message.toLowerCase().includes('fetch') || err.name === 'TypeError') {
+        setError('Connection Error: Could not reach the database. This usually means your Supabase project is paused or the project ID is incorrect. Please check your Supabase Dashboard.');
       } else {
         setError(err.message || 'An error occurred during authentication');
       }
@@ -80,7 +80,7 @@ export const Auth: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black p-4 relative overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-black p-4 relative overflow-hidden">
         {/* Ambient background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1d9bf0]/10 rounded-full blur-[120px] pointer-events-none" />
         
@@ -105,7 +105,7 @@ export const Auth: React.FC = () => {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-black border border-[#2f3336] pl-12 pr-4 py-3 rounded-xl text-[#eff3f4] focus:border-[#1d9bf0] outline-none transition-all placeholder-[#71767b]"
+                                className="w-full bg-black border border-[#2f3336] pl-12 pr-4 py-3 rounded-xl text-[#eff3f4] text-base focus:border-[#1d9bf0] outline-none transition-all placeholder-[#71767b]"
                                 placeholder="name@example.com"
                             />
                         </div>
@@ -131,7 +131,7 @@ export const Auth: React.FC = () => {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-black border border-[#2f3336] pl-12 pr-12 py-3 rounded-xl text-[#eff3f4] focus:border-[#1d9bf0] outline-none transition-all placeholder-[#71767b]"
+                                className="w-full bg-black border border-[#2f3336] pl-12 pr-12 py-3 rounded-xl text-[#eff3f4] text-base focus:border-[#1d9bf0] outline-none transition-all placeholder-[#71767b]"
                                 placeholder="••••••••"
                             />
                             <button
@@ -161,9 +161,19 @@ export const Auth: React.FC = () => {
                     </div>
 
                     {error && (
-                        <p className="text-red-500 text-sm font-bold bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                            {error}
-                        </p>
+                        <div className="text-red-500 text-sm font-bold bg-red-500/10 p-4 rounded-xl border border-red-500/20 space-y-2">
+                            <p>{error}</p>
+                            {(error.toLowerCase().includes('supabase') || error.toLowerCase().includes('database')) && (
+                                <a 
+                                    href="https://supabase.com/dashboard" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="block text-[#1d9bf0] hover:underline"
+                                >
+                                    Go to Supabase Dashboard →
+                                </a>
+                            )}
+                        </div>
                     )}
 
                     {message && (
