@@ -15,7 +15,12 @@ const formatDateStr = (d: Date): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) => {
+export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings = [] }) => {
+  // Dedupe habits by name to clean up any duplicate entries created during testing
+  const habits = useMemo(() => {
+    return Array.from(new Map(rawHabits.map(h => [h.name.trim().toLowerCase(), h])).values());
+  }, [rawHabits]);
+
   const [view, setView] = useState<ViewMode>('weekly');
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const todayStr = getEffectiveDateStr();
@@ -235,7 +240,13 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
               >
                 {navLabel}
               </button>
-              <button onClick={() => setNavOffset(prev => prev + 1)} className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]">
+              <button 
+                onClick={() => setNavOffset(prev => prev + 1)} 
+                disabled={navOffset >= 0}
+                className={`p-1.5 rounded-xl transition-all ${
+                  navOffset >= 0 ? 'opacity-30 cursor-not-allowed text-[#71767b]' : 'hover:bg-white/10 text-[#71767b] hover:text-[#eff3f4]'
+                }`}
+              >
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>

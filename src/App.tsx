@@ -163,18 +163,29 @@ export default function App() {
 
   // Add functions
   const saveHabit = async () => {
-    if (newHabitName.trim() && isAuthenticated) {
+    const trimmedName = newHabitName.trim();
+    if (trimmedName && isAuthenticated) {
+      // Prevent duplicate habit names
+      const isDuplicate = habits.some(
+        h => h.name.toLowerCase() === trimmedName.toLowerCase() && h.id !== editingHabitId
+      );
+      
+      if (isDuplicate) {
+        alert('A habit with this exact name already exists. Please choose a different name.');
+        return;
+      }
+
       if (editingHabitId) {
         await updateHabit({
           id: editingHabitId,
-          name: newHabitName,
+          name: trimmedName,
           category: newHabitCategory,
           time: newHabitTime || null,
           monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
         });
       } else {
         await createHabit({
-          name: newHabitName,
+          name: trimmedName,
           category: newHabitCategory,
           time: newHabitTime || null,
           monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
