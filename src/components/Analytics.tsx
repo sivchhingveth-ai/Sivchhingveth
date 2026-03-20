@@ -218,7 +218,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
             </div>
 
             {/* Row 2: View Switcher + Navigation */}
-            <div className="flex items-center justify-between gap-2 md:gap-3">
+            <div className="flex items-center justify-between gap-2 md:gap-3 w-full overflow-x-auto no-scrollbar scrollbar-hide pb-1">
               <div className="flex bg-[#16181c] p-1 rounded-2xl border border-[#2f3336] w-fit shrink-0">
                 {(['weekly', 'monthly'] as const).map(v => (
                   <button
