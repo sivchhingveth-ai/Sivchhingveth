@@ -178,10 +178,10 @@ export const Habits: React.FC<HabitsProps> = ({
   }, [habits, currentMonth]);
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black text-[#eff3f4] p-5 md:p-6 space-y-6 pb-20 flex flex-col">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black flex flex-col relative">
 
       {/* Visual Header / Summary */}
-      <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336] -mx-5 md:-mx-6">
+      <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
         <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
           <div className="px-5 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -263,8 +263,9 @@ export const Habits: React.FC<HabitsProps> = ({
         </div>
       </div>
 
-      {/* Yearly Heatmap (GitHub Style) */}
-      <section className="space-y-3">
+      <div className="p-5 md:p-6 space-y-6 pb-20 text-[#eff3f4]">
+        {/* Yearly Heatmap (GitHub Style) */}
+        <section className="space-y-3">
         <h3 className="text-[11px] font-black text-[#71767b] uppercase tracking-[0.3em] px-1 opacity-80">
           Activity Map (90 Days)
         </h3>
@@ -449,7 +450,7 @@ export const Habits: React.FC<HabitsProps> = ({
         })}
       </div>
 
-
+      </div>
 
     </div>
   );
