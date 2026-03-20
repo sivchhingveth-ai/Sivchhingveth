@@ -390,9 +390,9 @@ export default function App() {
     return <Auth />;
   }
 
-  const inputClass = "w-full bg-[#16181c] border border-[#2f3336] px-4 py-4 rounded-xl text-lg text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all focus:bg-black";
-  const labelClass = "text-[12px] md:text-[14px] font-black text-[#71767b] uppercase tracking-widest mb-2 block px-1";
-  const submitClass = "x-button-primary w-full py-4 text-[17px] font-black rounded-2xl shadow-[0_0_20px_rgba(29,155,240,0.2)]";
+  const inputClass = "w-full bg-[#16181c] border border-[#2f3336] px-4 py-3.5 rounded-xl text-[16px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all focus:bg-black";
+  const labelClass = "text-[11px] md:text-[13px] font-black text-[#71767b] uppercase tracking-widest mb-2 block px-1";
+  const submitClass = "x-button-primary w-full py-3.5 text-[16px] font-black rounded-xl shadow-[0_0_20px_rgba(29,155,240,0.2)]";
 
   return (
     <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative">
