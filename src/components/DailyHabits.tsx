@@ -325,7 +325,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                       onToggleHabit(habit.id, todayStr);
                       setFocusedHabitId(habit.id);
                     }}
-                    className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-[1ms] group border ${isDone
+                    className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-200 group border bit-click-spring ${isDone
                       ? 'bg-white/[0.03] border-white/[0.06]'
                       : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
                       } ${focusedHabitId === habit.id ? 'habit-shine z-10' : ''}`}
@@ -334,7 +334,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                     } as React.CSSProperties}
                   >
                     {/* Checkbox */}
-                    <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-[1ms] border-2 ${isDone
+                    <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
                       ? 'border-transparent scale-100 animate-check-pop'
                       : 'border-[#2f3336] group-hover:border-[#71767b]'
                       }`}
@@ -351,7 +351,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
                     {/* Habit Info */}
                     <div className="flex-1 text-left min-w-0">
-                      <p className={`text-[14px] md:text-[15px] font-bold transition-all duration-[1ms] ease-in-out truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'
+                      <p className={`text-[14px] md:text-[15px] font-bold transition-all duration-300 ease-in-out truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'
                         }`}>
                         {habit.name}
                       </p>
