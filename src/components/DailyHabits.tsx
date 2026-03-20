@@ -270,7 +270,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
 
       {/* Habit Checklist — Grouped by Time Phase */}
-      <div className="p-5 md:p-6 space-y-7 pb-32 animate-slide-up duration-[2000ms]">
+      <div className="p-5 md:p-6 space-y-7 pb-32">
         {habits.length === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
@@ -316,7 +316,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
                {/* Habit Items - Grid on Desktop */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
-                {phaseHabits.map(habit => {
+                {phaseHabits.map((habit, idx) => {
                   const isDone = !!habit.history[todayStr];
                   return (
                     <button
@@ -326,11 +326,12 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         onToggleHabit(habit.id, todayStr);
                         setFocusedHabitId(habit.id);
                       }}
-                      className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-200 group border bit-click-spring ${isDone
+                      className={`animate-slide-up duration-[2000ms] fill-mode-backwards w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-200 group border bit-click-spring ${isDone
                         ? 'bg-white/[0.03] border-white/[0.06]'
                         : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
                         } ${focusedHabitId === habit.id ? 'habit-shine z-10' : ''}`}
                       style={{
+                        animationDelay: `${idx * 100}ms`,
                         '--shine-color': focusedHabitId === habit.id ? `${phase.color}60` : 'transparent'
                       } as React.CSSProperties}
                     >

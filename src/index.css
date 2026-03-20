@@ -193,17 +193,17 @@ button:active {
 }
 
 .animate-check-pop {
-  animation: check-pop 0.01s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: check-pop 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .animate-check-mark {
-  animation: check-mark-pop 0.01s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: check-mark-pop 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .check-mark-path {
   stroke-dasharray: 24;
   stroke-dashoffset: 24;
-  animation: check-mark-draw 0.01s ease-out forwards;
+  animation: check-mark-draw 0.15s ease-out forwards;
 }
 
 @keyframes bounce-subtle {
