@@ -329,7 +329,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                   return (
                     <div 
                       key={habit.id} 
-                      className="w-full flex flex-col md:flex-row md:items-center gap-4 p-4 md:p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 group relative overflow-hidden"
+                      className="w-full flex flex-row items-center justify-between gap-2 md:gap-4 p-3 md:p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 group relative overflow-hidden"
                     >
                       {/* Background Progress Glow */}
                       <div 
@@ -338,8 +338,8 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                       />
 
                       {/* Left Section: Progress Circle + Identity */}
-                      <div className="flex items-center gap-4 flex-1 min-w-0 relative z-10">
-                        <div className="relative w-11 h-11 md:w-12 md:h-12 shrink-0">
+                      <div className="flex items-center gap-3 flex-1 min-w-0 relative z-10">
+                        <div className="relative w-10 h-10 md:w-12 md:h-12 shrink-0">
                           <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
                             <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
                             <circle 
@@ -354,23 +354,23 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-[10px] md:text-[11px] font-black" style={{ color: phase.color }}>{completionRate}%</span>
+                            <span className="text-[9px] md:text-[11px] font-black" style={{ color: phase.color }}>{completionRate}%</span>
                           </div>
                         </div>
 
                         <div className="min-w-0">
-                          <h4 className="text-[15px] md:text-[17px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
+                          <h4 className="text-[14px] md:text-[17px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
                             {habit.name}
                           </h4>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phase.color }} />
-                            <span className="text-[10px] md:text-[11px] font-bold text-[#71767b] uppercase tracking-wider">{habit.category}</span>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: phase.color }} />
+                            <span className="text-[9px] md:text-[11px] font-bold text-[#71767b] uppercase tracking-wider truncate">{habit.category}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Right Section: Stats + Desktop Actions */}
-                      <div className="flex items-center justify-between md:justify-end gap-6 relative z-10">
+                      <div className="flex items-center justify-end gap-3 md:gap-6 relative z-10 shrink-0">
                         <div className="flex flex-col items-end">
                           <span className="text-[15px] md:text-[18px] font-black text-[#eff3f4] leading-none">
                             {totalMonthly}<span className="text-[11px] text-[#71767b]">/{target}</span>
