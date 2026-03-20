@@ -12,7 +12,7 @@ interface TabsProps {
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogout, isLoggingOut }) => {
   return (
     <div className="border-b border-[#2f3336] bg-black sticky top-0 z-40">
-      <div className="w-full flex h-[53px] items-center">
+      <div className="max-w-[1200px] mx-auto flex h-[53px] items-center">
         {/* Scrollable Tabs Wrapper */}
         <div className="flex-1 flex h-full overflow-x-auto scrollbar-hide no-scrollbar">
           <div className="flex h-full min-w-max">
@@ -20,7 +20,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
               <button
                 key={tab}
                 onClick={() => onTabChange(tab)}
-                className="px-4 md:px-6 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
+                className="w-[115px] md:w-[170px] relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
               >
                 <div className="flex flex-col items-center justify-center h-full relative">
                   <span className={`text-[13px] md:text-[15px] transition-all font-black whitespace-nowrap ${activeTab === tab ? 'text-[#e7e9ea]' : 'text-[#71767b]'

@@ -47,12 +47,9 @@ export const Habits: React.FC<HabitsProps> = ({
 
   // Auto-hide header on scroll
   useEffect(() => {
-    const main = document.getElementById('main-scroller');
+    const main = document.querySelector('main');
     if (!main) return;
-    const handleScroll = () => {
-      const scrolled = main.scrollTop > 10;
-      if (scrolled !== isScrolled) setIsScrolled(scrolled);
-    };
+    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
     main.addEventListener('scroll', handleScroll, { passive: true });
     return () => main.removeEventListener('scroll', handleScroll);
   }, []);
@@ -181,17 +178,17 @@ export const Habits: React.FC<HabitsProps> = ({
   }, [habits, currentMonth]);
 
   return (
-    <div className="w-full mx-auto border-x border-[#2f3336] min-h-full bg-black flex flex-col relative overflow-hidden text-[#eff3f4] p-5 md:p-6 space-y-6 pb-20">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black text-[#eff3f4] p-5 md:p-6 space-y-6 pb-20 flex flex-col">
 
       {/* Visual Header / Summary */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336] -mx-5 md:-mx-6">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
         <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
-          <div className="px-5 md:px-6 py-4 md:py-6 space-y-4">
+          <div className="px-5 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/* Row 1: Title */}
             <div className="min-w-0">
               <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">
-                Habit Consistency
+                Manual Habits
               </h2>
               <p className="text-[#8b98a5] text-[10px] md:text-[13px] font-black uppercase tracking-[0.2em] mt-1.5 truncate">
                 Tracking {habits.length} daily goals

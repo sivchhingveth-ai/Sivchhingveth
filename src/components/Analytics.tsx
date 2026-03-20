@@ -39,15 +39,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({
 
   // Auto-hide header on scroll
   React.useEffect(() => {
-    const main = document.getElementById('main-scroller');
+    const main = document.querySelector('main');
     if (!main) return;
-    const handleScroll = () => {
-      const scrolled = main.scrollTop > 10;
-      if (scrolled !== isScrolled) setIsScrolled(scrolled);
-    };
+    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
     main.addEventListener('scroll', handleScroll, { passive: true });
     return () => main.removeEventListener('scroll', handleScroll);
-  }, [isScrolled]);
+  }, []);
 
   // Week navigation
   const [weekOffset, setWeekOffset] = useState(0);
@@ -207,13 +204,13 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   const navLabel = view === 'weekly' ? weekLabel : monthData.label;
 
   return (
-    <div className="w-full mx-auto border-x border-[#2f3336] min-h-[100dvh] bg-black relative overflow-hidden flex flex-col">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black relative">
 
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
         <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
-          <div className="px-5 py-4 md:px-6 md:py-6 space-y-4">
+          <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/* Row 1: Title */}
             <div className="min-w-0">
               <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">Analytics</h2>
