@@ -179,7 +179,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black flex flex-col relative">
+    <div className="flex flex-col relative w-full h-full">
 
       {/* Scroll to Top Signal Overlay */}
       {showTopSignal && (
@@ -270,7 +270,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
 
       {/* Habit Checklist — Grouped by Time Phase */}
-      <div className="p-5 md:p-6 space-y-7 pb-32">
+      <div className="p-5 md:p-6 space-y-7 pb-32 animate-slide-up">
         {habits.length === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
@@ -314,60 +314,62 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 </span>
               </div>
 
-              {/* Habit Items */}
-              {phaseHabits.map(habit => {
-                const isDone = !!habit.history[todayStr];
-                return (
-                  <button
-                    key={habit.id}
-                    id={`habit-${habit.id}`}
-                    onClick={() => {
-                      onToggleHabit(habit.id, todayStr);
-                      setFocusedHabitId(habit.id);
-                    }}
-                    className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-200 group border bit-click-spring ${isDone
-                      ? 'bg-white/[0.03] border-white/[0.06]'
-                      : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
-                      } ${focusedHabitId === habit.id ? 'habit-shine z-10' : ''}`}
-                    style={{
-                      '--shine-color': focusedHabitId === habit.id ? `${phase.color}60` : 'transparent'
-                    } as React.CSSProperties}
-                  >
-                    {/* Checkbox */}
-                    <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
-                      ? 'border-transparent scale-100 animate-check-pop'
-                      : 'border-[#2f3336] group-hover:border-[#71767b]'
-                      }`}
-                      style={isDone ? { backgroundColor: phase.color, boxShadow: `0 0 16px ${phase.color}44` } : {}}
+               {/* Habit Items - Grid on Desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+                {phaseHabits.map(habit => {
+                  const isDone = !!habit.history[todayStr];
+                  return (
+                    <button
+                      key={habit.id}
+                      id={`habit-${habit.id}`}
+                      onClick={() => {
+                        onToggleHabit(habit.id, todayStr);
+                        setFocusedHabitId(habit.id);
+                      }}
+                      className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-200 group border bit-click-spring ${isDone
+                        ? 'bg-white/[0.03] border-white/[0.06]'
+                        : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
+                        } ${focusedHabitId === habit.id ? 'habit-shine z-10' : ''}`}
+                      style={{
+                        '--shine-color': focusedHabitId === habit.id ? `${phase.color}60` : 'transparent'
+                      } as React.CSSProperties}
                     >
-                      {isDone ? (
-                        <svg className="w-4 h-4 text-white animate-check-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" className="check-mark-path" />
-                        </svg>
-                      ) : (
-                        <Circle className="w-4 h-4 text-[#2f3336] group-hover:text-[#71767b] transition-colors" />
-                      )}
-                    </div>
-
-                    {/* Habit Info */}
-                    <div className="flex-1 text-left min-w-0">
-                      <p className={`text-[14px] md:text-[15px] font-bold transition-all duration-300 ease-in-out truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'
-                        }`}>
-                        {habit.name}
-                      </p>
-                    </div>
-
-                    {/* Done indicator */}
-                    {isDone && (
-                      <div className="shrink-0 animate-fade-in flex items-center justify-center">
-                        <svg className="w-5 h-5 animate-check-mark" style={{ color: phase.color }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" className="check-mark-path" />
-                        </svg>
+                      {/* Checkbox */}
+                      <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
+                        ? 'border-transparent scale-100 animate-check-pop'
+                        : 'border-[#2f3336] group-hover:border-[#71767b]'
+                        }`}
+                        style={isDone ? { backgroundColor: phase.color, boxShadow: `0 0 16px ${phase.color}44` } : {}}
+                      >
+                        {isDone ? (
+                          <svg className="w-4 h-4 text-white animate-check-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" className="check-mark-path" />
+                          </svg>
+                        ) : (
+                          <Circle className="w-4 h-4 text-[#2f3336] group-hover:text-[#71767b] transition-colors" />
+                        )}
                       </div>
-                    )}
-                  </button>
-                );
-              })}
+
+                      {/* Habit Info */}
+                      <div className="flex-1 text-left min-w-0">
+                        <p className={`text-[14px] md:text-[15px] font-bold transition-all duration-300 ease-in-out truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'
+                          }`}>
+                          {habit.name}
+                        </p>
+                      </div>
+
+                      {/* Done indicator */}
+                      {isDone && (
+                        <div className="shrink-0 animate-fade-in flex items-center justify-center">
+                          <svg className="w-5 h-5 animate-check-mark" style={{ color: phase.color }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" className="check-mark-path" />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           );
         })}

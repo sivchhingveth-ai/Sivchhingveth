@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { SavingGoal, Habit } from '../types';
 import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Check, X, TrendingUp, Target, Flame, Award } from 'lucide-react';
 import { getCategoryStyles } from '../utils/colors';
@@ -40,6 +40,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   const [weekOffset, setWeekOffset] = useState(0);
   // Month navigation  
   const [monthOffset, setMonthOffset] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   // ── Weekly Data ──
   const weekData = useMemo(() => {
@@ -194,7 +200,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   const navLabel = view === 'weekly' ? weekLabel : monthData.label;
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black relative">
+    <div className="flex flex-col relative w-full h-full pb-20">
 
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
@@ -209,7 +215,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
             </div>
 
             {/* Row 2: View Switcher + Navigation */}
-            <div className="flex items-center justify-between gap-1.5 md:gap-3 w-full overflow-x-auto no-scrollbar scrollbar-hide pb-1">
+            <div className="flex items-center justify-between gap-1.5 md:gap-3 overflow-x-auto no-scrollbar scrollbar-hide pb-1 md:shrink-0">
               <div className="flex bg-[#16181c] p-0.5 md:p-1 rounded-2xl border border-[#2f3336] w-fit shrink-0">
                 {(['weekly', 'monthly'] as const).map(v => (
                   <button
@@ -251,11 +257,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({
           </div>
         </div>
 
-      <div className="p-5 md:p-6 space-y-7 pb-32">
+      <div className="p-5 md:p-6 space-y-7 pb-32 animate-slide-up">
 
         {/* ═══════ WEEKLY VIEW ═══════ */}
         {view === 'weekly' && (
-          <div className="space-y-4">
+          <div key="weekly" className="space-y-4 animate-slide-up">
             {/* Bar Chart */}
             <div className="bg-white/[0.02] border border-[#2f3336] p-4 md:p-8 rounded-3xl group/chart">
               <div className="flex items-end justify-between h-[160px] md:h-[220px] mb-8 px-2 md:px-4">
@@ -286,9 +292,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({
                           className={`w-7 sm:w-8 md:w-14 rounded-t-xl md:rounded-t-2xl transition-all duration-700 relative overflow-hidden group-hover/bar:brightness-125 ${d.dateStr === selectedDay ? 'ring-2 ring-white/30' : ''
                             }`}
                           style={{
-                            height: `${Math.max(d.pct, 4)}%`,
+                            height: `${isLoaded ? Math.max(d.pct, 4) : 0}%`,
                             backgroundColor: barColor,
-                            boxShadow: d.pct > 0 ? `0 0 20px ${barColor}20` : 'none'
+                            boxShadow: d.pct > 0 && isLoaded ? `0 0 20px ${barColor}20` : 'none'
                           }}
                         >
                           {isToday && (
@@ -372,7 +378,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
                             title={`${d.dayName} ${d.dayNum}`}
                           >
                             {!d.isFuture && habit.history[d.dateStr] ? (
-                              <Check className="w-3 h-3 text-white" strokeWidth={4} />
+                              <Check className="w-3 h-3 text-white animate-check-mark" strokeWidth={4} />
                             ) : !d.isFuture ? (
                               <span className="text-[9px] font-bold text-[#71767b]">{d.dayName[0]}</span>
                             ) : null}
@@ -388,8 +394,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({
                         </div>
                         <div className="h-1.5 w-full bg-white/[0.03] border border-white/5 rounded-full overflow-hidden">
                           <div
-                            className="h-full rounded-full transition-all duration-1000 shadow-lg bg-[#1d9bf0]"
-                            style={{ width: `${weekPct}%` }}
+                            className="h-full rounded-full transition-all duration-[1200ms] ease-out shadow-lg bg-[#1d9bf0]"
+                            style={{ width: `${isLoaded ? weekPct : 0}%` }}
                           />
                         </div>
                       </div>
@@ -403,7 +409,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
 
         {/* ═══════ MONTHLY VIEW ═══════ */}
         {view === 'monthly' && (
-          <div className="space-y-4">
+          <div key="monthly" className="space-y-4 animate-slide-up">
             {/* Calendar Grid */}
             <div className="bg-white/[0.02] border border-[#2f3336] rounded-3xl p-4 md:p-6">
               {/* Day names header */}

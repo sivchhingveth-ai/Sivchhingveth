@@ -25,10 +25,21 @@ const SavingItem: React.FC<{
 }> = ({ s, onDelete, onAddSaving }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAddSaving, setShowAddSaving] = useState(false);
+  const [displayedPct, setDisplayedPct] = useState(0);
   const [savingAmount, setSavingAmount] = useState('');
   const [savingError, setSavingError] = useState('');
   const [savingDate, setSavingDate] = useState(new Date().toISOString().split('T')[0]);
   const addSavingRef = useRef<HTMLDivElement>(null);
+
+  const goalPct = s.goal ? Math.round((s.saved / s.goal) * 100) : 0;
+
+  useEffect(() => {
+    // Initial animation delay
+    const timer = setTimeout(() => {
+      setDisplayedPct(goalPct);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [goalPct]);
 
   useEffect(() => {
     if (!showAddSaving) return;
@@ -45,7 +56,6 @@ const SavingItem: React.FC<{
     };
   }, [showAddSaving]);
 
-  const goalPct = Math.min(100, Math.round(s.saved / s.goal * 100));
   const left = s.goal - s.saved;
   const accentColor = "#ffffff";
 
@@ -168,9 +178,9 @@ const SavingItem: React.FC<{
           </div>
           <div className="w-full h-2 md:h-2.5 bg-white/[0.03] border border-white/20 rounded-full overflow-hidden">
             <div
-              className="h-full transition-all duration-1000 relative"
+              className="h-full transition-all duration-[1200ms] ease-out relative"
               style={{
-                width: `${goalPct}%`,
+                width: `${displayedPct}%`,
                 backgroundColor: accentColor
               }}
             >
@@ -242,7 +252,7 @@ export const Savings: React.FC<SavingsProps> = ({
   const pct = totalGoal ? Math.round(totalSaved / totalGoal * 100) : 0;
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black">
+    <div className="flex flex-col relative w-full h-full">
 
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
@@ -265,8 +275,8 @@ export const Savings: React.FC<SavingsProps> = ({
           </div>
         </div>
 
-      {/* Saving Goals List */}
-      <div className="p-3 md:p-4 grid gap-3 md:gap-4">
+      {/* Saving Goals List - Grid on Desktop */}
+      <div className="p-3 md:p-5 grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-5 animate-slide-up">
         {savings.map(s => (
           <SavingItem key={s.id} s={s} onDelete={onDeleteGoal} onAddSaving={onAddSaving} />
         ))}

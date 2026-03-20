@@ -412,71 +412,80 @@ export default function App() {
   const submitClass = "x-button-primary w-full py-3 text-[14px] font-black rounded-xl shadow-[0_0_20px_rgba(29,155,240,0.2)]";
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative">
-      {/* Premium Background Ambiance */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#1d9bf0]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7856ff]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-[#22c55e]/5 rounded-full blur-[100px] pointer-events-none" />
+    <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative w-full">
+      {/* Premium Background Ambiance — Wrapped to prevent horizontal overflow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#1d9bf0]/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7856ff]/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-[#22c55e]/5 rounded-full blur-[100px]" />
+      </div>
 
 
-      <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain">
-        <div className="w-full">
-
+      <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain bg-black/50 overflow-x-hidden">
+        <div className="max-w-[1000px] mx-auto border-x border-[#2f3336] min-h-full bg-black shadow-2xl relative flex flex-col w-full">
           {activeTab === 'Daily Habits' && (
-            <DailyHabits
-              habits={habits}
-              onToggleHabit={toggleHabit}
-              onLoadDemo={loadDemoData}
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              onLogout={handleLogout}
-              isLoggingOut={isLoggingOut}
-            />
+            <div key={activeTab}>
+              <DailyHabits
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                onLoadDemo={loadDemoData}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+              />
+            </div>
           )}
 
 
           {activeTab === 'Manual Habits' && (
-            <Habits
-              habits={habits}
-              onToggleHabit={toggleHabit}
-              onDeleteHabit={confirmDeleteHabit}
-              onAddHabit={openAddHabit}
-              onEditHabit={openEditHabit}
-              currentMonth={viewDate}
-              onMonthChange={setViewDate}
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              onLogout={handleLogout}
-              isLoggingOut={isLoggingOut}
-            />
+            <div key={activeTab}>
+              <Habits
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                onDeleteHabit={confirmDeleteHabit}
+                onAddHabit={openAddHabit}
+                onEditHabit={openEditHabit}
+                currentMonth={viewDate}
+                onMonthChange={setViewDate}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+              />
+            </div>
           )}
           {activeTab === 'Savings' && (
-            <Savings
-              savings={savings}
-              onDeleteGoal={confirmDeleteGoal}
-              onAddGoal={openAddGoal}
-              onAddSaving={addDailySaving}
-              onLoadDemo={loadDemoData}
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              onLogout={handleLogout}
-              isLoggingOut={isLoggingOut}
-            />
+            <div key={activeTab}>
+              <Savings
+                savings={savings}
+                onDeleteGoal={confirmDeleteGoal}
+                onAddGoal={openAddGoal}
+                onAddSaving={addDailySaving}
+                onLoadDemo={loadDemoData}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+              />
+            </div>
           )}
 
           {activeTab === 'Analytics' && (
-            <Analytics
-              habits={habits}
-              savings={savings}
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              onLogout={handleLogout}
-              isLoggingOut={isLoggingOut}
-            />
+            <div key={activeTab}>
+              <Analytics
+                habits={habits}
+                savings={savings}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+              />
+            </div>
           )}
 
         </div>

@@ -43,7 +43,13 @@ export const Habits: React.FC<HabitsProps> = ({
   const [activeHeatmapCell, setActiveHeatmapCell] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showActionsId, setShowActionsId] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const heatmapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Group habits by time phase
   const groupedByPhase = useMemo(() => {
@@ -169,7 +175,7 @@ export const Habits: React.FC<HabitsProps> = ({
   }, [habits, currentMonth]);
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black flex flex-col relative">
+    <div className="flex flex-col relative w-full h-full">
 
       {/* Visual Header / Summary */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
@@ -234,7 +240,7 @@ export const Habits: React.FC<HabitsProps> = ({
                 </button>
               </div>
 
-              <div className="relative flex-1 md:w-48">
+              <div className="relative flex-1 md:max-w-[280px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
                 <input
                   type="text"
@@ -257,14 +263,14 @@ export const Habits: React.FC<HabitsProps> = ({
         </div>
 
 
-      <div className="p-5 md:p-6 space-y-6 pb-20 text-[#eff3f4]">
+      <div className="p-5 md:p-6 space-y-6 pb-20 text-[#eff3f4] animate-slide-up">
         {/* Yearly Heatmap (GitHub Style) */}
         <section className="space-y-3">
         <h3 className="text-[11px] font-black text-[#71767b] uppercase tracking-[0.3em] px-1 opacity-80">
           Activity Map (90 Days)
         </h3>
-        <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-3 md:p-5 pt-4 md:pt-5 rounded-2xl relative" style={{ overflowX: 'clip', overflowY: 'visible' }}>
-          <div className="grid gap-[5px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(11px, 1fr))' }}>
+        <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-3 md:p-5 pt-4 md:pt-5 rounded-2xl relative lg:max-w-2xl" style={{ overflowX: 'clip', overflowY: 'visible' }}>
+          <div className="grid gap-[5px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(13px, 1fr))' }}>
             {heatmapData.map((d, i) => {
               // Edge detection: first 3 and last 3 cells in any row
               const isNearLeftEdge = i < 3;
@@ -358,8 +364,8 @@ export const Habits: React.FC<HabitsProps> = ({
                 <div className="flex-1 h-px bg-gradient-to-r from-[#2f3336] to-transparent" />
               </div>
 
-              {/* Habit Cards in this Phase */}
-              <div className="grid grid-cols-1 gap-4">
+              {/* Habit Cards in this Phase - 2 columns on large screens */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
                 {phaseHabits.map(habit => {
                   const totalMonthly = days.filter(d => habit.history[d.dateStr]).length;
                   const target = habit.monthlyTarget || days.length;
@@ -374,7 +380,7 @@ export const Habits: React.FC<HabitsProps> = ({
                       {/* Background Progress Glow */}
                       <div
                         className="absolute left-0 top-0 bottom-0 transition-all duration-1000 opacity-[0.03]"
-                        style={{ width: `${completionRate}%`, backgroundColor: phase.color }}
+                        style={{ width: `${isLoaded ? completionRate : 0}%`, backgroundColor: phase.color }}
                       />
 
                       {/* Left Section: Progress Circle + Identity */}
@@ -382,13 +388,13 @@ export const Habits: React.FC<HabitsProps> = ({
                         <div className="relative w-10 h-10 md:w-12 md:h-12 shrink-0">
                           <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
                             <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
-                            <circle
+                             <circle
                               cx="24" cy="24" r="21"
                               fill="transparent"
                               stroke={phase.color}
                               strokeWidth="4"
                               strokeDasharray={2 * Math.PI * 21}
-                              strokeDashoffset={2 * Math.PI * 21 * (1 - completionRate / 100)}
+                              strokeDashoffset={2 * Math.PI * 21 * (1 - (isLoaded ? completionRate : 0) / 100)}
                               strokeLinecap="round"
                               className="transition-all duration-1000"
                             />
@@ -419,7 +425,7 @@ export const Habits: React.FC<HabitsProps> = ({
                         </div>
 
                         {showActionsId === habit.id && (
-                          <div className="flex items-center gap-1 border-l border-[#2f3336] pl-3 animate-in fade-in slide-in-from-right-2 duration-300 z-20">
+                          <div className="flex items-center gap-1 border-l border-[#2f3336] pl-3 animate-fade-in z-20">
                             <button
                               onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
                               className="p-2 md:p-2.5 text-[#71767b] hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10 rounded-xl transition-all"
