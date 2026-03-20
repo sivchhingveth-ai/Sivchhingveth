@@ -379,9 +379,9 @@ export default function App() {
     return <Auth />;
   }
 
-  const inputClass = "w-full bg-transparent border border-[#2f3336] px-4 py-3 rounded-lg text-lg text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-colors";
-  const labelClass = "text-[14px] font-bold text-[#eff3f4] mb-1.5 block";
-  const submitClass = "x-button-primary w-full py-3 text-[17px]";
+  const inputClass = "w-full bg-[#16181c] border border-[#2f3336] px-4 py-4 rounded-xl text-lg text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all focus:bg-black";
+  const labelClass = "text-[12px] md:text-[14px] font-black text-[#71767b] uppercase tracking-widest mb-2 block px-1";
+  const submitClass = "x-button-primary w-full py-4 text-[17px] font-black rounded-2xl shadow-[0_0_20px_rgba(29,155,240,0.2)]";
 
   return (
     <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative">
@@ -429,15 +429,15 @@ export default function App() {
 
       {/* Add Habit Modal */}
       <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Habit" : "New Habit"}>
-        <div className="pb-6 space-y-4">
-          <div>
+        <div className="pb-8 space-y-6 px-1">
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <label className={labelClass}>Habit name</label>
             <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
-          <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
-            <div>
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-6">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <label className={labelClass}>Time Phase (Optional)</label>
-              <div className="flex flex-wrap gap-2 mt-1">
+              <div className="flex flex-wrap gap-2.5 mt-1">
                 {[
                   { name: 'Morning', time: '08:00' },
                   { name: 'Afternoon', time: '14:00' },

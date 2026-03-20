@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Habit } from '../types';
-import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp } from 'lucide-react';
+import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp, Sun, CloudSun, Moon, Stars } from 'lucide-react';
 import { getCategoryStyles } from '../utils/colors';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
 
@@ -14,9 +14,47 @@ interface HabitsProps {
   onMonthChange: (date: Date) => void;
 }
 
+// Time phase definitions
+const TIME_PHASES = [
+  { key: 'morning',   label: 'Morning',   time: '08:00', icon: Sun,      color: '#ffad1f' },
+  { key: 'afternoon', label: 'Afternoon', time: '14:00', icon: CloudSun, color: '#ff6b00' },
+  { key: 'night',     label: 'Night',     time: '20:00', icon: Moon,     color: '#7856ff' },
+  { key: 'midnight',  label: 'Midnight',  time: '02:00', icon: Stars,    color: '#1d9bf0' },
+] as const;
+
+const getPhaseForHabit = (habit: Habit) => {
+  if (!habit.time) return TIME_PHASES[0]; // Default to morning
+  const phase = TIME_PHASES.find(p => p.time === habit.time);
+  return phase || TIME_PHASES[0];
+};
+
 export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange }) => {
   const [activeHeatmapCell, setActiveHeatmapCell] = useState<number | null>(null);
   const heatmapRef = useRef<HTMLDivElement>(null);
+
+  // Group habits by time phase
+  const groupedByPhase = useMemo(() => {
+    const groups: Record<string, { phase: typeof TIME_PHASES[number]; habits: Habit[] }> = {};
+    
+    // Initialize groups in order
+    TIME_PHASES.forEach(p => {
+      groups[p.key] = { phase: p, habits: [] };
+    });
+
+    habits.forEach(h => {
+      const phase = getPhaseForHabit(h);
+      groups[phase.key].habits.push(h);
+    });
+
+    // Only return phases that have habits
+    const result: typeof groups = {};
+    TIME_PHASES.forEach(p => {
+      if (groups[p.key].habits.length > 0) {
+        result[p.key] = groups[p.key];
+      }
+    });
+    return result;
+  }, [habits]);
 
   // Dismiss tooltip when tapping outside the heatmap
   useEffect(() => {
@@ -107,7 +145,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
   }, [habits, currentMonth]);
 
   return (
-    <div className="w-full bg-black text-[#eff3f4] p-6 space-y-6 pb-20">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black text-[#eff3f4] p-5 md:p-6 space-y-6 pb-20 flex flex-col">
       
       {/* Visual Header / Summary */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 border-b border-[#2f3336] pb-6 md:pb-8">
@@ -164,11 +202,11 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
       </div>
 
       {/* Yearly Heatmap (GitHub Style) */}
-      <section className="space-y-4">
-        <h3 className="text-[12px] font-black text-[#71767b] uppercase tracking-[0.3em] px-1">
+      <section className="space-y-3">
+        <h3 className="text-[11px] font-black text-[#71767b] uppercase tracking-[0.3em] px-1 opacity-80">
           Activity Map (90 Days)
         </h3>
-        <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-4 md:p-6 pt-10 md:pt-12 rounded-3xl relative" style={{ overflowX: 'clip', overflowY: 'visible' }}>
+        <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-3 md:p-5 pt-4 md:pt-5 rounded-2xl relative" style={{ overflowX: 'clip', overflowY: 'visible' }}>
           <div className="grid gap-[5px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(11px, 1fr))' }}>
             {heatmapData.map((d, i) => {
               // Edge detection: first 3 and last 3 cells in any row
@@ -227,101 +265,120 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
       </section>
 
       {/* Habit List - Balanced Row Layout */}
-      <div className="flex flex-col gap-3">
-        {habits.map(habit => {
-          const totalMonthly = days.filter(d => habit.history[d.dateStr]).length;
-          const target = habit.monthlyTarget || days.length;
-          const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
-          const style = getCategoryStyles(habit.category);
-          
-          return (
-            <div key={habit.id} className="bg-white/[0.02] border border-[#2f3336] rounded-xl p-2 md:p-3.5 hover:bg-white/[0.04] transition-all group relative flex flex-col md:flex-row md:items-center overflow-hidden gap-1.5 md:gap-4">
-               {/* Background Water Fill Effect */}
-               <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                 <div 
-                    className="absolute bottom-0 left-0 right-0 transition-all duration-1000 opacity-5" 
-                    style={{ height: `${completionRate}%`, backgroundColor: style.hex }}
-                 />
-               </div>
+      {/* Habit List - Grouped by Time Phase to match Daily Habits */}
+      <div className="flex flex-col gap-8 pb-32">
+        {Object.entries(groupedByPhase).length === 0 && (
+          <div className="text-center py-16 bg-white/[0.01] border border-dashed border-[#2f3336] rounded-3xl">
+            <TrendingUp className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
+            <p className="text-[#71767b] text-base font-bold">No habits tracked yet</p>
+            <p className="text-[#71767b]/60 text-sm mt-1">Click "Add Habit" to start your journey!</p>
+          </div>
+        )}
 
-               <div className="relative z-10 flex items-center justify-between md:justify-start md:w-[320px] shrink-0 gap-2 md:gap-4">
-                  <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                    <div className="relative w-10 md:w-12 h-10 md:h-12 shrink-0">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-                        <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
-                        <circle 
-                          cx="24" cy="24" r="21" 
-                          fill="transparent" 
-                          stroke={style.hex} 
-                          strokeWidth="4" 
-                          strokeDasharray={2 * Math.PI * 21}
-                          strokeDashoffset={2 * Math.PI * 21 * (1 - completionRate / 100)}
-                          strokeLinecap="round"
-                          className="transition-all duration-1000"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-[10px] md:text-[11px] font-black">{completionRate}%</span>
+        {Object.entries(groupedByPhase).map(([phaseKey, phaseGroup]) => {
+          const { phase, habits: phaseHabits } = phaseGroup as { phase: typeof TIME_PHASES[number]; habits: Habit[] };
+          const PhaseIcon = phase.icon;
+
+          return (
+            <div key={phaseKey} className="space-y-4">
+              {/* Phase Header - Same as Daily Habits */}
+              <div className="flex items-center gap-3 px-1">
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-lg"
+                  style={{ backgroundColor: `${phase.color}15`, border: `1px solid ${phase.color}30` }}
+                >
+                  <PhaseIcon className="w-4 h-4" style={{ color: phase.color }} />
+                </div>
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-[12px] md:text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: phase.color }}>
+                    {phase.label} Phase
+                  </span>
+                  <div className="h-px w-12 bg-[#2f3336] hidden md:block" />
+                  <span className="text-[10px] font-bold text-[#71767b] uppercase tracking-widest whitespace-nowrap">
+                    {phaseHabits.length} {phaseHabits.length === 1 ? 'Habit' : 'Habits'}
+                  </span>
+                </div>
+                <div className="flex-1 h-px bg-gradient-to-r from-[#2f3336] to-transparent" />
+              </div>
+
+              {/* Habit Cards in this Phase */}
+              <div className="grid grid-cols-1 gap-4">
+                {phaseHabits.map(habit => {
+                  const totalMonthly = days.filter(d => habit.history[d.dateStr]).length;
+                  const target = habit.monthlyTarget || days.length;
+                  const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
+                  
+                  return (
+                    <div 
+                      key={habit.id} 
+                      className="w-full flex flex-col md:flex-row md:items-center gap-4 p-4 md:p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 group relative overflow-hidden"
+                    >
+                      {/* Background Progress Glow */}
+                      <div 
+                        className="absolute left-0 top-0 bottom-0 transition-all duration-1000 opacity-[0.03]" 
+                        style={{ width: `${completionRate}%`, backgroundColor: phase.color }}
+                      />
+
+                      {/* Left Section: Progress Circle + Identity */}
+                      <div className="flex items-center gap-4 flex-1 min-w-0 relative z-10">
+                        <div className="relative w-11 h-11 md:w-12 md:h-12 shrink-0">
+                          <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+                            <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
+                            <circle 
+                              cx="24" cy="24" r="21" 
+                              fill="transparent" 
+                              stroke={phase.color} 
+                              strokeWidth="4" 
+                              strokeDasharray={2 * Math.PI * 21}
+                              strokeDashoffset={2 * Math.PI * 21 * (1 - completionRate / 100)}
+                              strokeLinecap="round"
+                              className="transition-all duration-1000"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-[10px] md:text-[11px] font-black" style={{ color: phase.color }}>{completionRate}%</span>
+                          </div>
+                        </div>
+
+                        <div className="min-w-0">
+                          <h4 className="text-[15px] md:text-[17px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
+                            {habit.name}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phase.color }} />
+                            <span className="text-[10px] md:text-[11px] font-bold text-[#71767b] uppercase tracking-wider">{habit.category}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Section: Stats + Desktop Actions */}
+                      <div className="flex items-center justify-between md:justify-end gap-6 relative z-10">
+                        <div className="flex flex-col items-end">
+                          <span className="text-[15px] md:text-[18px] font-black text-[#eff3f4] leading-none">
+                            {totalMonthly}<span className="text-[11px] text-[#71767b]">/{target}</span>
+                          </span>
+                          <p className="text-[8px] md:text-[9px] font-black text-[#71767b] uppercase tracking-widest mt-1">Consistency</p>
+                        </div>
+
+                        <div className="flex items-center gap-1 border-l border-[#2f3336] pl-3">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
+                            className="p-2.5 text-[#71767b] hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10 rounded-xl transition-all"
+                          >
+                            <Edit2 className="w-4.5 h-4.5" />
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
+                            className="p-2.5 text-[#71767b] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                          >
+                            <Trash2 className="w-4.5 h-4.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="overflow-hidden">
-                      <h4 className="text-[15px] font-black text-[#eff3f4] uppercase tracking-tight truncate leading-tight">
-                        {habit.name}
-                      </h4>
-                    </div>
-                  </div>
-                  
-                  {/* Actions (visible on mobile next to identity) */}
-                  <div className="flex gap-0.5 md:hidden">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
-                      className="p-2 text-[#71767b] hover:text-x-blue transition-all"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
-                      className="p-2 text-[#71767b] hover:text-red-500 transition-all"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-               </div>
-
-
-
-               {/* RIGHT SECTION: Stats & Desktop Actions */}
-                <div className="flex items-center justify-between md:justify-end gap-2 md:gap-6 md:ml-auto shrink-0 w-full md:w-auto mt-0 md:mt-0">
-                  <div className="flex-1 md:w-[120px] space-y-1">
-                    <div className="flex justify-between items-end">
-                      <span className="text-[14px] md:text-[16px] font-black text-[#eff3f4]">
-                        {totalMonthly}<span className="text-[10px] md:text-[11px] text-[#71767b]">/{target}</span>
-                      </span>
-                      <span className="text-[9px] font-black text-[#71767b] uppercase tracking-tighter">
-                        {habit.monthlyTarget ? 'Target' : 'Monthly'}
-                      </span>
-                    </div>
-                    <div className="w-full h-1.5 bg-white/[0.03] border border-white/20 rounded-full overflow-hidden">
-                       <div className="h-full transition-all duration-1000" style={{ width: `${completionRate}%`, backgroundColor: style.hex }} />
-                    </div>
-                  </div>
-
-                  <div className="hidden md:flex gap-0.5 border-l border-[#2f3336] pl-3">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
-                      className="p-2 text-[#71767b] hover:text-x-blue transition-all opacity-40 group-hover:opacity-100"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
-                      className="p-2 text-[#71767b] hover:text-red-500 transition-all opacity-40 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-               </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })}

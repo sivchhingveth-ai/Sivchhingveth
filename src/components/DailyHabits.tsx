@@ -88,16 +88,16 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({ habits, onToggleHabit,
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black">
+    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black flex flex-col">
       
       {/* Header with inline stats */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
-        <div className="px-4 py-3 md:px-6 md:py-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] tracking-tight">Daily Habits</h2>
-            <p className="text-[11px] md:text-[13px] font-bold text-[#71767b]">
-              {todayDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              <span className="text-[#71767b]/50"> · Resets at 5:00 AM</span>
+        <div className="px-5 py-3 md:px-6 md:py-4 flex items-center justify-between">
+          <div className="min-w-0">
+            <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] tracking-tight truncate">Daily Habits</h2>
+            <p className="text-[10px] md:text-[13px] font-bold text-[#71767b] whitespace-nowrap">
+              {todayDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              <span className="hidden md:inline text-[#71767b]/50"> · Resets at 5:00 AM</span>
             </p>
             {onLoadDemo && (
               <button
@@ -136,7 +136,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({ habits, onToggleHabit,
 
 
       {/* Habit Checklist — Grouped by Time Phase */}
-      <div className="p-4 md:p-6 space-y-5 pb-28">
+      <div className="p-5 md:p-6 space-y-7 pb-32">
         {habits.length === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
