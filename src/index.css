@@ -232,25 +232,15 @@ button:active {
 }
 
 @keyframes habit-shine {
-  0% {
-    box-shadow: 0 0 0 0 var(--shine-color);
-    border-color: var(--shine-color);
-  }
-
-  50% {
-    box-shadow: 0 0 20px 2px var(--shine-color);
-    border-color: var(--shine-color);
-    opacity: 0.9;
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 var(--shine-color);
-    border-color: var(--shine-color);
-  }
+  0% { box-shadow: 0 0 0 0 var(--shine-color); border-color: var(--shine-color); }
+  50% { box-shadow: 0 0 15px 0 var(--shine-color); border-color: var(--shine-color); }
+  100% { box-shadow: 0 0 0 0 var(--shine-color); border-color: var(--shine-color); }
 }
 
 .habit-shine {
-  animation: habit-shine 1.5s ease-in-out infinite;
+  animation: habit-shine 2s ease-in-out infinite;
+  will-change: box-shadow, border-color;
+  z-index: 10;
 }
 
 /* X-style card */
