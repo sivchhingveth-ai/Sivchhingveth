@@ -193,10 +193,10 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   }, [habits]);
 
   const getBarColor = (pct: number) => {
-    if (pct >= 75) return '#00ba7c';
-    if (pct >= 50) return '#1d9bf0';
-    if (pct >= 25) return '#ffad1f';
-    return '#71767b';
+    if (pct >= 75) return '#00ba7c'; // Elite (Green)
+    if (pct >= 50) return '#ffad1f'; // High (Orange)
+    if (pct >= 25) return '#1d9bf0'; // Steady (Blue)
+    return '#ef4444'; // Low (Red)
   };
 
   const navOffset = view === 'weekly' ? weekOffset : monthOffset;
@@ -320,22 +320,22 @@ export const Analytics: React.FC<AnalyticsProps> = ({
               </div>
 
               {/* Productivity Legend */}
-              <div className="border-t border-[#2f3336] pt-6 flex flex-wrap items-center justify-center gap-y-4 gap-x-6 md:gap-x-10">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#00ba7c]" />
-                  <span className="text-[10px] md:text-[11px] font-black text-[#71767b] uppercase tracking-widest">ELITE <span className="text-[#eff3f4]/40 ml-1">(75-100%)</span></span>
+              <div className="border-t border-[#2f3336] pt-4 flex flex-wrap items-center justify-center gap-y-2.5 gap-x-4 md:gap-x-8">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#00ba7c]" />
+                  <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest">ELITE <span className="text-[#eff3f4]/40 ml-0.5">(75+)</span></span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#1d9bf0]" />
-                  <span className="text-[10px] md:text-[11px] font-black text-[#71767b] uppercase tracking-widest">HIGH <span className="text-[#eff3f4]/40 ml-1">(50-75%)</span></span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#ffad1f]" />
+                  <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest">HIGH <span className="text-[#eff3f4]/40 ml-0.5">(50-75)</span></span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#ffad1f]" />
-                  <span className="text-[10px] md:text-[11px] font-black text-[#71767b] uppercase tracking-widest">STEADY <span className="text-[#eff3f4]/40 ml-1">(25-50%)</span></span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#1d9bf0]" />
+                  <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest">STEADY <span className="text-[#eff3f4]/40 ml-0.5">(25-50)</span></span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#71767b]" />
-                  <span className="text-[10px] md:text-[11px] font-black text-[#71767b] uppercase tracking-widest">LOW <span className="text-[#eff3f4]/40 ml-1">(0-25%)</span></span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#ef4444]" />
+                  <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest">LOW <span className="text-[#eff3f4]/40 ml-0.5">(0-25)</span></span>
                 </div>
               </div>
             </div>
