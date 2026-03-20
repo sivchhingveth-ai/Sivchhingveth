@@ -48,16 +48,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const currentPhaseKey = getCurrentPhaseKey();
   const [focusedHabitId, setFocusedHabitId] = React.useState<string | null>(null);
   const [canScrollMore, setCanScrollMore] = React.useState(true);
-  const [isScrolled, setIsScrolled] = React.useState(false);
-
-  // Auto-hide header on scroll
-  React.useEffect(() => {
-    const main = document.querySelector('main');
-    if (!main) return;
-    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
-    main.addEventListener('scroll', handleScroll, { passive: true });
-    return () => main.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Stats for today
   const completedCount = habits.filter(h => h.history[todayStr]).length;
@@ -224,8 +214,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       {/* Header with inline navigation + stats */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
-          <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      </div>
+      <div>
+        <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">
             <div className="min-w-0">
               <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight flex items-center gap-2">
                 <span className="truncate tracking-tight">Daily Habits</span>
@@ -267,7 +258,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
             </div>
           </div>
         </div>
-      </div>
 
 
       {/* Habit Checklist — Grouped by Time Phase */}
