@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Habit } from '../types';
-import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp, Sun, CloudSun, Moon, Stars } from 'lucide-react';
+import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search } from 'lucide-react';
 import { getCategoryStyles } from '../utils/colors';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
 
@@ -30,6 +30,7 @@ const getPhaseForHabit = (habit: Habit) => {
 
 export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange }) => {
   const [activeHeatmapCell, setActiveHeatmapCell] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const heatmapRef = useRef<HTMLDivElement>(null);
 
   // Group habits by time phase
@@ -41,7 +42,12 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
       groups[p.key] = { phase: p, habits: [] };
     });
 
-    habits.forEach(h => {
+    const searchLower = searchTerm.trim().toLowerCase();
+    const filteredHabits = habits.filter(h => 
+      h.name.toLowerCase().includes(searchLower)
+    );
+
+    filteredHabits.forEach(h => {
       const phase = getPhaseForHabit(h);
       groups[phase.key].habits.push(h);
     });
@@ -54,7 +60,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
       }
     });
     return result;
-  }, [habits]);
+  }, [habits, searchTerm]);
 
   // Dismiss tooltip when tapping outside the heatmap
   useEffect(() => {
@@ -192,13 +198,25 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
           </button>
         </div>
 
-        <button 
-          onClick={onAddHabit} 
-          className="x-button-primary w-full md:w-auto text-[14px] md:text-[15px]"
-        >
-          <Plus className="w-4 h-4" strokeWidth={3} />
-          Add Habit
-        </button>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <button 
+            onClick={onAddHabit} 
+            className="x-button-primary shrink-0 py-3.5 md:py-3 px-5 text-[14px] md:text-[15px]"
+          >
+            <Plus className="w-5 h-5 md:w-4 md:h-4" strokeWidth={3} />
+            <span className="hidden md:inline">Add Habit</span>
+          </button>
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71767b]" />
+            <input
+              type="text"
+              placeholder="Search habits..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[#16181c] border border-[#2f3336] pl-10 pr-4 py-3.5 md:py-3 rounded-2xl text-[14px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Yearly Heatmap (GitHub Style) */}
