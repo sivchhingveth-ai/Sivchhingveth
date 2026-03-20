@@ -13,28 +13,29 @@ import { Header } from './components/Header';
 import { Tabs } from './components/Tabs';
 import { Habits } from './components/Habits';
 import { Savings } from './components/Savings';
-import { Schedule } from './components/Schedule';
-import { Overview } from './components/Overview';
+import { DailyHabits } from './components/DailyHabits';
+
+
 import { Analytics } from './components/Analytics';
 import { Modal } from './components/Modal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { Auth } from './components/Auth';
 import { Plus, Loader2, ShieldAlert } from 'lucide-react';
-import { Habit, SavingGoal, Task, Routine, Transaction, BudgetStats, AppNotification } from './types';
+import { Habit, SavingGoal } from './types';
+import { getEffectiveDateStr, getEffectiveDate } from './utils/dateUtils';
 
 export default function App() {
-  const todayStr = new Date().toISOString().split('T')[0];
-  const [activeTab, setActiveTab] = useState('Overview');
+  const todayStr = getEffectiveDateStr();
+  const [activeTab, setActiveTab] = useState('Daily Habits');
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['Overview', 'Schedule', 'Manual habit', 'Savings', 'Analytics'];
+  const tabs = ['Daily Habits', 'Manual habit', 'Savings', 'Analytics'];
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
-  const [previousModal, setPreviousModal] = useState<string | null>(null);
-  const [viewDate, setViewDate] = useState(new Date());
+  const [viewDate, setViewDate] = useState(getEffectiveDate());
 
   // Loading timeout
   useEffect(() => {
@@ -57,10 +58,7 @@ export default function App() {
   const [newGoalTargetDate, setNewGoalTargetDate] = useState(todayStr);
   const [newHabitTime, setNewHabitTime] = useState('');
   const [newHabitMonthlyTarget, setNewHabitMonthlyTarget] = useState('');
-  const [newRoutineName, setNewRoutineName] = useState('');
-  const [newRoutineTime, setNewRoutineTime] = useState('');
-  const [newExpenseName, setNewExpenseName] = useState('');
-  const [newExpenseAmount, setNewExpenseAmount] = useState('');
+
 
   // Confirmation state
   const [confirmModal, setConfirmModal] = useState<{
@@ -110,34 +108,15 @@ export default function App() {
     history: s.history || {},
   }));
 
-  const [routines, setRoutines] = useState<Routine[]>([
-    { id: 1, name: "Morning Ritual", time: "05:00 AM", icon: "🌅", color: "#f97316", done: false },
-    { id: 2, name: "Afternoon Focus", time: "01:00 PM", icon: "🧠", color: "#ffd400", done: false },
-    { id: 3, name: "Night Today", time: "10:00 PM", icon: "🌙", color: "#7856ff", done: false },
-    { id: 4, name: "Midnight Calm", time: "12:00 AM", icon: "🌌", color: "#22c55e", done: false },
-  ]);
 
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    { id: 1, name: "Grocery Store", amount: 45.20, category: "Food", date: "Today", type: "expense", icon: "ShoppingCart", color: "#f91880" },
-    { id: 2, name: "Coffee Shop", amount: 4.50, category: "Food", date: "Yesterday", type: "expense", icon: "Coffee", color: "#f91880" },
-  ]);
-
-  const [budgetStats, setBudgetStats] = useState<BudgetStats>({
-    balance: 4250.00,
-    budgetLeft: 1240.00,
-    monthlyBudget: 3000.00,
-  });
-
-  const [notifications, setNotifications] = useState<AppNotification[]>([
-    { id: 1, message: "Don't forget to review the project proposal before 10 AM", type: 'reminder' },
-  ]);
-
-  const [tasks, setTasks] = useState<Task[]>([]);
 
   // Toggle functions
   const toggleHabit = React.useCallback(async (id: any, dateStr: string = todayStr) => {
     if (!isAuthenticated) return;
-    const habit = habits.find(h => h.id === id);
+    
+    // Use the latest habits from the query result directly in the callback
+    // or trigger the mutation which handles logic on the server side
+    const habit = (rawHabits || []).find(h => h._id === id);
     if (!habit) return;
 
     const updatedHistory = { ...habit.history };
@@ -147,24 +126,9 @@ export default function App() {
       id: id as Id<"habits">,
       history: updatedHistory,
     });
-  }, [isAuthenticated, habits, todayStr, updateHabit]);
+  }, [isAuthenticated, rawHabits, todayStr, updateHabit]);
 
-  const toggleTask = (id: number) => {
-    toggleHabit(id);
-  };
 
-  const toggleRoutine = (id: number) => {
-    setRoutines(prev => {
-      const routine = prev.find(r => r.id === id);
-      if (routine) {
-        const matchingHabit = habits.find(h => h.name.toLowerCase() === routine.name.toLowerCase());
-        if (matchingHabit) {
-          toggleHabit(matchingHabit.id);
-        }
-      }
-      return prev.map(r => r.id === id ? { ...r, done: !r.done } : r);
-    });
-  };
 
   // Delete functions
   const deleteHabit = async (id: any) => {
@@ -195,22 +159,7 @@ export default function App() {
     });
   };
 
-  const deleteTask = (id: any) => {
-    // Habits are deleted via onDeleteHabit prop in components
-  };
 
-  const deleteRoutine = (id: any) => {
-    setRoutines(prev => prev.filter(r => r.id !== id));
-  };
-
-  const confirmDeleteRoutine = (id: any) => {
-    setConfirmModal({
-      isOpen: true,
-      title: 'Delete Routine',
-      message: 'Are you sure you want to delete this routine?',
-      onConfirm: () => deleteRoutine(id)
-    });
-  };
 
   // Add functions
   const saveHabit = async () => {
@@ -273,33 +222,7 @@ export default function App() {
   };
 
 
-  const addRoutine = () => {
-    if (!newRoutineName.trim() || !newRoutineTime) return;
-    const colors = ['#ff9500', '#ff3b30', '#34c759', '#5856d6', '#007aff', '#ffcc00'];
-    const newId = Math.max(0, ...routines.map(r => r.id)) + 1;
-    setRoutines(prev => [...prev, { id: newId, name: newRoutineName.trim(), time: newRoutineTime, icon: "⭐", color: colors[newId % colors.length], done: false }]);
-    setNewRoutineName('');
-    setNewRoutineTime('');
 
-    // Return to previous modal if any, otherwise close
-    if (previousModal) {
-      setModalOpen(previousModal);
-      setPreviousModal(null);
-    } else {
-      setModalOpen(null);
-    }
-  };
-
-  const addExpense = () => {
-    if (!newExpenseName.trim() || !newExpenseAmount) return;
-    const amount = parseFloat(newExpenseAmount);
-    const newId = Math.max(0, ...transactions.map(t => t.id)) + 1;
-    setTransactions(prev => [...prev, { id: newId, name: newExpenseName.trim(), amount, category: "Other", date: "Today", type: "expense", icon: "Receipt", color: "#FF3B30" }]);
-    setBudgetStats(prev => ({ ...prev, balance: prev.balance - amount, budgetLeft: prev.budgetLeft - amount }));
-    setNewExpenseName('');
-    setNewExpenseAmount('');
-    setModalOpen(null);
-  };
 
   // Open modal helpers
   const openAddHabit = () => {
@@ -326,12 +249,6 @@ export default function App() {
     setNewGoalTargetDate(todayStr);
     setModalOpen('goal'); 
   };
-  const openAddTask = () => { setModalOpen('habit'); setActiveTab('Schedule'); };
-  const openAddRoutine = () => {
-    setPreviousModal(modalOpen);
-    setModalOpen('routine');
-  };
-  const openAddExpense = () => { setModalOpen('expense'); setActiveTab('Savings'); };
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -341,6 +258,88 @@ export default function App() {
       console.error('Logout failed:', err);
     } finally {
       setIsLoggingOut(false);
+    }
+  };
+
+  const loadDemoData = async () => {
+    if (!isAuthenticated) return;
+
+    // ── Demo Habits ──
+    const demoHabits = [
+      { name: 'Drink 8 glasses of water', category: 'HEALTH', time: '08:00', chance: 0.85 },
+      { name: 'Morning stretching', category: 'BODY', time: '08:00', chance: 0.7 },
+      { name: 'Read for 30 minutes', category: 'LEARNING', time: '14:00', chance: 0.6 },
+      { name: 'Take vitamins', category: 'HEALTH', time: '08:00', chance: 0.9 },
+      { name: 'Evening workout', category: 'BODY', time: '20:00', chance: 0.55 },
+      { name: 'Journal before bed', category: 'RECOVERY', time: '20:00', chance: 0.65 },
+      { name: 'Brush teeth 2x', category: 'HYGIENE', time: '08:00', chance: 0.95 },
+      { name: 'Track expenses', category: 'FINANCE', time: '14:00', chance: 0.45 },
+      { name: '10 min Meditation', category: 'HEALTH', time: '08:00', chance: 0.5 },
+      { name: 'Learn Coding', category: 'LEARNING', time: '20:00', chance: 0.75 },
+      { name: 'No Sugar', category: 'HEALTH', time: '14:00', chance: 0.8 },
+      { name: 'Cold Shower', category: 'BODY', time: '08:00', chance: 0.4 },
+    ];
+
+    for (const demo of demoHabits) {
+      const history: Record<string, boolean> = {};
+      const d = new Date(getEffectiveDate());
+      for (let i = 0; i < 45; i++) {
+        const dStr = d.toISOString().split('T')[0];
+        if (Math.random() < demo.chance) {
+          history[dStr] = true;
+        }
+        d.setDate(d.getDate() - 1);
+      }
+
+      const id = await createHabit({
+        name: demo.name,
+        category: demo.category,
+        time: demo.time,
+        monthlyTarget: null,
+      });
+
+      await updateHabit({ id, history });
+    }
+
+    // ── Demo Saving Goals ──
+    const demoGoals = [
+      { name: 'New MacBook Pro', goal: 2500, saved: 1680, color: '#1d9bf0', days: 30 },
+      { name: 'Emergency Fund', goal: 5000, saved: 3200, color: '#00ba7c', days: 60 },
+      { name: 'Japan Trip 2026', goal: 3000, saved: 850, color: '#7856ff', days: 45 },
+    ];
+
+    for (const demo of demoGoals) {
+      const startDate = new Date(getEffectiveDate());
+      startDate.setDate(startDate.getDate() - demo.days);
+      const targetDate = new Date(getEffectiveDate());
+      targetDate.setDate(targetDate.getDate() + 90);
+
+      const history: Record<string, number> = {};
+      let remaining = demo.saved;
+      const d = new Date(startDate);
+      while (remaining > 0 && d <= getEffectiveDate()) {
+        const dStr = d.toISOString().split('T')[0];
+        if (Math.random() < 0.4) {
+          const amount = Math.min(remaining, Math.round(20 + Math.random() * 80));
+          history[dStr] = amount;
+          remaining -= amount;
+        }
+        d.setDate(d.getDate() + 1);
+      }
+
+      const goalId = await createGoal({
+        name: demo.name,
+        goal: demo.goal,
+        color: demo.color,
+        startDate: startDate.toISOString().split('T')[0],
+        targetDate: targetDate.toISOString().split('T')[0],
+      });
+
+      await updateGoal({
+        id: goalId,
+        saved: demo.saved,
+        history,
+      });
     }
   };
 
@@ -396,24 +395,15 @@ export default function App() {
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain">
         <div className="w-full">
 
-
-          {activeTab === 'Overview' && (
-            <Overview
+          {activeTab === 'Daily Habits' && (
+            <DailyHabits
               habits={habits}
               onToggleHabit={toggleHabit}
-              tasks={tasks}
-              routines={routines}
-              savings={savings}
-              transactions={transactions}
-              budgetStats={budgetStats}
-              notifications={notifications}
-              setActiveTab={setActiveTab}
-              onAddHabit={openAddHabit}
-              onEditHabit={openEditHabit}
-              onAddTask={openAddHabit}
-              onAddExpense={openAddExpense}
+              onLoadDemo={loadDemoData}
             />
           )}
+
+
           {activeTab === 'Manual habit' && (
             <Habits
               habits={habits}
@@ -425,21 +415,12 @@ export default function App() {
               onMonthChange={setViewDate}
             />
           )}
-          {activeTab === 'Savings' && <Savings savings={savings} onDeleteGoal={confirmDeleteGoal} onAddGoal={openAddGoal} onAddSaving={addDailySaving} />}
-          {activeTab === 'Schedule' && (
-            <div className="flex flex-col">
-              <Schedule
-                habits={habits}
-                onToggleHabit={toggleHabit}
-                onDeleteHabit={confirmDeleteHabit}
-                onAddTask={openAddHabit}
-              />
-            </div>
-          )}
+          {activeTab === 'Savings' && <Savings savings={savings} onDeleteGoal={confirmDeleteGoal} onAddGoal={openAddGoal} onAddSaving={addDailySaving} onLoadDemo={loadDemoData} />}
+
           {activeTab === 'Analytics' && (
             <Analytics
               habits={habits}
-              tasks={tasks}
+              savings={savings}
             />
           )}
 
@@ -529,46 +510,7 @@ export default function App() {
       </Modal>
 
 
-      {/* Add Routine Modal */}
-      <Modal
-        isOpen={modalOpen === 'routine'}
-        onClose={() => {
-          if (previousModal) {
-            setModalOpen(previousModal);
-            setPreviousModal(null);
-          } else {
-            setModalOpen(null);
-          }
-        }}
-        title="New Routine"
-      >
-        <div className="space-y-4">
-          <div>
-            <label className={labelClass}>Routine name</label>
-            <input className={inputClass} placeholder="e.g. Morning yoga" value={newRoutineName} onChange={e => setNewRoutineName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
-          </div>
-          <div>
-            <label className={labelClass}>Time</label>
-            <input className={inputClass} placeholder="e.g. 07:00 AM" value={newRoutineTime} onChange={e => setNewRoutineTime(e.target.value)} />
-          </div>
-          <button onClick={addRoutine} className={submitClass}>Add Routine</button>
-        </div>
-      </Modal>
 
-      {/* Add Expense Modal */}
-      <Modal isOpen={modalOpen === 'expense'} onClose={() => setModalOpen(null)} title="New Expense">
-        <div className="space-y-4">
-          <div>
-            <label className={labelClass}>Expense name</label>
-            <input className={inputClass} placeholder="e.g. Uber ride" value={newExpenseName} onChange={e => setNewExpenseName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
-          </div>
-          <div>
-            <label className={labelClass}>Amount ($)</label>
-            <input className={inputClass} type="number" step="0.01" placeholder="25.00" value={newExpenseAmount} onChange={e => setNewExpenseAmount(e.target.value)} />
-          </div>
-          <button onClick={addExpense} className={submitClass}>Add Expense</button>
-        </div>
-      </Modal>
 
       <ConfirmModal
         isOpen={confirmModal.isOpen}

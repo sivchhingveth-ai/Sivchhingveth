@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import { Habit } from '../types';
 import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp } from 'lucide-react';
 import { getCategoryStyles } from '../utils/colors';
+import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
 
 interface HabitsProps {
   habits: Habit[];
@@ -127,7 +128,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
             <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </button>
           <button 
-            onClick={() => onMonthChange(new Date())}
+            onClick={() => onMonthChange(getEffectiveDate())}
             className="px-2 md:px-3 py-1 md:py-1.5 rounded-xl transition-all text-[9px] md:text-[11px] font-black text-[#71767b] hover:text-[#eff3f4] bg-white/[0.05] border border-white/5 uppercase"
           >
             TODAY
@@ -288,20 +289,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                   </div>
                </div>
 
-               {/* CENTER SECTION: Heatmap (Hidden on small mobile) */}
-               <div className="flex-1 hidden md:flex items-center px-4 overflow-hidden">
-                  <div className="flex gap-1 flex-nowrap justify-start w-full">
-                    {days.map(d => (
-                      <div key={d.dayNum} className="relative group/day shrink-0">
-                        <div 
-                          className={`w-2.5 h-2.5 rounded-[1px] transition-all border
-                            ${habit.history[d.dateStr] ? 'border-transparent' : 'bg-transparent border-[#2f3336]'}`}
-                          style={habit.history[d.dateStr] ? { backgroundColor: style.hex, boxShadow: `0 0 8px ${style.hex}4d` } : {}}
-                        />
-                      </div>
-                    ))}
-                  </div>
-               </div>
+
 
                {/* RIGHT SECTION: Stats & Desktop Actions */}
                 <div className="flex items-center justify-between md:justify-end gap-2 md:gap-6 md:ml-auto shrink-0 w-full md:w-auto mt-0 md:mt-0">

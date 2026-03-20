@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SavingGoal } from '../types';
-import { Plus, Trash2, Calendar, ChevronDown, ChevronUp, ArrowUpRight } from 'lucide-react';
+import { Plus, Trash2, Calendar, ChevronDown, ChevronUp, ArrowUpRight, Sparkles } from 'lucide-react';
 
 interface SavingsProps {
   savings: SavingGoal[];
   onDeleteGoal: (id: any) => void;
   onAddGoal: () => void;
   onAddSaving: (id: any, amount: number, date: string) => void;
+  onLoadDemo?: () => void;
 }
 
 const SavingItem: React.FC<{
@@ -191,7 +192,7 @@ const SavingItem: React.FC<{
   );
 };
 
-export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGoal, onAddSaving }) => {
+export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGoal, onAddSaving, onLoadDemo }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -247,7 +248,16 @@ export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGo
 
       {savings.length === 0 && (
         <div className="p-10 text-center">
-          <p className="text-[#71767b] text-base md:text-lg">No saving goals yet. Time to plan ahead!</p>
+          <p className="text-[#71767b] text-base md:text-lg mb-4">No saving goals yet. Time to plan ahead!</p>
+          {onLoadDemo && (
+            <button
+              onClick={onLoadDemo}
+              className="x-button-glass text-[13px] mx-auto"
+            >
+              <Sparkles className="w-4 h-4" />
+              Load Demo Data
+            </button>
+          )}
         </div>
       )}
 
