@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { LogOut, Loader2 } from 'lucide-react';
 
 interface TabsProps {
@@ -10,6 +10,14 @@ interface TabsProps {
 }
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogout, isLoggingOut }) => {
+  const activeTabRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (activeTabRef.current) {
+      activeTabRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeTab]);
+
   return (
     <div className="border-b border-[#2f3336] bg-black sticky top-0 z-40">
       <div className="max-w-[1200px] mx-auto flex h-[53px] items-center">
@@ -19,6 +27,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
             {tabs.map((tab) => (
               <button
                 key={tab}
+                ref={activeTab === tab ? activeTabRef : null}
                 onClick={() => onTabChange(tab)}
                 className="w-[115px] md:w-[170px] relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
               >
