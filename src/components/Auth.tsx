@@ -57,8 +57,6 @@ export const Auth: React.FC = () => {
       formData.set("password", password);
       formData.set("flow", isSignUp ? "signUp" : "signIn");
 
-      await signIn("password", formData);
-
       if (!isSignUp) {
         if (rememberMe) {
           localStorage.setItem('remembered_email', email);
@@ -70,6 +68,8 @@ export const Auth: React.FC = () => {
           localStorage.removeItem('remembered_password');
         }
       }
+
+      await signIn("password", formData);
 
       if (isSignUp) {
         setMessage('Account created successfully!');
