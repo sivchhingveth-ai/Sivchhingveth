@@ -13,7 +13,6 @@ interface DailyHabitsProps {
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
-  onResetData?: () => void;
 }
 
 // Time phase definitions
@@ -41,7 +40,7 @@ const getCurrentPhaseKey = (): string => {
 
 export const DailyHabits: React.FC<DailyHabitsProps> = ({
   habits, onToggleHabit,
-  tabs, activeTab, onTabChange, onLogout, isLoggingOut, onResetData
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut
 }) => {
   const todayStr = getEffectiveDateStr();
   const todayDate = getEffectiveDate();
@@ -222,7 +221,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       )}
       {/* Header with inline navigation + stats */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} onResetData={onResetData} />
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
       <div>
         <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">

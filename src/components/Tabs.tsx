@@ -7,10 +7,9 @@ interface TabsProps {
   onTabChange: (tab: string) => void;
   onLogout?: () => void;
   isLoggingOut?: boolean;
-  onResetData?: () => void;
 }
 
-export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogout, isLoggingOut, onResetData }) => {
+export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogout, isLoggingOut }) => {
   const activeTabRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -48,19 +47,6 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
 
         {/* Reset & Logout Controls */}
         <div className="flex h-full border-l border-[#2f3336] shrink-0 bg-black">
-          {onResetData && (
-            <button
-              onClick={() => {
-                if (window.confirm("Permanently wipe ALL habits and data? This cannot be undone.")) {
-                  onResetData();
-                }
-              }}
-              className="px-4 h-full flex items-center justify-center text-[#71767b] hover:text-red-500 hover:bg-red-500/10 transition-all border-r border-[#2f3336]"
-              title="Reset All Project Data"
-            >
-              <Trash2 className="w-4 h-4 md:w-5 h-5" />
-            </button>
-          )}
 
           {onLogout && (
             <button

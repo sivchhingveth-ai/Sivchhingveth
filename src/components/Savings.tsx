@@ -15,7 +15,6 @@ interface SavingsProps {
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
-  onResetData?: () => void;
 }
 
 const SavingItem: React.FC<{
@@ -236,7 +235,7 @@ const SavingItem: React.FC<{
 
 export const Savings: React.FC<SavingsProps> = ({
   savings, onDeleteGoal, onAddGoal, onAddSaving, onLoadDemo,
-  tabs, activeTab, onTabChange, onLogout, isLoggingOut, onResetData
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -256,7 +255,7 @@ export const Savings: React.FC<SavingsProps> = ({
 
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} onResetData={onResetData} />
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
       <div>
         <div className="px-5 py-4 md:px-6 md:py-6 flex items-center justify-between border-b border-[#2f3336]">
