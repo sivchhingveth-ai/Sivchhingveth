@@ -274,7 +274,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                       className={`flex flex-col items-center gap-4 flex-1 h-full justify-end group/bar relative ${d.isFuture ? 'opacity-30' : 'cursor-pointer'}`}
                     >
                       {/* Tooltip on Hover */}
-                      <div className="absolute bottom-full mb-3 opacity-0 group-hover/bar:opacity-100 transition-all z-10 pointer-events-none translate-y-2 group-hover/bar:translate-y-0 text-center">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover/bar:opacity-100 transition-all z-50 pointer-events-none translate-y-2 group-hover/bar:translate-y-0 text-center whitespace-nowrap">
                         <div className="bg-[#16181c] border border-[#2f3336] px-3 py-1.5 rounded-xl shadow-2xl">
                           <span className="text-[14px] md:text-[16px] font-black text-[#eff3f4]">
                             {d.completed}/{d.total}
