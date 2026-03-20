@@ -26,6 +26,7 @@ const SavingItem: React.FC<{
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAddSaving, setShowAddSaving] = useState(false);
   const [savingAmount, setSavingAmount] = useState('');
+  const [savingError, setSavingError] = useState('');
   const [savingDate, setSavingDate] = useState(new Date().toISOString().split('T')[0]);
   const addSavingRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +50,14 @@ const SavingItem: React.FC<{
   const accentColor = "#ffffff";
 
   const handleAddSaving = () => {
-    const amt = parseFloat(savingAmount);
+    const amt = parseFloat(savingAmount.replace(/,/g, ''));
+    const remaining = s.goal - s.saved;
     if (!isNaN(amt) && amt > 0) {
+      if (amt > remaining) {
+        setSavingError(`Max you can add is $${remaining.toLocaleString()}`);
+        return;
+      }
+      setSavingError('');
       onAddSaving(s.id, amt, savingDate);
       setSavingAmount('');
       setShowAddSaving(false);
@@ -109,23 +116,40 @@ const SavingItem: React.FC<{
 
         {showAddSaving && (
           <div ref={addSavingRef} className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 animate-slide-down relative z-10">
-            <div className="flex flex-col md:grid md:grid-cols-2 gap-2 md:gap-3">
+            <div className="relative">
               <input
-                type="number"
-                placeholder="Amount ($)"
-                className="w-full bg-black/40 border border-[#2f3336] px-3 py-2 rounded-xl text-sm text-white outline-none focus:border-x-blue"
+                type="text"
+                inputMode="decimal"
+                placeholder="Amount"
+                className="w-full bg-black/40 border border-[#2f3336] px-3 pr-16 py-2 rounded-xl text-sm text-white outline-none focus:border-x-blue"
                 value={savingAmount}
-                onChange={e => setSavingAmount(e.target.value)}
+                onChange={e => {
+                  const raw = e.target.value.replace(/,/g, '');
+                  if (raw === '' || /^\d*\.?\d*$/.test(raw)) {
+                    const parts = raw.split('.');
+                    const intPart = parts[0] ? Number(parts[0]).toLocaleString() : '';
+                    const formatted = parts.length > 1 ? `${intPart}.${parts[1]}` : intPart;
+                    setSavingAmount(formatted);
+                    setSavingError('');
+                  }
+                }}
                 autoComplete="off"
               />
-              <input
-                type="date"
-                className="w-full bg-black/40 border border-[#2f3336] px-3 py-2 rounded-xl text-sm text-[#71767b] outline-none cursor-default"
-                style={{ colorScheme: 'dark' }}
-                value={savingDate}
-                readOnly
-              />
+              {savingAmount && (
+                <button
+                  onClick={() => { setSavingAmount(''); setSavingError(''); }}
+                  className="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#71767b]/30 hover:bg-[#71767b]/50 transition-colors"
+                >
+                  <span className="text-[#eff3f4] text-[10px] font-bold leading-none">✕</span>
+                </button>
+              )}
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] font-black text-[#71767b]">$</span>
             </div>
+            {savingError && (
+              <div className="text-red-500 text-[11px] font-bold bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl animate-fade-in text-center">
+                {savingError}
+              </div>
+            )}
             <button
               onClick={handleAddSaving}
               className="w-full py-2.5 bg-[#eff3f4] text-black font-extrabold text-[13px] md:text-sm rounded-xl hover:bg-white transition-all uppercase tracking-wider active:scale-[0.95]"
