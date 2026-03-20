@@ -233,7 +233,7 @@ export const Habits: React.FC<HabitsProps> = ({
 
                 <button
                   onClick={onAddHabit}
-                  className="x-button-primary shrink-0 w-[42px] h-[42px] md:w-auto md:h-auto md:py-2.5 md:px-8 !p-0 md:!p-[inherit] flex items-center justify-center gap-3 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:scale-105 active:scale-95"
+                  className="x-button-primary shrink-0 w-[42px] h-[42px] md:w-auto md:h-auto !p-0 md:!py-2.5 md:!px-8 flex items-center justify-center gap-3 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:scale-105 active:scale-95"
                 >
                   <Plus className="w-4 h-4" strokeWidth={3} />
                   <span className="hidden md:inline font-black tracking-tight">Add Habit</span>
