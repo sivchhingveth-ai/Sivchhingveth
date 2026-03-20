@@ -123,7 +123,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
     return groups;
   }, [habits]);
 
-  const sortedCategoryNames = ['HEALTH', 'HYGIENE', 'RECOVERY', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'];
+  const sortedCategoryNames = ['HEALTH', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'];
 
   // Calculate consistency for heatmap (last 90 days relative to current viewed month)
   const heatmapData = useMemo(() => {

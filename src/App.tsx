@@ -476,7 +476,7 @@ export default function App() {
           <div>
             <label className={labelClass}>Category</label>
             <div className="flex flex-wrap gap-2">
-              {['HEALTH', 'HYGIENE', 'RECOVERY', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
+              {['HEALTH', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
                 <button
                   key={cat}
                   onClick={() => setNewHabitCategory(cat)}
