@@ -1,12 +1,19 @@
 import React, { useMemo } from 'react';
 import { Habit } from '../types';
-import { Check, Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
+import { Tabs } from './Tabs';
 
 interface DailyHabitsProps {
   habits: Habit[];
   onToggleHabit: (id: any, dateStr: string) => void;
   onLoadDemo?: () => void;
+  // Navigation props
+  tabs: string[];
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  onLogout: () => void;
+  isLoggingOut: boolean;
 }
 
 // Time phase definitions
@@ -32,12 +39,25 @@ const getCurrentPhaseKey = (): string => {
   return 'midnight'; // 0-4
 };
 
-export const DailyHabits: React.FC<DailyHabitsProps> = ({ habits, onToggleHabit, onLoadDemo }) => {
+export const DailyHabits: React.FC<DailyHabitsProps> = ({
+  habits, onToggleHabit, onLoadDemo,
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut
+}) => {
   const todayStr = getEffectiveDateStr();
   const todayDate = getEffectiveDate();
   const currentPhaseKey = getCurrentPhaseKey();
   const [focusedHabitId, setFocusedHabitId] = React.useState<string | null>(null);
-  const [moveDirection, setMoveDirection] = React.useState<'down' | 'up'>('down');
+  const [canScrollMore, setCanScrollMore] = React.useState(true);
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  // Auto-hide header on scroll
+  React.useEffect(() => {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
+    main.addEventListener('scroll', handleScroll, { passive: true });
+    return () => main.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Stats for today
   const completedCount = habits.filter(h => h.history[todayStr]).length;
@@ -61,62 +81,50 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({ habits, onToggleHabit,
     return groups.filter(g => g.habits.length > 0);
   }, [habits]);
 
-  // Scroll to Pending Tool Logic - Strictly follows UI order (Morning -> Midnight)
+  // Scroll to Pending Tool Logic
   const pendingHabitList = useMemo(() => {
     return groupedByPhase.flatMap(group => group.habits).filter(h => !h.history[todayStr]);
   }, [groupedByPhase, todayStr]);
 
+  // Use a refined position detection to toggle the tool state
+  React.useEffect(() => {
+    const scrollContainer = document.querySelector('main');
+    const checkVisibility = () => {
+      if (pendingHabitList.length === 0) {
+        setCanScrollMore(false); // No pending habits, so no more to scroll to
+        return;
+      }
+
+      const center = window.innerHeight / 2;
+      const lastId = pendingHabitList[pendingHabitList.length - 1].id;
+      const rect = document.getElementById(`habit-${lastId}`)?.getBoundingClientRect();
+
+      // If the top of the last pending habit is at or above viewport center, we are "done" scrolling
+      if (rect && rect.top <= center + 50) setCanScrollMore(false);
+      else setCanScrollMore(true);
+    };
+
+    scrollContainer?.addEventListener('scroll', checkVisibility, { passive: true });
+    checkVisibility(); // Initial check
+    return () => scrollContainer?.removeEventListener('scroll', checkVisibility);
+  }, [pendingHabitList]);
+
   const handleScrollToPending = () => {
     if (pendingHabitList.length === 0) return;
 
-    // Find where we are relative to the UI-ordered list (from groupedByPhase)
-    const uiOrderedFullList = groupedByPhase.flatMap(g => g.habits);
-    const lastFocusedIdx = focusedHabitId ? uiOrderedFullList.findIndex(h => h.id === focusedHabitId) : -1;
+    // Position-aware down-only logic
+    const viewportCenter = window.innerHeight / 2;
+    const targetHabit = pendingHabitList.find(h => {
+      const el = document.getElementById(`habit-${h.id}`);
+      const top = el?.getBoundingClientRect().top ?? 0;
+      return top > viewportCenter + 20;
+    });
 
-    // Find the next/previous habit in the pending list based on our current position in the FULL list
-    let nextIdx;
-    if (moveDirection === 'down') {
-      // Find the first pending habit that is AFTER our last focused habit
-      const nextPendingIdx = pendingHabitList.findIndex(h => {
-        const fullIdx = uiOrderedFullList.findIndex(f => f.id === h.id);
-        return fullIdx > lastFocusedIdx;
-      });
-
-      if (nextPendingIdx !== -1) {
-        nextIdx = nextPendingIdx;
-      } else {
-        // Nothing below, start moving up
-        setMoveDirection('up');
-        nextIdx = pendingHabitList.length - 1;
-      }
-    } else {
-      // Find the last pending habit that is BEFORE our last focused habit
-      const prevPendingList = [...pendingHabitList].reverse();
-      const prevPendingIdxInReverse = prevPendingList.findIndex(h => {
-        const fullIdx = uiOrderedFullList.findIndex(f => f.id === h.id);
-        return fullIdx < lastFocusedIdx;
-      });
-
-      if (prevPendingIdxInReverse !== -1) {
-        nextIdx = (pendingHabitList.length - 1) - prevPendingIdxInReverse;
-      } else {
-        // Nothing above, start moving down
-        setMoveDirection('down');
-        nextIdx = 0;
-      }
-    }
-
-    const target = pendingHabitList[nextIdx];
-    if (target) {
-      setFocusedHabitId(target.id);
-      document.getElementById(`habit-${target.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      // Update direction for NEXT click based on final position
-      if (nextIdx === pendingHabitList.length - 1) setMoveDirection('up');
-      else if (nextIdx === 0) setMoveDirection('down');
+    if (targetHabit) {
+      setFocusedHabitId(targetHabit.id);
+      document.getElementById(`habit-${targetHabit.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
-
   // Streak: consecutive days up to today
   const currentStreak = useMemo(() => {
     if (totalCount === 0) return 0;
@@ -155,7 +163,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({ habits, onToggleHabit,
       const scrollTarget = document.querySelector('main') || window;
       scrollTarget.scrollTo({ top: 0, behavior: 'smooth' });
       setFocusedHabitId(null);
-      setMoveDirection('down');
       isLongPressRef.current = true;
       setShowTopSignal(true);
       setTimeout(() => setShowTopSignal(false), 800);
@@ -175,8 +182,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({ habits, onToggleHabit,
       {/* Scroll to Top Signal Overlay */}
       {showTopSignal && (
         <div className="fixed inset-x-0 top-0 z-[100] pointer-events-none flex justify-center pt-24 animate-fade-in">
-          <div className="bg-white px-4 py-2 rounded-full text-black font-black text-[12px] tracking-[0.2em] shadow-[0_0_50px_rgba(255,255,255,0.4)] flex items-center gap-2">
-            <ChevronUp className="w-3.5 h-3.5" />
+          <div className="bg-white px-3 py-1.5 rounded-full text-black font-black text-[9px] tracking-[0.2em] shadow-[0_0_50px_rgba(255,255,255,0.4)] flex items-center gap-1.5 transition-all">
+            <ChevronUp className="w-3 h-3" />
             GO TO TOP
           </div>
         </div>
@@ -203,52 +210,56 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({ habits, onToggleHabit,
             className="w-11 h-11 rounded-full bg-white text-black shadow-[0_8px_32px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-95 transition-all animate-bounce-subtle flex items-center justify-center border border-white/40 touch-none select-none relative z-10"
             title="Click to cycle, hold to go to top"
           >
-            {moveDirection === 'up' ? (
-              <ChevronUp className="w-6 h-6" strokeWidth={3} />
-            ) : (
+            {canScrollMore ? (
               <ChevronDown className="w-6 h-6" strokeWidth={3} />
+            ) : (
+              <Minus className="w-6 h-6" strokeWidth={3} />
             )}
           </button>
         </div>
       )}
-      {/* Header with inline stats */}
+      {/* Header with inline navigation + stats */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
-        <div className="px-5 py-3 md:px-6 md:py-4 flex items-center justify-between">
-          <div className="min-w-0">
-            <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] tracking-tight truncate">Daily Habits</h2>
-            <p className="text-[10px] md:text-[13px] font-bold text-[#71767b] whitespace-nowrap">
-              {todayDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-              <span className="hidden md:inline text-[#71767b]/50"> · Resets at 5:00 AM</span>
-            </p>
-            {onLoadDemo && (
-              <button
-                onClick={onLoadDemo}
-                className="flex items-center gap-1.5 px-2 py-0.5 mt-1 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-[10px] font-bold text-[#eff3f4]"
-              >
-                <Sparkles className="w-3 h-3 text-[#ffad1f]" />
-                Demo Test
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="flex items-center gap-1.5 md:gap-2">
-              <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#00ba7c]/10 border border-[#00ba7c]/20 flex items-center justify-center">
-                <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#00ba7c]" />
-              </div>
-              <div>
-                <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-tight">{completedCount}<span className="text-[#71767b]">/{totalCount}</span></p>
-                <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase">Completed</p>
-              </div>
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
+          <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight flex items-center gap-2">
+                <span className="truncate tracking-tight">Daily Habits</span>
+                {completedCount === totalCount && totalCount > 0 && (
+                  <div className="w-5 h-5 rounded-full bg-[#00ba7c] flex items-center justify-center animate-bounce-subtle shrink-0">
+                    <Check className="w-3 h-3 text-white" strokeWidth={4} />
+                  </div>
+                )}
+              </h2>
+              <p className="text-[#8b98a5] text-[10px] md:text-[13px] font-black uppercase tracking-[0.2em] mt-1.5 truncate">
+                {getMessage()}
+              </p>
             </div>
-            <div className="w-px h-7 bg-[#2f3336]" />
-            <div className="flex items-center gap-1.5 md:gap-2">
-              <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
-                <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#ff6b00]" />
+
+            <div className="flex items-center gap-2 md:gap-4 shrink-0">
+              {/* Done Chip */}
+              <div className="bg-[#16181c] border border-[#2f3336] rounded-xl md:rounded-2xl p-1.5 md:p-2 flex items-center gap-2 md:gap-3 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
+                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-[#00ba7c]/10 border border-[#00ba7c]/20 flex items-center justify-center">
+                  <Target className="w-4 h-4 md:w-5 md:h-5 text-[#00ba7c]" />
+                </div>
+                <div className="text-right pr-1 md:pr-2">
+                  <p className="text-[14px] md:text-[17px] font-black text-[#eff3f4] leading-none">
+                    {completedCount}<span className="text-[#71767b] text-[10px] md:text-[12px]">/{totalCount}</span>
+                  </p>
+                  <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-1 tracking-wider">Done</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-tight">{currentStreak}</p>
-                <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase">Day Streak</p>
+
+              {/* Streak Chip */}
+              <div className="bg-[#16181c] border border-[#2f3336] rounded-xl md:rounded-2xl p-1.5 md:p-2 flex items-center gap-2 md:gap-3 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
+                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
+                  <Flame className="w-4 h-4 md:w-5 md:h-5 text-[#ff6b00]" />
+                </div>
+                <div className="text-right pr-1 md:pr-2">
+                  <p className="text-[14px] md:text-[17px] font-black text-[#eff3f4] leading-none">{currentStreak}</p>
+                  <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-1 tracking-wider">Streak</p>
+                </div>
               </div>
             </div>
           </div>
@@ -315,7 +326,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({ habits, onToggleHabit,
                     className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-[1ms] group border ${isDone
                       ? 'bg-white/[0.03] border-white/[0.06]'
                       : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
-                      } ${focusedHabitId === habit.id ? 'habit-shine scale-[1.01] z-10' : ''}`}
+                      } ${focusedHabitId === habit.id ? 'habit-shine z-10' : ''}`}
                     style={{
                       '--shine-color': focusedHabitId === habit.id ? `${phase.color}60` : 'transparent'
                     } as React.CSSProperties}

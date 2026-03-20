@@ -2,12 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SavingGoal } from '../types';
 import { Plus, Trash2, Calendar, ChevronDown, ChevronUp, ArrowUpRight, Sparkles } from 'lucide-react';
 
+import { Tabs } from './Tabs';
+
 interface SavingsProps {
   savings: SavingGoal[];
   onDeleteGoal: (id: any) => void;
   onAddGoal: () => void;
   onAddSaving: (id: any, amount: number, date: string) => void;
   onLoadDemo?: () => void;
+  // Navigation props
+  tabs: string[];
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  onLogout: () => void;
+  isLoggingOut: boolean;
 }
 
 const SavingItem: React.FC<{
@@ -54,13 +62,13 @@ const SavingItem: React.FC<{
     const start = new Date(s.startDate);
     const end = new Date(s.targetDate);
     const curr = new Date(start);
-    
+
     while (curr <= end) {
       dates.push(curr.toISOString().split('T')[0]);
       curr.setDate(curr.getDate() + 1);
-      if (dates.length > 365) break; 
+      if (dates.length > 365) break;
     }
-    return dates.reverse(); 
+    return dates.reverse();
   };
 
   return (
@@ -80,13 +88,13 @@ const SavingItem: React.FC<{
           </div>
           <div className="flex items-center gap-1.5 md:gap-2 shrink-0 pt-0.5">
             <button
-               onClick={() => {
-                 if (!showAddSaving) {
-                   setSavingDate(new Date().toISOString().split('T')[0]);
-                 }
-                 setShowAddSaving(!showAddSaving);
-               }}
-               className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-white/[0.05] border border-white/10 text-[#71767b] hover:text-white hover:bg-white/10 transition-all active:scale-90"
+              onClick={() => {
+                if (!showAddSaving) {
+                  setSavingDate(new Date().toISOString().split('T')[0]);
+                }
+                setShowAddSaving(!showAddSaving);
+              }}
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-white/[0.05] border border-white/10 text-[#71767b] hover:text-white hover:bg-white/10 transition-all active:scale-90"
             >
               <Plus className="w-4 h-4 md:w-5 md:h-5" />
             </button>
@@ -102,23 +110,23 @@ const SavingItem: React.FC<{
         {showAddSaving && (
           <div ref={addSavingRef} className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/[0.03] border border-white/10 space-y-3 animate-slide-down relative z-10">
             <div className="flex flex-col md:grid md:grid-cols-2 gap-2 md:gap-3">
-              <input 
-                type="number" 
-                placeholder="Amount ($)" 
+              <input
+                type="number"
+                placeholder="Amount ($)"
                 className="w-full bg-black/40 border border-[#2f3336] px-3 py-2 rounded-xl text-sm text-white outline-none focus:border-x-blue"
                 value={savingAmount}
                 onChange={e => setSavingAmount(e.target.value)}
                 autoComplete="off"
               />
-              <input 
-                type="date" 
+              <input
+                type="date"
                 className="w-full bg-black/40 border border-[#2f3336] px-3 py-2 rounded-xl text-sm text-[#71767b] outline-none cursor-default"
                 style={{ colorScheme: 'dark' }}
                 value={savingDate}
                 readOnly
               />
             </div>
-            <button 
+            <button
               onClick={handleAddSaving}
               className="w-full py-2.5 bg-[#eff3f4] text-black font-extrabold text-[13px] md:text-sm rounded-xl hover:bg-white transition-all uppercase tracking-wider active:scale-[0.95]"
             >
@@ -147,7 +155,7 @@ const SavingItem: React.FC<{
           </div>
         </div>
 
-        <button 
+        <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center justify-center gap-2 py-1 md:py-2 text-[10px] md:text-[11px] font-bold text-[#71767b] hover:text-[#eff3f4] uppercase tracking-wider transition-colors"
         >
@@ -192,12 +200,25 @@ const SavingItem: React.FC<{
   );
 };
 
-export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGoal, onAddSaving, onLoadDemo }) => {
+export const Savings: React.FC<SavingsProps> = ({
+  savings, onDeleteGoal, onAddGoal, onAddSaving, onLoadDemo,
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut
+}) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Auto-hide header on scroll
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
+    main.addEventListener('scroll', handleScroll, { passive: true });
+    return () => main.removeEventListener('scroll', handleScroll);
   }, []);
 
   const totalSaved = savings.reduce((a, s) => a + s.saved, 0);
@@ -206,36 +227,25 @@ export const Savings: React.FC<SavingsProps> = ({ savings, onDeleteGoal, onAddGo
 
   return (
     <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black">
-      
-      {/* Header */}
-      <div className="px-4 py-3 md:p-6 border-b border-[#2f3336] flex items-center justify-between bg-black/80 backdrop-blur-md z-30 sticky top-0">
-        <div className="flex flex-col">
-          <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4]">
-            Savings
-          </h2>
-          <p className="text-[11px] md:text-[14px] font-bold text-[#71767b]">
-            {currentTime.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} • {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-          </p>
-        </div>
-        <button onClick={onAddGoal} className="x-button-glass py-1.5 px-3 md:px-4 text-[12px] md:text-[14px] shrink-0">
-          <Plus className="w-3.5 h-3.5" />
-          <span className="ml-1.5 md:ml-2">Goal</span>
-        </button>
-      </div>
 
-      {/* Summary View */}
-      <div className="grid grid-cols-3 divide-x divide-[#2f3336] border-b border-[#2f3336] bg-white/[0.01]">
-        <div className="p-3 md:p-4 text-center">
-          <p className="text-[10px] md:text-[12px] font-bold text-[#71767b] uppercase tracking-wider text-[10px]">Saved</p>
-          <p className="text-[18px] md:text-[24px] font-bold text-[#00ba7c] mt-1">${totalSaved.toLocaleString()}</p>
-        </div>
-        <div className="p-3 md:p-4 text-center">
-          <p className="text-[10px] md:text-[12px] font-bold text-[#71767b] uppercase tracking-wider text-[10px]">Goal</p>
-          <p className="text-[18px] md:text-[24px] font-bold text-[#eff3f4] mt-1">${totalGoal.toLocaleString()}</p>
-        </div>
-        <div className="p-3 md:p-4 text-center">
-          <p className="text-[10px] md:text-[12px] font-bold text-[#71767b] uppercase tracking-wider text-[10px]">Progress</p>
-          <p className="text-[18px] md:text-[24px] font-bold text-white mt-1">{pct}%</p>
+      {/* Header */}
+      <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[200px] opacity-100'}`}>
+          <div className="px-5 py-4 md:px-6 md:py-6 flex items-center justify-between">
+            <div className="min-w-0">
+              <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">
+                Savings
+              </h2>
+              <p className="text-[#8b98a5] text-[10px] md:text-[13px] font-black uppercase tracking-[0.2em] mt-1.5 truncate">
+                {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+              </p>
+            </div>
+            <button onClick={onAddGoal} className="x-button-glass py-2 px-4 text-[13px] shrink-0 font-black uppercase tracking-wider">
+              <Plus className="w-4 h-4" strokeWidth={3} />
+              <span className="ml-2">Add Goal</span>
+            </button>
+          </div>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { Habit } from '../types';
 import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search } from 'lucide-react';
 import { getCategoryStyles } from '../utils/colors';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
+import { Tabs } from './Tabs';
 
 interface HabitsProps {
   habits: Habit[];
@@ -12,6 +13,12 @@ interface HabitsProps {
   onEditHabit: (id: any) => void;
   currentMonth: Date;
   onMonthChange: (date: Date) => void;
+  // Navigation props
+  tabs: string[];
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  onLogout: () => void;
+  isLoggingOut: boolean;
 }
 
 // Time phase definitions
@@ -28,11 +35,24 @@ const getPhaseForHabit = (habit: Habit) => {
   return phase || TIME_PHASES[0];
 };
 
-export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange }) => {
+export const Habits: React.FC<HabitsProps> = ({
+  habits, onToggleHabit, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange,
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut
+}) => {
   const [activeHeatmapCell, setActiveHeatmapCell] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showActionsId, setShowActionsId] = useState<string | null>(null);
   const heatmapRef = useRef<HTMLDivElement>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Auto-hide header on scroll
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
+    main.addEventListener('scroll', handleScroll, { passive: true });
+    return () => main.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Group habits by time phase
   const groupedByPhase = useMemo(() => {
@@ -87,6 +107,12 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     return new Date(year, month + 1, 0).getDate();
+  }, [currentMonth]);
+
+  const isCurrentOrFutureMonth = useMemo(() => {
+    const today = getEffectiveDate();
+    return currentMonth.getFullYear() > today.getFullYear() ||
+      (currentMonth.getFullYear() === today.getFullYear() && currentMonth.getMonth() >= today.getMonth());
   }, [currentMonth]);
 
   const monthYearLabel = useMemo(() => {
@@ -155,67 +181,84 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
     <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black text-[#eff3f4] p-5 md:p-6 space-y-6 pb-20 flex flex-col">
 
       {/* Visual Header / Summary */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 border-b border-[#2f3336] pb-6 md:pb-8">
-        <div className="text-center md:text-left">
-          <h2 className="text-[22px] md:text-[28px] font-black leading-tight">
-            Habit Consistency
-          </h2>
-          <p className="text-[#8b98a5] text-[11px] md:text-[14px] font-black uppercase tracking-tight">
-            Tracking {habits.length} daily goals
-          </p>
-        </div>
-
-        <div className="flex items-center gap-1 md:gap-2 bg-white/[0.03] p-1 md:p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
-          <button
-            onClick={() => changeMonth(-1)}
-            className="p-1.5 md:p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
-          >
-            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-          <button
-            onClick={() => onMonthChange(getEffectiveDate())}
-            className="px-2 md:px-3 py-1 md:py-1.5 rounded-xl transition-all text-[9px] md:text-[11px] font-black text-[#71767b] hover:text-[#eff3f4] bg-white/[0.05] border border-white/5 uppercase"
-          >
-            TODAY
-          </button>
-          <div className="relative group/month">
-            <input
-              type="month"
-              className="absolute inset-0 opacity-0 cursor-pointer z-10"
-              value={`${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`}
-              onChange={handleMonthSelect}
-            />
-            <div className="text-center min-w-[110px] md:min-w-[140px] px-2 md:px-4 py-1 md:py-1.5 rounded-xl group-hover/month:bg-white/5 transition-colors cursor-pointer border border-transparent group-hover/month:border-white/10">
-              <span className="block text-[11px] md:text-[13px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] whitespace-nowrap">
-                {monthYearLabel}
-              </span>
+      <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336] -mx-5 md:-mx-6">
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
+          <div className="px-5 md:px-6 py-4 md:py-6 space-y-4">
+            {/* Row 1: Title */}
+            <div className="min-w-0">
+              <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">
+                Habit Consistency
+              </h2>
+              <p className="text-[#8b98a5] text-[10px] md:text-[13px] font-black uppercase tracking-[0.2em] mt-1.5 truncate">
+                Tracking {habits.length} daily goals
+              </p>
             </div>
-          </div>
-          <button
-            onClick={() => changeMonth(1)}
-            className="p-1.5 md:p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
-          >
-            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-        </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <button
-            onClick={onAddHabit}
-            className="x-button-primary shrink-0 py-3.5 md:py-3 px-5 text-[14px] md:text-[15px]"
-          >
-            <Plus className="w-5 h-5 md:w-4 md:h-4" strokeWidth={3} />
-            <span className="hidden md:inline">Add Habit</span>
-          </button>
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#71767b]" />
-            <input
-              type="text"
-              placeholder="Search habits..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#16181c] border border-[#2f3336] pl-10 pr-4 py-3.5 md:py-3 rounded-2xl text-[14px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
-            />
+            {/* Row 2: Controls */}
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/10 backdrop-blur-md">
+                  <button
+                    onClick={() => changeMonth(-1)}
+                    className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => onMonthChange(getEffectiveDate())}
+                    className={`px-2 py-1 rounded-xl transition-all text-[9px] font-black uppercase ${isCurrentOrFutureMonth
+                      ? 'bg-white/10 text-[#eff3f4] border border-white/10'
+                      : 'text-[#71767b] hover:text-[#eff3f4] bg-white/[0.05] border border-white/5'
+                      }`}
+                  >
+                    TODAY
+                  </button>
+                  <div className="relative group/month">
+                    <input
+                      type="month"
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                      value={`${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`}
+                      onChange={handleMonthSelect}
+                    />
+                    <div className="text-center min-w-[80px] px-2 py-1 rounded-xl group-hover/month:bg-white/5 transition-colors cursor-pointer border border-transparent group-hover/month:border-white/10">
+                      <span className="block text-[10px] font-black uppercase tracking-[0.1em] whitespace-nowrap">
+                        {monthYearLabel}
+                      </span>
+                    </div>
+                  </div>
+                  {!isCurrentOrFutureMonth ? (
+                    <button
+                      onClick={() => changeMonth(1)}
+                      className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <div className="w-7 md:w-8" />
+                  )}
+                </div>
+
+                <button
+                  onClick={onAddHabit}
+                  className="x-button-primary shrink-0 py-2.5 px-4 text-[13px]"
+                >
+                  <Plus className="w-4 h-4" strokeWidth={3} />
+                  <span className="hidden md:inline">Add Habit</span>
+                </button>
+              </div>
+
+              <div className="relative flex-1 md:w-48">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-[#16181c] border border-[#2f3336] pl-9 pr-3 py-2.5 rounded-xl text-[13px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -3,10 +3,17 @@ import { SavingGoal, Habit } from '../types';
 import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Check, X, TrendingUp, Target, Flame, Award } from 'lucide-react';
 import { getCategoryStyles } from '../utils/colors';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
+import { Tabs } from './Tabs';
 
 interface AnalyticsProps {
   habits: Habit[];
   savings?: SavingGoal[];
+  // Navigation props
+  tabs: string[];
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  onLogout: () => void;
+  isLoggingOut: boolean;
 }
 
 type ViewMode = 'weekly' | 'monthly';
@@ -15,7 +22,10 @@ const formatDateStr = (d: Date): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings = [] }) => {
+export const Analytics: React.FC<AnalyticsProps> = ({
+  habits: rawHabits, savings = [],
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut
+}) => {
   // Dedupe habits by name to clean up any duplicate entries created during testing
   const habits = useMemo(() => {
     return Array.from(new Map(rawHabits.map(h => [h.name.trim().toLowerCase(), h])).values());
@@ -25,6 +35,16 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const todayStr = getEffectiveDateStr();
   const today = getEffectiveDate();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Auto-hide header on scroll
+  React.useEffect(() => {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
+    main.addEventListener('scroll', handleScroll, { passive: true });
+    return () => main.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Week navigation
   const [weekOffset, setWeekOffset] = useState(0);
@@ -35,7 +55,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
   const weekData = useMemo(() => {
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay() + 1 + weekOffset * 7); // Monday
-    
+
     const days = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(startOfWeek);
@@ -80,9 +100,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
     const year = base.getFullYear();
     const month = base.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
+
     const weeks: { date: Date; dateStr: string; dayNum: number; completed: number; total: number; pct: number; isToday: boolean; isFuture: boolean; isCurrentMonth: boolean }[][] = [];
-    
+
     // Find the Monday before or on the 1st
     const firstDay = new Date(year, month, 1);
     const startDay = new Date(firstDay);
@@ -91,12 +111,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
 
     let currentWeek: typeof weeks[0] = [];
     const d = new Date(startDay);
-    
+
     for (let i = 0; i < 42; i++) { // 6 weeks max
       const dateStr = formatDateStr(d);
       const completed = habits.filter(h => h.history[dateStr]).length;
       const isCurrentMonth = d.getMonth() === month;
-      
+
       currentWeek.push({
         date: new Date(d),
         dateStr,
@@ -135,7 +155,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
     if (!selectedDay) return null;
     const completedHabits = habits.filter(h => h.history[selectedDay]);
     const missedHabits = habits.filter(h => !h.history[selectedDay]);
-    
+
     // Day's savings
     const dailySavings = savings
       .map(s => ({
@@ -187,68 +207,55 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
     <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black relative">
 
       {/* Header */}
-      <div className="sticky top-0 bg-black/80 backdrop-blur-xl z-20 border-b border-[#2f3336]">
-        <div className="px-5 py-3 md:px-6 md:py-4 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
+      <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
+          <div className="px-5 py-4 md:px-6 md:py-6 space-y-4">
+            {/* Row 1: Title */}
             <div className="min-w-0">
-              <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] tracking-tight truncate">Analytics</h2>
-              <p className="text-[10px] md:text-[11px] font-black text-[#71767b] uppercase tracking-[0.2em] mt-0.5 truncate">Real Progress</p>
+              <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">Analytics</h2>
+              <p className="text-[#8b98a5] text-[10px] md:text-[13px] font-black uppercase tracking-[0.2em] mt-1.5 truncate">Real Progress</p>
             </div>
-            {/* Quick Stats */}
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-tight">
-                  {view === 'weekly' ? weekAvg : monthAvg}%
-                </p>
-                <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase">Avg Rate</p>
-              </div>
-              <div className="w-px h-7 bg-[#2f3336]" />
-              <div className="text-right">
-                <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-tight">{habits.length}</p>
-                <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase">Habits</p>
-              </div>
-            </div>
-          </div>
 
-          {/* View Switcher + Navigation */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex bg-[#16181c] p-1 rounded-2xl border border-[#2f3336]">
-              {(['weekly', 'monthly'] as const).map(v => (
-                <button
-                  key={v}
-                  onClick={() => { setView(v); setSelectedDay(null); }}
-                  className={`px-3 md:px-4 py-1.5 rounded-xl text-[11px] md:text-[12px] font-bold transition-all duration-300 ${
-                    view === v
+            {/* Row 2: View Switcher + Navigation */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="flex bg-[#16181c] p-1 rounded-2xl border border-[#2f3336] w-fit">
+                {(['weekly', 'monthly'] as const).map(v => (
+                  <button
+                    key={v}
+                    onClick={() => { setView(v); setSelectedDay(null); }}
+                    className={`px-3 md:px-4 py-1.5 rounded-xl text-[11px] md:text-[12px] font-bold transition-all duration-300 ${view === v
                       ? 'bg-[#eff3f4] text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]'
                       : 'text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5'
-                  }`}
-                >
-                  {v.charAt(0).toUpperCase() + v.slice(1)}
-                </button>
-              ))}
-            </div>
+                      }`}
+                  >
+                    {v.charAt(0).toUpperCase() + v.slice(1)}
+                  </button>
+                ))}
+              </div>
 
-            <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/10">
-              <button onClick={() => setNavOffset(prev => prev - 1)} className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={() => setNavOffset(0)}
-                className={`px-2 py-1 rounded-xl text-[10px] font-black transition-all w-[130px] md:w-[150px] truncate text-center ${
-                  navOffset === 0 ? 'bg-[#1d9bf0] text-white' : 'text-[#71767b] bg-white/[0.05] border border-white/5'
-                }`}
-              >
-                {navLabel}
-              </button>
-              <button 
-                onClick={() => setNavOffset(prev => prev + 1)} 
-                disabled={navOffset >= 0}
-                className={`p-1.5 rounded-xl transition-all ${
-                  navOffset >= 0 ? 'opacity-0 cursor-not-allowed' : 'hover:bg-white/10 text-[#71767b] hover:text-[#eff3f4]'
-                }`}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/10 w-fit">
+                <button onClick={() => setNavOffset(prev => prev - 1)} className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setNavOffset(0)}
+                  className={`px-2 py-1 rounded-xl text-[10px] font-black transition-all w-[130px] md:w-[150px] truncate text-center ${navOffset === 0 ? 'bg-white/10 text-[#eff3f4] border border-white/20' : 'text-[#71767b] bg-white/[0.05] border border-white/5'
+                    }`}
+                >
+                  {navLabel}
+                </button>
+                {navOffset < 0 ? (
+                  <button
+                    onClick={() => setNavOffset(prev => prev + 1)}
+                    className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <div className="w-7 md:w-8" />
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -265,9 +272,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                 {weekData.map((d, i) => {
                   const isToday = d.dateStr === todayStr;
                   const barColor = getBarColor(d.pct);
-                  
+
                   return (
-                    <button 
+                    <button
                       key={i}
                       onClick={() => !d.isFuture && setSelectedDay(d.dateStr === selectedDay ? null : d.dateStr)}
                       disabled={d.isFuture}
@@ -285,19 +292,18 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                       </div>
 
                       <div className="w-full flex justify-center items-end h-full">
-                        <div 
-                          className={`w-7 sm:w-8 md:w-14 rounded-t-xl md:rounded-t-2xl transition-all duration-700 relative overflow-hidden group-hover/bar:brightness-125 ${
-                            d.dateStr === selectedDay ? 'ring-2 ring-white/30' : ''
-                          }`}
-                          style={{ 
-                            height: `${Math.max(d.pct, 4)}%`, 
+                        <div
+                          className={`w-7 sm:w-8 md:w-14 rounded-t-xl md:rounded-t-2xl transition-all duration-700 relative overflow-hidden group-hover/bar:brightness-125 ${d.dateStr === selectedDay ? 'ring-2 ring-white/30' : ''
+                            }`}
+                          style={{
+                            height: `${Math.max(d.pct, 4)}%`,
                             backgroundColor: barColor,
                             boxShadow: d.pct > 0 ? `0 0 20px ${barColor}20` : 'none'
                           }}
                         >
-                           {isToday && (
-                             <div className="absolute inset-0 bg-white/10 animate-pulse" />
-                           )}
+                          {isToday && (
+                            <div className="absolute inset-0 bg-white/10 animate-pulse" />
+                          )}
                         </div>
                       </div>
                       <div className="text-center">
@@ -370,10 +376,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                         {weekData.map((d, i) => (
                           <div
                             key={i}
-                            className={`w-6 h-6 rounded-lg border transition-all flex items-center justify-center ${
-                              d.isFuture ? 'border-dashed border-[#2f3336] bg-transparent opacity-20' :
+                            className={`w-6 h-6 rounded-lg border transition-all flex items-center justify-center ${d.isFuture ? 'border-dashed border-[#2f3336] bg-transparent opacity-20' :
                               habit.history[d.dateStr] ? 'border-transparent shadow-lg bg-[#1d9bf0]' : 'border-[#2f3336] bg-transparent'
-                            }`}
+                              }`}
                             title={`${d.dayName} ${d.dayNum}`}
                           >
                             {!d.isFuture && habit.history[d.dateStr] ? (
@@ -392,8 +397,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                           <span className="text-[12px] font-black text-[#1d9bf0]">{weekPct}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-white/[0.03] border border-white/5 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full rounded-full transition-all duration-1000 shadow-lg bg-[#1d9bf0]" 
+                          <div
+                            className="h-full rounded-full transition-all duration-1000 shadow-lg bg-[#1d9bf0]"
                             style={{ width: `${weekPct}%` }}
                           />
                         </div>
@@ -427,12 +432,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                       key={di}
                       onClick={() => !d.isFuture && d.isCurrentMonth && setSelectedDay(d.dateStr === selectedDay ? null : d.dateStr)}
                       disabled={d.isFuture || !d.isCurrentMonth}
-                      className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all relative ${
-                        !d.isCurrentMonth ? 'opacity-20' :
+                      className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all relative ${!d.isCurrentMonth ? 'opacity-20' :
                         d.isFuture ? 'opacity-30' :
-                        d.dateStr === selectedDay ? 'ring-2 ring-[#1d9bf0] bg-white/[0.06]' :
-                        'hover:bg-white/[0.04] cursor-pointer'
-                      }`}
+                          d.dateStr === selectedDay ? 'ring-2 ring-[#1d9bf0] bg-white/[0.06]' :
+                            'hover:bg-white/[0.04] cursor-pointer'
+                        }`}
                       style={d.isCurrentMonth && !d.isFuture && d.pct > 0 ? {
                         backgroundColor: `${getBarColor(d.pct)}${Math.round(d.pct * 0.3).toString(16).padStart(2, '0')}`,
                       } : {}}
@@ -442,9 +446,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                           <div className="w-1.5 h-1.5 rounded-full bg-[#1d9bf0] animate-ping" />
                         </div>
                       )}
-                      <span className={`text-[11px] md:text-[13px] font-black ${
-                        d.isToday ? 'text-[#1d9bf0]' : d.isCurrentMonth ? 'text-[#eff3f4]' : 'text-[#71767b]'
-                      }`}>
+                      <span className={`text-[11px] md:text-[13px] font-black ${d.isToday ? 'text-[#1d9bf0]' : d.isCurrentMonth ? 'text-[#eff3f4]' : 'text-[#71767b]'
+                        }`}>
                         {d.dayNum}
                       </span>
                       {d.isCurrentMonth && !d.isFuture && (
@@ -525,6 +528,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };

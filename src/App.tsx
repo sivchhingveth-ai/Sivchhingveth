@@ -33,6 +33,12 @@ export default function App() {
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const tabs = ['Daily Habits', 'Manual habit', 'Savings', 'Analytics'];
 
+  // Scroll to top on tab change
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (main) main.scrollTop = 0;
+  }, [activeTab]);
+
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
   const [viewDate, setViewDate] = useState(getEffectiveDate());
@@ -113,7 +119,7 @@ export default function App() {
   // Toggle functions
   const toggleHabit = React.useCallback(async (id: any, dateStr: string = todayStr) => {
     if (!isAuthenticated) return;
-    
+
     // Use the latest habits from the query result directly in the callback
     // or trigger the mutation which handles logic on the server side
     const habit = (rawHabits || []).find(h => h._id === id);
@@ -169,7 +175,7 @@ export default function App() {
       const isDuplicate = habits.some(
         h => h.name.toLowerCase() === trimmedName.toLowerCase() && h.id !== editingHabitId
       );
-      
+
       if (isDuplicate) {
         alert('A habit with this exact name already exists. Please choose a different name.');
         return;
@@ -202,7 +208,7 @@ export default function App() {
   const addGoal = async () => {
     if (!newGoalName.trim() || !newGoalAmount || !isAuthenticated) return;
     const colors = ['#34c759', '#007aff', '#ff9500', '#ff3b30', '#af52de', '#5ac8fa'];
-    
+
     await createGoal({
       name: newGoalName.trim(),
       goal: parseFloat(newGoalAmount),
@@ -255,10 +261,10 @@ export default function App() {
       setModalOpen('habit');
     }
   };
-  const openAddGoal = () => { 
+  const openAddGoal = () => {
     setNewGoalStartDate(todayStr);
     setNewGoalTargetDate(todayStr);
-    setModalOpen('goal'); 
+    setModalOpen('goal');
   };
 
   const handleLogout = async () => {
@@ -367,13 +373,13 @@ export default function App() {
             <p className="text-[#71767b] font-black animate-pulse uppercase tracking-[0.2em] text-[10px]">Establishing Secure Link</p>
             <p className="text-[#eff3f4] font-bold text-sm">Loading your habits...</p>
           </div>
-          
+
           {loadingTimeout && (
             <div className="pt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
               <p className="text-red-400 text-xs font-bold mb-3 max-w-[200px] mx-auto">
                 Connection is taking longer than expected. Please check your internet.
               </p>
-              <button 
+              <button
                 onClick={() => window.location.reload()}
                 className="bg-white/10 hover:bg-white/20 text-[#eff3f4] px-4 py-2 rounded-full text-xs font-bold border border-white/10 transition-all"
               >
@@ -401,7 +407,6 @@ export default function App() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7856ff]/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-[#22c55e]/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} isLoggingOut={isLoggingOut} />
 
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain">
         <div className="w-full">
@@ -411,6 +416,11 @@ export default function App() {
               habits={habits}
               onToggleHabit={toggleHabit}
               onLoadDemo={loadDemoData}
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onLogout={handleLogout}
+              isLoggingOut={isLoggingOut}
             />
           )}
 
@@ -424,14 +434,37 @@ export default function App() {
               onEditHabit={openEditHabit}
               currentMonth={viewDate}
               onMonthChange={setViewDate}
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onLogout={handleLogout}
+              isLoggingOut={isLoggingOut}
             />
           )}
-          {activeTab === 'Savings' && <Savings savings={savings} onDeleteGoal={confirmDeleteGoal} onAddGoal={openAddGoal} onAddSaving={addDailySaving} onLoadDemo={loadDemoData} />}
+          {activeTab === 'Savings' && (
+            <Savings
+              savings={savings}
+              onDeleteGoal={confirmDeleteGoal}
+              onAddGoal={openAddGoal}
+              onAddSaving={addDailySaving}
+              onLoadDemo={loadDemoData}
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onLogout={handleLogout}
+              isLoggingOut={isLoggingOut}
+            />
+          )}
 
           {activeTab === 'Analytics' && (
             <Analytics
               habits={habits}
               savings={savings}
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              onLogout={handleLogout}
+              isLoggingOut={isLoggingOut}
             />
           )}
 

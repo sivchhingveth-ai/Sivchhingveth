@@ -23,9 +23,8 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
                 className="px-5 md:px-8 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
               >
                 <div className="flex flex-col items-center justify-center h-full relative">
-                  <span className={`text-[13px] md:text-[15px] transition-all font-black whitespace-nowrap ${
-                    activeTab === tab ? 'text-[#e7e9ea]' : 'text-[#71767b]'
-                  }`}>
+                  <span className={`text-[13px] md:text-[15px] transition-all font-black whitespace-nowrap ${activeTab === tab ? 'text-[#e7e9ea]' : 'text-[#71767b]'
+                    }`}>
                     {tab}
                   </span>
                   {activeTab === tab && (
@@ -36,10 +35,10 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
             ))}
           </div>
         </div>
-        
+
         {/* Fixed Sign Out Button */}
         {onLogout && (
-          <button 
+          <button
             onClick={onLogout}
             disabled={isLoggingOut}
             className="px-5 h-full flex items-center justify-center text-[#71767b] hover:text-red-500 hover:bg-red-500/10 transition-all border-l border-[#2f3336] disabled:opacity-50 shrink-0 bg-black"
