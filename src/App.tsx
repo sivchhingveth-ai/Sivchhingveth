@@ -500,23 +500,23 @@ export default function App() {
         <div className="space-y-4">
           <div>
             <label className={labelClass}>Goal name</label>
-            <input className={inputClass} placeholder="e.g. New Phone" value={newGoalName} onChange={e => setNewGoalName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
+            <input className={`${inputClass} !py-3 !text-[15px]`} placeholder="e.g. New Phone" value={newGoalName} onChange={e => setNewGoalName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div>
             <label className={labelClass}>Target amount ($)</label>
-            <input className={inputClass} type="number" placeholder="500" value={newGoalAmount} onChange={e => setNewGoalAmount(e.target.value)} />
+            <input className={`${inputClass} !py-3 !text-[15px]`} type="number" placeholder="500" value={newGoalAmount} onChange={e => setNewGoalAmount(e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
             <div>
               <label className={labelClass}>Start Date</label>
-              <input className={inputClass} type="date" value={newGoalStartDate} onChange={e => setNewGoalStartDate(e.target.value)} style={{ colorScheme: 'dark' }} />
+              <input className={`${inputClass} !px-2.5 !py-3 !text-[14px] md:!text-[15px] leading-tight`} type="date" value={newGoalStartDate} onChange={e => setNewGoalStartDate(e.target.value)} style={{ colorScheme: 'dark' }} />
             </div>
             <div>
               <label className={labelClass}>Target Date</label>
-              <input className={inputClass} type="date" value={newGoalTargetDate} onChange={e => setNewGoalTargetDate(e.target.value)} style={{ colorScheme: 'dark' }} />
+              <input className={`${inputClass} !px-2.5 !py-3 !text-[14px] md:!text-[15px] leading-tight`} type="date" value={newGoalTargetDate} onChange={e => setNewGoalTargetDate(e.target.value)} style={{ colorScheme: 'dark' }} />
             </div>
           </div>
-          <button onClick={addGoal} className={submitClass}>Add Goal</button>
+          <button onClick={addGoal} className={`${submitClass} !py-3 mt-4`}>Add Goal</button>
         </div>
       </Modal>
 
