@@ -9,7 +9,7 @@ interface AnalyticsProps {
   savings?: SavingGoal[];
 }
 
-type ViewMode = 'weekly' | 'monthly' | 'full';
+type ViewMode = 'weekly' | 'monthly';
 
 const formatDateStr = (d: Date): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -25,8 +25,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
   const [weekOffset, setWeekOffset] = useState(0);
   // Month navigation  
   const [monthOffset, setMonthOffset] = useState(0);
-  // Full view month navigation
-  const [fullMonthOffset, setFullMonthOffset] = useState(0);
 
   // ── Weekly Data ──
   const weekData = useMemo(() => {
@@ -125,32 +123,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
     return Math.round(allDays.reduce((a, d) => a + d.pct, 0) / allDays.length);
   }, [monthData]);
 
-  // ── Full View Data ──
-  const fullData = useMemo(() => {
-    const base = new Date(today.getFullYear(), today.getMonth() + fullMonthOffset, 1);
-    const year = base.getFullYear();
-    const month = base.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
-    const days = [];
-    for (let i = 1; i <= daysInMonth; i++) {
-      const d = new Date(year, month, i);
-      const dateStr = formatDateStr(d);
-      const completed = habits.filter(h => h.history[dateStr]).length;
-      days.push({
-        date: d,
-        dateStr,
-        dayNum: i,
-        dayName: d.toLocaleString('default', { weekday: 'short' }),
-        completed,
-        total: habits.length,
-        pct: habits.length > 0 ? Math.round((completed / habits.length) * 100) : 0,
-        isToday: dateStr === todayStr,
-        isFuture: d > today,
-      });
-    }
-    return { days, label: `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}` };
-  }, [habits, fullMonthOffset, today, todayStr]);
+
 
   // ── Selected Day Detail ──
   const selectedDayDetail = useMemo(() => {
@@ -201,9 +174,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
     return '#71767b';
   };
 
-  const navOffset = view === 'weekly' ? weekOffset : view === 'monthly' ? monthOffset : fullMonthOffset;
-  const setNavOffset = view === 'weekly' ? setWeekOffset : view === 'monthly' ? setMonthOffset : setFullMonthOffset;
-  const navLabel = view === 'weekly' ? weekLabel : view === 'monthly' ? monthData.label : fullData.label;
+  const navOffset = view === 'weekly' ? weekOffset : monthOffset;
+  const setNavOffset = view === 'weekly' ? setWeekOffset : setMonthOffset;
+  const navLabel = view === 'weekly' ? weekLabel : monthData.label;
 
   return (
     <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black relative">
@@ -235,7 +208,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
           {/* View Switcher + Navigation */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex bg-[#16181c] p-1 rounded-2xl border border-[#2f3336]">
-              {(['weekly', 'monthly', 'full'] as const).map(v => (
+              {(['weekly', 'monthly'] as const).map(v => (
                 <button
                   key={v}
                   onClick={() => { setView(v); setSelectedDay(null); }}
@@ -245,7 +218,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
                       : 'text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5'
                   }`}
                 >
-                  {v === 'full' ? 'Full View' : v.charAt(0).toUpperCase() + v.slice(1)}
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
                 </button>
               ))}
             </div>
@@ -320,33 +293,67 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
             {/* Per-Habit Weekly Breakdown */}
             <div className="space-y-2">
               <p className="text-[10px] font-black text-[#71767b] uppercase tracking-[0.2em] px-1">Per Habit This Week</p>
+
+
               {habits.map(habit => {
-                const style = getCategoryStyles(habit.category);
-                const weekCompleted = weekData.filter(d => !d.isFuture && habit.history[d.dateStr]).length;
-                const weekTotal = weekData.filter(d => !d.isFuture).length;
-                const weekPct = weekTotal > 0 ? Math.round((weekCompleted / weekTotal) * 100) : 0;
+                const weekDays = weekData.filter(d => !d.isFuture);
+                const weekCompleted = weekDays.filter(d => habit.history[d.dateStr]).length;
+                const weekMissed = weekDays.length - weekCompleted;
+                const weekPct = weekDays.length > 0 ? Math.round((weekCompleted / weekDays.length) * 100) : 0;
 
                 return (
-                  <div key={habit.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-[#2f3336] hover:bg-white/[0.04] transition-all">
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: style.hex }} />
-                    <span className="text-[13px] font-bold text-[#eff3f4] flex-1 truncate">{habit.name}</span>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex gap-0.5">
+                  <div key={habit.id} className="p-4 rounded-2xl bg-white/[0.02] border border-[#2f3336] hover:bg-white/[0.04] transition-all group">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_10px_rgba(29,155,240,0.3)] bg-[#1d9bf0]" />
+                        <span className="text-[14px] font-bold text-[#eff3f4] truncate">{habit.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#71767b]">
+                          {weekCompleted}/{weekDays.length} Done
+                        </span>
+                        {weekMissed > 0 && (
+                          <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500/70">
+                            {weekMissed} Missing
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      {/* 7-Day heatmap grid */}
+                      <div className="flex gap-1 shrink-0">
                         {weekData.map((d, i) => (
                           <div
                             key={i}
-                            className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-[2px] border transition-all ${
-                              d.isFuture ? 'border-[#2f3336]/50 bg-transparent' :
-                              habit.history[d.dateStr] ? 'border-transparent' : 'border-[#2f3336] bg-transparent'
+                            className={`w-6 h-6 rounded-lg border transition-all flex items-center justify-center ${
+                              d.isFuture ? 'border-dashed border-[#2f3336] bg-transparent opacity-20' :
+                              habit.history[d.dateStr] ? 'border-transparent shadow-lg bg-[#1d9bf0]' : 'border-[#2f3336] bg-transparent'
                             }`}
-                            style={!d.isFuture && habit.history[d.dateStr] ? { backgroundColor: style.hex } : {}}
                             title={`${d.dayName} ${d.dayNum}`}
-                          />
+                          >
+                            {!d.isFuture && habit.history[d.dateStr] ? (
+                              <Check className="w-3 h-3 text-white" strokeWidth={4} />
+                            ) : !d.isFuture ? (
+                              <span className="text-[9px] font-bold text-[#71767b]">{d.dayName[0]}</span>
+                            ) : null}
+                          </div>
                         ))}
                       </div>
-                      <span className="text-[11px] font-black min-w-[32px] text-right" style={{ color: style.hex }}>
-                        {weekPct}%
-                      </span>
+
+                      {/* Progress Bar & Percentage */}
+                      <div className="flex-1 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black text-[#71767b] uppercase tracking-widest">Efficiency</span>
+                          <span className="text-[12px] font-black text-[#1d9bf0]">{weekPct}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/[0.03] border border-white/5 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full transition-all duration-1000 shadow-lg bg-[#1d9bf0]" 
+                            style={{ width: `${weekPct}%` }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -413,74 +420,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
           </div>
         )}
 
-        {/* ═══════ FULL VIEW ═══════ */}
-        {view === 'full' && (
-          <div className="space-y-2">
-            <p className="text-[10px] font-black text-[#71767b] uppercase tracking-[0.2em] px-1">Tap any day to see details</p>
-            {fullData.days.map(d => {
-              const isSelected = d.dateStr === selectedDay;
-              return (
-                <button
-                  key={d.dateStr}
-                  onClick={() => !d.isFuture && setSelectedDay(isSelected ? null : d.dateStr)}
-                  disabled={d.isFuture}
-                  className={`w-full flex items-center gap-3 p-3 md:p-4 rounded-xl transition-all border ${
-                    d.isFuture ? 'opacity-30 border-[#2f3336]/50' :
-                    isSelected ? 'bg-white/[0.05] border-[#1d9bf0]/40' :
-                    'border-[#2f3336] hover:bg-white/[0.02]'
-                  }`}
-                >
-                  {/* Day Info */}
-                  <div className="w-10 md:w-12 text-center shrink-0">
-                    <p className={`text-[16px] md:text-[18px] font-black leading-tight ${d.isToday ? 'text-[#1d9bf0]' : 'text-[#eff3f4]'}`}>
-                      {d.dayNum}
-                    </p>
-                    <p className={`text-[9px] font-bold uppercase ${d.isToday ? 'text-[#1d9bf0]' : 'text-[#71767b]'}`}>
-                      {d.dayName}
-                    </p>
-                  </div>
 
-                  <div className="w-px h-8 bg-[#2f3336] shrink-0" />
-
-                  {/* Progress Bar */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] font-bold text-[#71767b]">
-                        {d.completed}/{d.total} habits
-                      </span>
-                      <span className="text-[11px] font-black" style={{ color: getBarColor(d.pct) }}>
-                        {d.pct}%
-                      </span>
-                    </div>
-                    <div className="w-full h-1.5 bg-white/[0.03] border border-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-700"
-                        style={{ width: `${d.pct}%`, backgroundColor: getBarColor(d.pct) }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Status Icon */}
-                  <div className="shrink-0">
-                    {d.pct === 100 ? (
-                      <div className="w-7 h-7 rounded-full bg-[#00ba7c]/10 flex items-center justify-center">
-                        <Check className="w-4 h-4 text-[#00ba7c]" strokeWidth={3} />
-                      </div>
-                    ) : d.pct > 0 ? (
-                      <div className="w-7 h-7 rounded-full bg-[#ffad1f]/10 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 text-[#ffad1f]" />
-                      </div>
-                    ) : !d.isFuture ? (
-                      <div className="w-7 h-7 rounded-full bg-[#71767b]/10 flex items-center justify-center">
-                        <X className="w-4 h-4 text-[#71767b]" />
-                      </div>
-                    ) : null}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
 
         {/* ═══════ SELECTED DAY DETAIL ═══════ */}
         {selectedDayDetail && (
@@ -502,10 +442,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits, savings = [] }) =>
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-[#71767b] uppercase tracking-widest px-1 mb-1.5">Habits</p>
                 {selectedDayDetail.completedHabits.map(h => {
-                  const style = getCategoryStyles(h.category);
                   return (
                     <div key={h.id} className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.02] border border-white/[0.03]">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: style.hex }}>
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 bg-[#1d9bf0]">
                         <Check className="w-3 h-3 text-white" strokeWidth={3} />
                       </div>
                       <span className="text-[13px] font-bold text-[#eff3f4]">{h.name}</span>
