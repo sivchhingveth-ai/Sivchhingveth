@@ -22,8 +22,8 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
     <div className="border-b border-[#2f3336] bg-black sticky top-0 z-40">
       <div className="max-w-[1200px] mx-auto flex h-[53px] items-center">
         {/* Scrollable Tabs Wrapper */}
-        <div className="flex-1 min-w-0 flex h-full overflow-x-auto scrollbar-hide no-scrollbar">
-          <div className="flex h-full min-w-max">
+        <div className="flex-1 min-w-0 flex h-full overflow-x-auto scrollbar-hide no-scrollbar relative scroll-smooth">
+          <div className="flex h-full min-w-max px-[calc(50%-57.5px)] md:px-0">
             {tabs.map((tab) => (
               <button
                 key={tab}
