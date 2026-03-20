@@ -229,11 +229,11 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
             </div>
 
             <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/10">
-              <button onClick={() => setNavOffset(prev => prev - 1)} className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]">
+              <button onClick={() => { setNavOffset(prev => prev - 1); setSelectedDay(null); }} className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]">
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button 
-                onClick={() => setNavOffset(0)}
+                onClick={() => { setNavOffset(0); setSelectedDay(null); }}
                 className={`px-2 py-1 rounded-xl text-[9px] md:text-[10px] font-black transition-all min-w-[80px] md:min-w-[120px] text-center ${
                   navOffset === 0 ? 'bg-[#1d9bf0] text-white' : 'text-[#71767b] bg-white/[0.05] border border-white/5'
                 }`}
@@ -241,7 +241,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                 {navLabel}
               </button>
               <button 
-                onClick={() => setNavOffset(prev => prev + 1)} 
+                onClick={() => { setNavOffset(prev => prev + 1); setSelectedDay(null); }} 
                 disabled={navOffset >= 0}
                 className={`p-1.5 rounded-xl transition-all ${
                   navOffset >= 0 ? 'opacity-30 cursor-not-allowed text-[#71767b]' : 'hover:bg-white/10 text-[#71767b] hover:text-[#eff3f4]'
@@ -286,7 +286,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
 
                       <div className="w-full flex justify-center items-end h-full">
                         <div 
-                          className={`w-7 sm:w-8 md:w-14 rounded-t-xl md:rounded-t-2xl transition-all duration-700 relative overflow-hidden group-hover/bar:brightness-125 ${
+                          className={`w-7 sm:w-8 md:w-14 rounded-t-xl md:rounded-t-2xl transition-all duration-500 ease-out relative overflow-hidden group-hover/bar:brightness-125 ${
                             d.dateStr === selectedDay ? 'ring-2 ring-white/30' : ''
                           }`}
                           style={{ 
