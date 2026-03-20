@@ -218,13 +218,13 @@ export const Analytics: React.FC<AnalyticsProps> = ({
             </div>
 
             {/* Row 2: View Switcher + Navigation */}
-            <div className="flex items-center justify-between gap-2 md:gap-3 w-full overflow-x-auto no-scrollbar scrollbar-hide pb-1">
-              <div className="flex bg-[#16181c] p-1 rounded-2xl border border-[#2f3336] w-fit shrink-0">
+            <div className="flex items-center justify-between gap-1.5 md:gap-3 w-full overflow-x-auto no-scrollbar scrollbar-hide pb-1">
+              <div className="flex bg-[#16181c] p-0.5 md:p-1 rounded-2xl border border-[#2f3336] w-fit shrink-0">
                 {(['weekly', 'monthly'] as const).map(v => (
                   <button
                     key={v}
                     onClick={() => { setView(v); setSelectedDay(null); }}
-                    className={`px-3 md:px-4 py-1.5 rounded-xl text-[11px] md:text-[12px] font-bold transition-all duration-300 ${view === v
+                    className={`px-2.5 md:px-4 py-1 md:py-1.5 rounded-xl text-[10px] md:text-[12px] font-bold transition-all duration-300 ${view === v
                       ? 'bg-[#eff3f4] text-black shadow-[0_0_20px_rgba(255,255,255,0.1)]'
                       : 'text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5'
                       }`}
@@ -234,13 +234,13 @@ export const Analytics: React.FC<AnalyticsProps> = ({
                 ))}
               </div>
 
-              <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/10 w-fit shrink-0">
-                <button onClick={() => setNavOffset(prev => prev - 1)} className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]">
+              <div className="flex items-center bg-white/[0.03] p-0.5 md:p-1 rounded-2xl border border-white/10 w-fit shrink-0">
+                <button onClick={() => setNavOffset(prev => prev - 1)} className="p-1 md:p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setNavOffset(0)}
-                  className={`px-2 py-1 rounded-xl text-[10px] font-black transition-all w-[110px] md:w-[150px] truncate text-center ${navOffset === 0 ? 'bg-white/10 text-[#eff3f4] border border-white/20' : 'text-[#71767b] bg-white/[0.05] border border-white/5'
+                  className={`px-1.5 md:px-2 py-1 rounded-xl text-[9px] md:text-[10px] font-black transition-all min-w-[90px] md:w-[150px] text-center ${navOffset === 0 ? 'bg-white/10 text-[#eff3f4] border border-white/20' : 'text-[#71767b] bg-white/[0.05] border border-white/5'
                     }`}
                 >
                   {navLabel}
@@ -248,12 +248,12 @@ export const Analytics: React.FC<AnalyticsProps> = ({
                 {navOffset < 0 ? (
                   <button
                     onClick={() => setNavOffset(prev => prev + 1)}
-                    className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
+                    className="p-1 md:p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <div className="w-7 md:w-8" />
+                  <div className="w-6 md:w-8" />
                 )}
               </div>
             </div>
