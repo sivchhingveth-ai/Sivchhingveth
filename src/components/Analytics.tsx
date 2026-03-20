@@ -14,6 +14,7 @@ interface AnalyticsProps {
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
+  onResetData?: () => void;
 }
 
 type ViewMode = 'weekly' | 'monthly';
@@ -24,7 +25,7 @@ const formatDateStr = (d: Date): string => {
 
 export const Analytics: React.FC<AnalyticsProps> = ({
   habits: rawHabits, savings = [],
-  tabs, activeTab, onTabChange, onLogout, isLoggingOut
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut, onResetData
 }) => {
   // Dedupe habits by name to clean up any duplicate entries created during testing
   const habits = useMemo(() => {
@@ -204,7 +205,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
 
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} onResetData={onResetData} />
       </div>
       <div>
         <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { LogOut, Loader2 } from 'lucide-react';
+import { LogOut, Loader2, Trash2 } from 'lucide-react';
 
 interface TabsProps {
   tabs: string[];
@@ -7,9 +7,10 @@ interface TabsProps {
   onTabChange: (tab: string) => void;
   onLogout?: () => void;
   isLoggingOut?: boolean;
+  onResetData?: () => void;
 }
 
-export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogout, isLoggingOut }) => {
+export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogout, isLoggingOut, onResetData }) => {
   const activeTabRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -45,21 +46,37 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
           </div>
         </div>
 
-        {/* Fixed Sign Out Button */}
-        {onLogout && (
-          <button
-            onClick={onLogout}
-            disabled={isLoggingOut}
-            className="px-5 h-full flex items-center justify-center text-[#71767b] hover:text-red-500 hover:bg-red-500/10 transition-all border-l border-[#2f3336] disabled:opacity-50 shrink-0 bg-black"
-            title="Sign Out"
-          >
-            {isLoggingOut ? (
-              <Loader2 className="w-4 h-4 md:w-5 h-5 animate-spin" />
-            ) : (
-              <LogOut className="w-4 h-4 md:w-5 h-5" />
-            )}
-          </button>
-        )}
+        {/* Reset & Logout Controls */}
+        <div className="flex h-full border-l border-[#2f3336] shrink-0 bg-black">
+          {onResetData && (
+            <button
+              onClick={() => {
+                if (window.confirm("Permanently wipe ALL habits and data? This cannot be undone.")) {
+                  onResetData();
+                }
+              }}
+              className="px-4 h-full flex items-center justify-center text-[#71767b] hover:text-red-500 hover:bg-red-500/10 transition-all border-r border-[#2f3336]"
+              title="Reset All Project Data"
+            >
+              <Trash2 className="w-4 h-4 md:w-5 h-5" />
+            </button>
+          )}
+
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              disabled={isLoggingOut}
+              className="px-5 h-full flex items-center justify-center text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5 transition-all disabled:opacity-50"
+              title="Sign Out"
+            >
+              {isLoggingOut ? (
+                <Loader2 className="w-4 h-4 md:w-5 h-5 animate-spin" />
+              ) : (
+                <LogOut className="w-4 h-4 md:w-5 h-5" />
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

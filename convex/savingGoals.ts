@@ -75,3 +75,20 @@ export const remove = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+export const clearAll = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    
+    const goals = await ctx.db
+      .query("savingGoals")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+      
+    for (const g of goals) {
+      await ctx.db.delete(g._id);
+    }
+  },
+});

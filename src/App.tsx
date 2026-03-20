@@ -289,6 +289,21 @@ export default function App() {
     }
   };
 
+  const clearAllHabits = useMutation(api.habits.clearAll);
+  const clearAllSavings = useMutation(api.savingGoals.clearAll);
+
+  const handleResetData = async () => {
+    try {
+      await clearAllHabits();
+      await clearAllSavings();
+      setModalOpen(null);
+      alert("System Reset Complete! All habits and data have been wiped.");
+    } catch (err) {
+      console.error("Reset failed:", err);
+      alert("Reset failed. Please check your connection.");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="h-[100dvh] bg-black flex flex-col items-center justify-center gap-6 relative overflow-hidden">
@@ -352,6 +367,7 @@ export default function App() {
                 onTabChange={setActiveTab}
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
+                onResetData={handleResetData}
               />
             </div>
           )}
@@ -372,6 +388,7 @@ export default function App() {
                 onTabChange={setActiveTab}
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
+                onResetData={handleResetData}
               />
             </div>
           )}
@@ -388,6 +405,7 @@ export default function App() {
                 onTabChange={setActiveTab}
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
+                onResetData={handleResetData}
               />
             </div>
           )}
@@ -402,6 +420,7 @@ export default function App() {
                 onTabChange={setActiveTab}
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
+                onResetData={handleResetData}
               />
             </div>
           )}

@@ -78,3 +78,20 @@ export const remove = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+export const clearAll = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    
+    const habits = await ctx.db
+      .query("habits")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+      
+    for (const h of habits) {
+      await ctx.db.delete(h._id);
+    }
+  },
+});

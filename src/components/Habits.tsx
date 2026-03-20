@@ -20,6 +20,7 @@ interface HabitsProps {
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
+  onResetData?: () => void;
 }
 
 // Time phase definitions
@@ -38,7 +39,7 @@ const getPhaseForHabit = (habit: Habit) => {
 
 export const Habits: React.FC<HabitsProps> = ({
   habits, onToggleHabit, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange,
-  tabs, activeTab, onTabChange, onLogout, isLoggingOut
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut, onResetData
 }) => {
   const [activeHeatmapCell, setActiveHeatmapCell] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -179,7 +180,7 @@ export const Habits: React.FC<HabitsProps> = ({
 
       {/* Visual Header / Summary */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} onResetData={onResetData} />
       </div>
       <div>
         <div className="px-5 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">
