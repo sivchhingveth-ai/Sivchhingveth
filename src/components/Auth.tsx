@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useConvex } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 export const Auth: React.FC = () => {
   const { signIn } = useAuthActions();
+  const convex = useConvex();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,8 +31,20 @@ export const Auth: React.FC = () => {
     setError(null);
     setMessage(null);
     try {
+      const normalizedEmail = email.trim().toLowerCase();
+      
+      // Pre-flight check for duplicates during Sign Up
+      if (isSignUp) {
+        const exists = await convex.query(api.users.checkEmailExists, { email: normalizedEmail });
+        if (exists) {
+           setError('An account with this email already exists. Try signing in instead.');
+           setLoading(false);
+           return;
+        }
+      }
+
       const formData = new FormData();
-      formData.set("email", email.trim());
+      formData.set("email", normalizedEmail);
       formData.set("password", password);
       formData.set("flow", isSignUp ? "signUp" : "signIn");
 
@@ -117,21 +132,23 @@ export const Auth: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between py-1">
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                            <div className="relative flex items-center">
-                                <input 
-                                    type="checkbox" 
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                    className="peer sr-only"
-                                />
-                                <div className="w-5 h-5 border-2 border-[#2f3336] rounded-md peer-checked:bg-[#1d9bf0] peer-checked:border-[#1d9bf0] transition-all" />
-                                <CheckIcon className="absolute w-3.5 h-3.5 text-white left-[3px] opacity-0 peer-checked:opacity-100 transition-opacity" strokeWidth={4} />
-                            </div>
-                            <span className="text-[13px] font-bold text-[#71767b] group-hover:text-[#eff3f4] transition-colors">Remember Me</span>
-                        </label>
-                    </div>
+                    {!isSignUp && (
+                      <div className="flex items-center justify-between py-1">
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                              <div className="relative flex items-center">
+                                  <input 
+                                      type="checkbox" 
+                                      checked={rememberMe}
+                                      onChange={(e) => setRememberMe(e.target.checked)}
+                                      className="peer sr-only"
+                                  />
+                                  <div className="w-5 h-5 border-2 border-[#2f3336] rounded-md peer-checked:bg-[#1d9bf0] peer-checked:border-[#1d9bf0] transition-all" />
+                                  <CheckIcon className="absolute w-3.5 h-3.5 text-white left-[3px] opacity-0 peer-checked:opacity-100 transition-opacity" strokeWidth={4} />
+                              </div>
+                              <span className="text-[13px] font-bold text-[#71767b] group-hover:text-[#eff3f4] transition-colors">Remember Me</span>
+                          </label>
+                      </div>
+                    )}
 
                     {error && (
                         <div className="text-red-500 text-sm font-bold bg-red-500/10 p-4 rounded-xl border border-red-500/20 space-y-2">
