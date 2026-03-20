@@ -9,7 +9,6 @@ interface SavingsProps {
   onDeleteGoal: (id: any) => void;
   onAddGoal: () => void;
   onAddSaving: (id: any, amount: number, date: string) => void;
-  onLoadDemo?: () => void;
   // Navigation props
   tabs: string[];
   activeTab: string;
@@ -285,15 +284,6 @@ export const Savings: React.FC<SavingsProps> = ({
       {savings.length === 0 && (
         <div className="p-10 text-center">
           <p className="text-[#71767b] text-base md:text-lg mb-4">No saving goals yet. Time to plan ahead!</p>
-          {onLoadDemo && (
-            <button
-              onClick={onLoadDemo}
-              className="x-button-glass text-[13px] mx-auto"
-            >
-              <Sparkles className="w-4 h-4" />
-              Load Demo Data
-            </button>
-          )}
         </div>
       )}
 

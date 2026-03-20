@@ -289,88 +289,6 @@ export default function App() {
     }
   };
 
-  const loadDemoData = async () => {
-    if (!isAuthenticated) return;
-
-    // ── Demo Habits ──
-    const demoHabits = [
-      { name: 'Drink 8 glasses of water', category: 'HEALTH', time: '08:00', chance: 0.85 },
-      { name: 'Morning stretching', category: 'BODY', time: '08:00', chance: 0.7 },
-      { name: 'Read for 30 minutes', category: 'LEARNING', time: '14:00', chance: 0.6 },
-      { name: 'Take vitamins', category: 'HEALTH', time: '08:00', chance: 0.9 },
-      { name: 'Evening workout', category: 'BODY', time: '20:00', chance: 0.55 },
-      { name: 'Journal before bed', category: 'RECOVERY', time: '20:00', chance: 0.65 },
-      { name: 'Brush teeth 2x', category: 'HYGIENE', time: '08:00', chance: 0.95 },
-      { name: 'Track expenses', category: 'FINANCE', time: '14:00', chance: 0.45 },
-      { name: '10 min Meditation', category: 'HEALTH', time: '08:00', chance: 0.5 },
-      { name: 'Learn Coding', category: 'LEARNING', time: '20:00', chance: 0.75 },
-      { name: 'No Sugar', category: 'HEALTH', time: '14:00', chance: 0.8 },
-      { name: 'Cold Shower', category: 'BODY', time: '08:00', chance: 0.4 },
-    ];
-
-    for (const demo of demoHabits) {
-      const history: Record<string, boolean> = {};
-      const d = new Date(getEffectiveDate());
-      for (let i = 0; i < 45; i++) {
-        const dStr = d.toISOString().split('T')[0];
-        if (Math.random() < demo.chance) {
-          history[dStr] = true;
-        }
-        d.setDate(d.getDate() - 1);
-      }
-
-      const id = await createHabit({
-        name: demo.name,
-        category: demo.category,
-        time: demo.time,
-        monthlyTarget: null,
-      });
-
-      await updateHabit({ id, history });
-    }
-
-    // ── Demo Saving Goals ──
-    const demoGoals = [
-      { name: 'New MacBook Pro', goal: 2500, saved: 1680, color: '#1d9bf0', days: 30 },
-      { name: 'Emergency Fund', goal: 5000, saved: 3200, color: '#00ba7c', days: 60 },
-      { name: 'Japan Trip 2026', goal: 3000, saved: 850, color: '#7856ff', days: 45 },
-    ];
-
-    for (const demo of demoGoals) {
-      const startDate = new Date(getEffectiveDate());
-      startDate.setDate(startDate.getDate() - demo.days);
-      const targetDate = new Date(getEffectiveDate());
-      targetDate.setDate(targetDate.getDate() + 90);
-
-      const history: Record<string, number> = {};
-      let remaining = demo.saved;
-      const d = new Date(startDate);
-      while (remaining > 0 && d <= getEffectiveDate()) {
-        const dStr = d.toISOString().split('T')[0];
-        if (Math.random() < 0.4) {
-          const amount = Math.min(remaining, Math.round(20 + Math.random() * 80));
-          history[dStr] = amount;
-          remaining -= amount;
-        }
-        d.setDate(d.getDate() + 1);
-      }
-
-      const goalId = await createGoal({
-        name: demo.name,
-        goal: demo.goal,
-        color: demo.color,
-        startDate: startDate.toISOString().split('T')[0],
-        targetDate: targetDate.toISOString().split('T')[0],
-      });
-
-      await updateGoal({
-        id: goalId,
-        saved: demo.saved,
-        history,
-      });
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="h-[100dvh] bg-black flex flex-col items-center justify-center gap-6 relative overflow-hidden">
@@ -428,7 +346,7 @@ export default function App() {
               <DailyHabits
                 habits={habits}
                 onToggleHabit={toggleHabit}
-                onLoadDemo={loadDemoData}
+
                 tabs={tabs}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
@@ -464,7 +382,7 @@ export default function App() {
                 onDeleteGoal={confirmDeleteGoal}
                 onAddGoal={openAddGoal}
                 onAddSaving={addDailySaving}
-                onLoadDemo={loadDemoData}
+
                 tabs={tabs}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}

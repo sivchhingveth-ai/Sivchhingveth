@@ -7,7 +7,6 @@ import { Tabs } from './Tabs';
 interface DailyHabitsProps {
   habits: Habit[];
   onToggleHabit: (id: any, dateStr: string) => void;
-  onLoadDemo?: () => void;
   // Navigation props
   tabs: string[];
   activeTab: string;
@@ -40,7 +39,7 @@ const getCurrentPhaseKey = (): string => {
 };
 
 export const DailyHabits: React.FC<DailyHabitsProps> = ({
-  habits, onToggleHabit, onLoadDemo,
+  habits, onToggleHabit,
   tabs, activeTab, onTabChange, onLogout, isLoggingOut
 }) => {
   const todayStr = getEffectiveDateStr();
