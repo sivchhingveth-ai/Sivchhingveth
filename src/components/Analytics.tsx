@@ -286,7 +286,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
 
                       <div className="w-full flex justify-center items-end h-full">
                         <div 
-                          className={`w-10 md:w-16 rounded-t-2xl transition-all duration-700 relative overflow-hidden group-hover/bar:brightness-125 ${
+                          className={`w-7 sm:w-8 md:w-14 rounded-t-xl md:rounded-t-2xl transition-all duration-700 relative overflow-hidden group-hover/bar:brightness-125 ${
                             d.dateStr === selectedDay ? 'ring-2 ring-white/30' : ''
                           }`}
                           style={{ 
