@@ -218,8 +218,8 @@ export const Analytics: React.FC<AnalyticsProps> = ({
             </div>
 
             {/* Row 2: View Switcher + Navigation */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div className="flex bg-[#16181c] p-1 rounded-2xl border border-[#2f3336] w-fit">
+            <div className="flex items-center justify-between gap-2 md:gap-3">
+              <div className="flex bg-[#16181c] p-1 rounded-2xl border border-[#2f3336] w-fit shrink-0">
                 {(['weekly', 'monthly'] as const).map(v => (
                   <button
                     key={v}
@@ -234,13 +234,13 @@ export const Analytics: React.FC<AnalyticsProps> = ({
                 ))}
               </div>
 
-              <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/10 w-fit">
+              <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/10 w-fit shrink-0">
                 <button onClick={() => setNavOffset(prev => prev - 1)} className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setNavOffset(0)}
-                  className={`px-2 py-1 rounded-xl text-[10px] font-black transition-all w-[130px] md:w-[150px] truncate text-center ${navOffset === 0 ? 'bg-white/10 text-[#eff3f4] border border-white/20' : 'text-[#71767b] bg-white/[0.05] border border-white/5'
+                  className={`px-2 py-1 rounded-xl text-[10px] font-black transition-all w-[110px] md:w-[150px] truncate text-center ${navOffset === 0 ? 'bg-white/10 text-[#eff3f4] border border-white/20' : 'text-[#71767b] bg-white/[0.05] border border-white/5'
                     }`}
                 >
                   {navLabel}
