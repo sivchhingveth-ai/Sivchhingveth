@@ -210,7 +210,7 @@ export const Habits: React.FC<HabitsProps> = ({
                       : 'text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5'
                       }`}
                   >
-                    Today
+                    To Present
                   </button>
                   <MonthPicker value={currentMonth} onChange={onMonthChange}>
                     <div className="h-8 flex items-center min-w-[90px] px-3 rounded-full hover:bg-white/5 transition-colors cursor-pointer">
