@@ -158,6 +158,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const [showTopSignal, setShowTopSignal] = React.useState(false);
 
   const handlePointerDown = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+    }
     isLongPressRef.current = false;
     longPressTimer.current = setTimeout(() => {
       const scrollTarget = document.querySelector('main') || window;
