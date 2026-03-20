@@ -364,7 +364,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 mt-1">
                       {/* 7-Day heatmap grid */}
                       <div className="flex gap-1 shrink-0">
                         {weekData.map((d, i) => (
@@ -386,7 +386,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ habits: rawHabits, savings
                       </div>
 
                       {/* Progress Bar & Percentage */}
-                      <div className="flex-1 space-y-1.5">
+                      <div className="flex-1 space-y-1.5 w-full">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-black text-[#71767b] uppercase tracking-widest">Efficiency</span>
                           <span className="text-[12px] font-black text-[#1d9bf0]">{weekPct}%</span>
