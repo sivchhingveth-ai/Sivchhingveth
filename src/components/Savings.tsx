@@ -276,7 +276,7 @@ export const Savings: React.FC<SavingsProps> = ({
         </div>
 
       {/* Saving Goals List - Grid on Desktop */}
-      <div className="p-3 md:p-5 grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-5 animate-slide-up">
+      <div className="p-3 md:p-5 grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-5 animate-slide-up duration-[2000ms]">
         {savings.map(s => (
           <SavingItem key={s.id} s={s} onDelete={onDeleteGoal} onAddSaving={onAddSaving} />
         ))}

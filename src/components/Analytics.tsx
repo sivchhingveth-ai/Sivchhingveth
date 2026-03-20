@@ -257,7 +257,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
           </div>
         </div>
 
-      <div className="p-5 md:p-6 space-y-7 pb-32 animate-slide-up">
+      <div className="p-5 md:p-6 space-y-7 pb-32 animate-slide-up duration-[2000ms]">
 
         {/* ═══════ WEEKLY VIEW ═══════ */}
         {view === 'weekly' && (

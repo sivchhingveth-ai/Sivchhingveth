@@ -263,7 +263,7 @@ export const Habits: React.FC<HabitsProps> = ({
         </div>
 
 
-      <div className="p-5 md:p-6 space-y-6 pb-20 text-[#eff3f4] animate-slide-up">
+      <div className="p-5 md:p-6 space-y-6 pb-20 text-[#eff3f4] animate-slide-up duration-[2000ms]">
         {/* Yearly Heatmap (GitHub Style) */}
         <section className="space-y-3">
         <h3 className="text-[11px] font-black text-[#71767b] uppercase tracking-[0.3em] px-1 opacity-80">
