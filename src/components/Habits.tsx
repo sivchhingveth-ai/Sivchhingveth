@@ -185,10 +185,10 @@ export const Habits: React.FC<HabitsProps> = ({
         <div className="px-5 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">
             {/* Row 1: Title */}
             <div className="min-w-0">
-              <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">
+              <h2 className="text-[18px] md:text-[20px] font-black text-[#eff3f4] leading-tight tracking-tight whitespace-nowrap">
                 Manual Habits
               </h2>
-              <p className="text-[#8b98a5] text-[10px] md:text-[13px] font-black uppercase tracking-[0.2em] mt-1.5 truncate">
+              <p className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] mt-1 truncate">
                 Tracking {habits.length} daily goals
               </p>
             </div>
