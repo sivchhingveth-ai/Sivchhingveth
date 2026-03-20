@@ -16,12 +16,21 @@ export const Auth: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
 
-  // Load remembered email
+  // Load remembered email and password
   React.useEffect(() => {
     const savedEmail = localStorage.getItem('remembered_email');
+    const savedPassword = localStorage.getItem('remembered_password');
     if (savedEmail) {
       setEmail(savedEmail);
       setRememberMe(true);
+    }
+    if (savedPassword) {
+      try {
+        setPassword(atob(savedPassword));
+      } catch (e) {
+        // Handle old or invalid encoded passwords gracefully
+        console.error('Could not decode saved password');
+      }
     }
   }, []);
 
@@ -50,10 +59,16 @@ export const Auth: React.FC = () => {
 
       await signIn("password", formData);
 
-      if (rememberMe) {
-        localStorage.setItem('remembered_email', email);
-      } else {
-        localStorage.removeItem('remembered_email');
+      if (!isSignUp) {
+        if (rememberMe) {
+          localStorage.setItem('remembered_email', email);
+          if (password) {
+            localStorage.setItem('remembered_password', btoa(password));
+          }
+        } else {
+          localStorage.removeItem('remembered_email');
+          localStorage.removeItem('remembered_password');
+        }
       }
 
       if (isSignUp) {
