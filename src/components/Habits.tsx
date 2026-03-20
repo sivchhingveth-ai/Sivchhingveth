@@ -47,9 +47,12 @@ export const Habits: React.FC<HabitsProps> = ({
 
   // Auto-hide header on scroll
   useEffect(() => {
-    const main = document.querySelector('main');
+    const main = document.getElementById('main-scroller');
     if (!main) return;
-    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
+    const handleScroll = () => {
+      const scrolled = main.scrollTop > 10;
+      if (scrolled !== isScrolled) setIsScrolled(scrolled);
+    };
     main.addEventListener('scroll', handleScroll, { passive: true });
     return () => main.removeEventListener('scroll', handleScroll);
   }, []);
@@ -178,7 +181,7 @@ export const Habits: React.FC<HabitsProps> = ({
   }, [habits, currentMonth]);
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black text-[#eff3f4] p-5 md:p-6 space-y-6 pb-20 flex flex-col">
+    <div className="w-full mx-auto border-x border-[#2f3336] min-h-full bg-black flex flex-col relative overflow-hidden text-[#eff3f4] p-5 md:p-6 space-y-6 pb-20">
 
       {/* Visual Header / Summary */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336] -mx-5 md:-mx-6">

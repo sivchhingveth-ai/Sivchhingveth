@@ -52,12 +52,15 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
   // Auto-hide header on scroll
   React.useEffect(() => {
-    const main = document.querySelector('main');
+    const main = document.getElementById('main-scroller');
     if (!main) return;
-    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
+    const handleScroll = () => {
+      const scrolled = main.scrollTop > 10;
+      if (scrolled !== isScrolled) setIsScrolled(scrolled);
+    };
     main.addEventListener('scroll', handleScroll, { passive: true });
     return () => main.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isScrolled]); // Added isScrolled to dependencies to prevent stale closure issues
 
   // Stats for today
   const completedCount = habits.filter(h => h.history[todayStr]).length;
@@ -177,7 +180,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black flex flex-col relative">
+    <div className="w-full mx-auto border-x border-[#2f3336] min-h-[100dvh] bg-black relative overflow-hidden flex flex-col">
 
       {/* Scroll to Top Signal Overlay */}
       {showTopSignal && (

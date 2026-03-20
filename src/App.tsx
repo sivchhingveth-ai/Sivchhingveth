@@ -408,9 +408,8 @@ export default function App() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-[#22c55e]/5 rounded-full blur-[100px] pointer-events-none" />
 
 
-      <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain">
-        <div className="w-full">
-
+      <main id="main-scroller" className="flex-1 overflow-y-auto relative z-10 overscroll-contain bg-black custom-scrollbar flex flex-col items-center">
+        <div className="w-full max-w-[1200px] flex-1 flex flex-col">
           {activeTab === 'Daily Habits' && (
             <DailyHabits
               habits={habits}

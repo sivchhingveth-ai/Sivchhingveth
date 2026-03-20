@@ -214,19 +214,22 @@ export const Savings: React.FC<SavingsProps> = ({
 
   // Auto-hide header on scroll
   useEffect(() => {
-    const main = document.querySelector('main');
+    const main = document.getElementById('main-scroller');
     if (!main) return;
-    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
+    const handleScroll = () => {
+      const scrolled = main.scrollTop > 10;
+      if (scrolled !== isScrolled) setIsScrolled(scrolled);
+    };
     main.addEventListener('scroll', handleScroll, { passive: true });
     return () => main.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isScrolled]);
 
   const totalSaved = savings.reduce((a, s) => a + s.saved, 0);
   const totalGoal = savings.reduce((a, s) => a + s.goal, 0);
   const pct = totalGoal ? Math.round(totalSaved / totalGoal * 100) : 0;
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black">
+    <div className="w-full mx-auto border-x border-[#2f3336] min-h-[100dvh] bg-black flex flex-col relative overflow-hidden">
 
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">

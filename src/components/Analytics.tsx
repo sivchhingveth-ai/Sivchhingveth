@@ -39,12 +39,15 @@ export const Analytics: React.FC<AnalyticsProps> = ({
 
   // Auto-hide header on scroll
   React.useEffect(() => {
-    const main = document.querySelector('main');
+    const main = document.getElementById('main-scroller');
     if (!main) return;
-    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
+    const handleScroll = () => {
+      const scrolled = main.scrollTop > 10;
+      if (scrolled !== isScrolled) setIsScrolled(scrolled);
+    };
     main.addEventListener('scroll', handleScroll, { passive: true });
     return () => main.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isScrolled]);
 
   // Week navigation
   const [weekOffset, setWeekOffset] = useState(0);
@@ -204,7 +207,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   const navLabel = view === 'weekly' ? weekLabel : monthData.label;
 
   return (
-    <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black relative">
+    <div className="w-full mx-auto border-x border-[#2f3336] min-h-[100dvh] bg-black relative overflow-hidden flex flex-col">
 
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
