@@ -270,7 +270,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
 
       {/* Habit Checklist — Grouped by Time Phase */}
-      <div className="p-5 md:p-6 space-y-7 pb-32 animate-slide-up duration-[2000ms]">
+      <div className="p-5 md:p-6 space-y-7 pb-32 animate-slide-up duration-[3000ms]">
         {habits.length === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
