@@ -4,6 +4,7 @@ import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, Trendi
 import { getCategoryStyles } from '../utils/colors';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
+import { MonthPicker } from './MonthPicker';
 
 interface HabitsProps {
   habits: Habit[];
@@ -43,16 +44,6 @@ export const Habits: React.FC<HabitsProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [showActionsId, setShowActionsId] = useState<string | null>(null);
   const heatmapRef = useRef<HTMLDivElement>(null);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // Auto-hide header on scroll
-  useEffect(() => {
-    const main = document.querySelector('main');
-    if (!main) return;
-    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
-    main.addEventListener('scroll', handleScroll, { passive: true });
-    return () => main.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Group habits by time phase
   const groupedByPhase = useMemo(() => {
@@ -183,8 +174,9 @@ export const Habits: React.FC<HabitsProps> = ({
       {/* Visual Header / Summary */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
-          <div className="px-5 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      </div>
+      <div>
+        <div className="px-5 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">
             {/* Row 1: Title */}
             <div className="min-w-0">
               <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">
@@ -196,54 +188,48 @@ export const Habits: React.FC<HabitsProps> = ({
             </div>
 
             {/* Row 2: Controls */}
-            <div className="flex flex-col md:flex-row md:items-center gap-3">
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/10 backdrop-blur-md">
+            <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
+              <div className="flex items-center justify-between w-full md:w-auto gap-3">
+                <div className="flex items-center gap-0.5 bg-[#16181c] p-0.5 rounded-full border border-[#2f3336]">
                   <button
                     onClick={() => changeMonth(-1)}
-                    className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
+                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-[#71767b] hover:text-[#eff3f4] active:scale-90"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => onMonthChange(getEffectiveDate())}
-                    className={`px-2 py-1 rounded-xl transition-all text-[9px] font-black uppercase ${isCurrentOrFutureMonth
-                      ? 'bg-white/10 text-[#eff3f4] border border-white/10'
-                      : 'text-[#71767b] hover:text-[#eff3f4] bg-white/[0.05] border border-white/5'
+                    className={`px-2.5 h-8 rounded-full transition-all text-[9px] font-black uppercase tracking-widest ${isCurrentOrFutureMonth
+                      ? 'bg-[#1d9bf0]/15 text-[#1d9bf0] border border-[#1d9bf0]/30'
+                      : 'text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5'
                       }`}
                   >
-                    TODAY
+                    Today
                   </button>
-                  <div className="relative group/month">
-                    <input
-                      type="month"
-                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                      value={`${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`}
-                      onChange={handleMonthSelect}
-                    />
-                    <div className="text-center min-w-[80px] px-2 py-1 rounded-xl group-hover/month:bg-white/5 transition-colors cursor-pointer border border-transparent group-hover/month:border-white/10">
-                      <span className="block text-[10px] font-black uppercase tracking-[0.1em] whitespace-nowrap">
+                  <MonthPicker value={currentMonth} onChange={onMonthChange}>
+                    <div className="h-8 flex items-center min-w-[90px] px-3 rounded-full hover:bg-white/5 transition-colors cursor-pointer">
+                      <span className="block text-[11px] font-black text-[#eff3f4] tracking-wide whitespace-nowrap mx-auto">
                         {monthYearLabel}
                       </span>
                     </div>
-                  </div>
+                  </MonthPicker>
                   {!isCurrentOrFutureMonth ? (
                     <button
                       onClick={() => changeMonth(1)}
-                      className="p-1.5 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-[#71767b] hover:text-[#eff3f4] active:scale-90"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   ) : (
-                    <div className="w-7 md:w-8" />
+                    <div className="w-8" />
                   )}
                 </div>
 
                 <button
                   onClick={onAddHabit}
-                  className="x-button-primary shrink-0 py-2.5 px-4 text-[13px]"
+                  className="x-button-primary shrink-0 w-[42px] h-[42px] md:w-auto md:h-auto md:py-2.5 md:px-4 !p-0 md:!p-[inherit] text-[13px] flex items-center justify-center md:justify-start"
                 >
-                  <Plus className="w-4 h-4" strokeWidth={3} />
+                  <Plus className="w-4 h-4 md:w-4 md:h-4" strokeWidth={3} />
                   <span className="hidden md:inline">Add Habit</span>
                 </button>
               </div>
@@ -252,16 +238,24 @@ export const Habits: React.FC<HabitsProps> = ({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Search habits..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#16181c] border border-[#2f3336] pl-9 pr-3 py-2.5 rounded-xl text-[13px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
+                  className="w-full bg-[#16181c] border border-[#2f3336] pl-9 pr-8 py-2.5 rounded-xl text-[13px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
                 />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#71767b]/30 hover:bg-[#71767b]/50 transition-colors"
+                  >
+                    <span className="text-[#eff3f4] text-[10px] font-bold leading-none">✕</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
-      </div>
+
 
       <div className="p-5 md:p-6 space-y-6 pb-20 text-[#eff3f4]">
         {/* Yearly Heatmap (GitHub Style) */}

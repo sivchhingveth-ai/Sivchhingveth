@@ -205,21 +205,13 @@ export const Savings: React.FC<SavingsProps> = ({
   tabs, activeTab, onTabChange, onLogout, isLoggingOut
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Auto-hide header on scroll
-  useEffect(() => {
-    const main = document.querySelector('main');
-    if (!main) return;
-    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
-    main.addEventListener('scroll', handleScroll, { passive: true });
-    return () => main.removeEventListener('scroll', handleScroll);
-  }, []);
+
 
   const totalSaved = savings.reduce((a, s) => a + s.saved, 0);
   const totalGoal = savings.reduce((a, s) => a + s.goal, 0);
@@ -231,8 +223,9 @@ export const Savings: React.FC<SavingsProps> = ({
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[200px] opacity-100'}`}>
-          <div className="px-5 py-4 md:px-6 md:py-6 flex items-center justify-between">
+      </div>
+      <div>
+        <div className="px-5 py-4 md:px-6 md:py-6 flex items-center justify-between border-b border-[#2f3336]">
             <div className="min-w-0">
               <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">
                 Savings
@@ -241,13 +234,12 @@ export const Savings: React.FC<SavingsProps> = ({
                 {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
             </div>
-            <button onClick={onAddGoal} className="x-button-glass py-2 px-4 text-[13px] shrink-0 font-black uppercase tracking-wider">
-              <Plus className="w-4 h-4" strokeWidth={3} />
-              <span className="ml-2">Add Goal</span>
+            <button onClick={onAddGoal} className="x-button-glass !py-1 !px-2.5 !text-[9px] shrink-0 font-black uppercase tracking-widest">
+              <Plus className="w-3 h-3" strokeWidth={3} />
+              <span className="ml-1">Add Goal</span>
             </button>
           </div>
         </div>
-      </div>
 
       {/* Saving Goals List */}
       <div className="p-3 md:p-4 grid gap-3 md:gap-4">

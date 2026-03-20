@@ -16,14 +16,14 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
       <div className="absolute inset-0 bg-black/60 backdrop-blur-md animate-fade-in" onClick={onClose}></div>
       <div className="relative bg-black w-full max-w-[600px] rounded-2xl shadow-2xl overflow-hidden animate-slide-up border border-[#2f3336] max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-4 h-[53px] flex items-center gap-4 border-b border-[#2f3336]">
+        <div className="px-4 h-[44px] flex items-center gap-3 border-b border-[#2f3336]">
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.08] border border-white/10 hover:bg-white/[0.15] transition-all active:scale-95"
+            className="w-7 h-7 rounded-full flex items-center justify-center bg-white/[0.08] border border-white/10 hover:bg-white/[0.15] transition-all active:scale-95"
           >
-            <CloseIcon className="w-[18px] h-[18px] text-[#eff3f4]" />
+            <CloseIcon className="w-[14px] h-[14px] text-[#eff3f4]" />
           </button>
-          <h2 className="text-xl font-bold text-[#eff3f4]">{title}</h2>
+          <h2 className="text-[15px] md:text-[17px] font-black text-[#eff3f4] tracking-tight">{title}</h2>
         </div>
         
         {/* Content */}

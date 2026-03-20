@@ -112,7 +112,16 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
     if (targetHabit) {
       setFocusedHabitId(targetHabit.id);
-      document.getElementById(`habit-${targetHabit.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const el = document.getElementById(`habit-${targetHabit.id}`);
+      const main = document.querySelector('main');
+      if (el && main) {
+        const elRect = el.getBoundingClientRect();
+        const mainRect = main.getBoundingClientRect();
+        main.scrollTo({
+          top: main.scrollTop + (elRect.top - mainRect.top) - (mainRect.height / 2) + (elRect.height / 2),
+          behavior: 'smooth'
+        });
+      }
     }
   };
   // Streak: consecutive days up to today

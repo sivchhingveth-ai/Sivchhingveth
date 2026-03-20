@@ -19,6 +19,7 @@ import { DailyHabits } from './components/DailyHabits';
 import { Analytics } from './components/Analytics';
 import { Modal } from './components/Modal';
 import { ConfirmModal } from './components/ConfirmModal';
+import { DatePicker } from './components/DatePicker';
 import { Auth } from './components/Auth';
 import { Plus, Loader2, ShieldAlert } from 'lucide-react';
 import { Habit, SavingGoal } from './types';
@@ -62,6 +63,7 @@ export default function App() {
   const [newGoalAmount, setNewGoalAmount] = useState('');
   const [newGoalStartDate, setNewGoalStartDate] = useState(todayStr);
   const [newGoalTargetDate, setNewGoalTargetDate] = useState(todayStr);
+  const [goalError, setGoalError] = useState('');
   const [newHabitTime, setNewHabitTime] = useState('');
   const [newHabitMonthlyTarget, setNewHabitMonthlyTarget] = useState('');
 
@@ -207,6 +209,14 @@ export default function App() {
 
   const addGoal = async () => {
     if (!newGoalName.trim() || !newGoalAmount || !isAuthenticated) return;
+    
+    if (newGoalStartDate > newGoalTargetDate) {
+      setGoalError("Target date must be after the start date.");
+      return;
+    }
+
+    setGoalError('');
+
     const colors = ['#34c759', '#007aff', '#ff9500', '#ff3b30', '#af52de', '#5ac8fa'];
 
     await createGoal({
@@ -263,6 +273,7 @@ export default function App() {
   };
   const openAddGoal = () => {
     setNewGoalStartDate(todayStr);
+    setGoalError('');
     setNewGoalTargetDate(todayStr);
     setModalOpen('goal');
   };
@@ -396,9 +407,9 @@ export default function App() {
     return <Auth />;
   }
 
-  const inputClass = "w-full bg-[#16181c] border border-[#2f3336] px-4 py-3.5 rounded-xl text-[16px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all focus:bg-black";
-  const labelClass = "text-[11px] md:text-[13px] font-black text-[#71767b] uppercase tracking-widest mb-2 block px-1";
-  const submitClass = "x-button-primary w-full py-3.5 text-[16px] font-black rounded-xl shadow-[0_0_20px_rgba(29,155,240,0.2)]";
+  const inputClass = "w-full bg-[#16181c] border border-[#2f3336] px-3 py-2.5 md:py-3 rounded-xl text-[13px] md:text-[14px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all focus:bg-black";
+  const labelClass = "text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest mb-1.5 block px-1";
+  const submitClass = "x-button-primary w-full py-3 text-[14px] font-black rounded-xl shadow-[0_0_20px_rgba(29,155,240,0.2)]";
 
   return (
     <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative">
@@ -473,15 +484,15 @@ export default function App() {
 
       {/* Add Habit Modal */}
       <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Habit" : "New Habit"}>
-        <div className="pb-8 space-y-6 px-1">
+        <div className="pb-4 space-y-4 px-1">
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <label className={labelClass}>Habit name</label>
             <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
-          <div className="flex flex-col md:grid md:grid-cols-2 gap-6">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <label className={labelClass}>Time Phase (Optional)</label>
-              <div className="flex flex-wrap gap-2.5 mt-1">
+              <div className="flex flex-wrap gap-1.5 mt-1">
                 {[
                   { name: 'Morning', time: '08:00' },
                   { name: 'Afternoon', time: '14:00' },
@@ -491,9 +502,9 @@ export default function App() {
                   <button
                     key={phase.name}
                     onClick={(e) => { e.preventDefault(); setNewHabitTime(phase.time); }}
-                    className={`px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all border ${newHabitTime === phase.time
-                      ? 'bg-white border-white text-black'
-                      : 'bg-white/[0.05] border-white/10 text-[#71767b] hover:bg-white/[0.1] hover:text-[#eff3f4]'
+                    className={`px-2.5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all border ${newHabitTime === phase.time
+                      ? 'bg-white border-white text-black shadow-[0_0_10px_rgba(255,255,255,0.2)]'
+                      : 'bg-[#16181c] border-[#2f3336] text-[#71767b] hover:border-white/30 hover:text-[#eff3f4]'
                       }`}
                   >
                     {phase.name}
@@ -508,14 +519,14 @@ export default function App() {
           </div>
           <div>
             <label className={labelClass}>Category</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {['HEALTH', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
                 <button
                   key={cat}
                   onClick={() => setNewHabitCategory(cat)}
-                  className={`px-4 py-2 rounded-xl text-[12px] font-bold transition-all border ${newHabitCategory === cat
-                    ? 'bg-white border-white text-black'
-                    : 'bg-white/[0.05] border-white/10 text-[#71767b] hover:bg-white/[0.1] hover:text-[#eff3f4]'
+                  className={`px-2.5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all border ${newHabitCategory === cat
+                    ? 'bg-white border-white text-black shadow-[0_0_10px_rgba(255,255,255,0.2)]'
+                    : 'bg-[#16181c] border-[#2f3336] text-[#71767b] hover:border-white/30 hover:text-[#eff3f4]'
                     }`}
                 >
                   {cat}
@@ -523,33 +534,38 @@ export default function App() {
               ))}
             </div>
           </div>
-          <button onClick={saveHabit} className={submitClass}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
+          <button onClick={saveHabit} className={`${submitClass} mt-2`}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
 
         </div>
       </Modal>
 
       {/* Add Goal Modal */}
       <Modal isOpen={modalOpen === 'goal'} onClose={() => setModalOpen(null)} title="New Saving Goal">
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
             <label className={labelClass}>Goal name</label>
-            <input className={`${inputClass} !py-3 !text-[15px]`} placeholder="e.g. New Phone" value={newGoalName} onChange={e => setNewGoalName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
+            <input className={inputClass} placeholder="e.g. New Phone" value={newGoalName} onChange={e => setNewGoalName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div>
             <label className={labelClass}>Target amount ($)</label>
-            <input className={`${inputClass} !py-3 !text-[15px]`} type="number" placeholder="500" value={newGoalAmount} onChange={e => setNewGoalAmount(e.target.value)} />
+            <input className={inputClass} type="number" placeholder="500" value={newGoalAmount} onChange={e => setNewGoalAmount(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-3 md:gap-4">
             <div>
               <label className={labelClass}>Start Date</label>
-              <input className={`${inputClass} !px-2.5 !py-3 !text-[14px] md:!text-[15px] leading-tight`} type="date" value={newGoalStartDate} onChange={e => setNewGoalStartDate(e.target.value)} style={{ colorScheme: 'dark' }} />
+              <DatePicker value={newGoalStartDate} onChange={val => { setNewGoalStartDate(val); setGoalError(''); }} className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Target Date</label>
-              <input className={`${inputClass} !px-2.5 !py-3 !text-[14px] md:!text-[15px] leading-tight`} type="date" value={newGoalTargetDate} onChange={e => setNewGoalTargetDate(e.target.value)} style={{ colorScheme: 'dark' }} />
+              <DatePicker value={newGoalTargetDate} onChange={val => { setNewGoalTargetDate(val); setGoalError(''); }} className={inputClass} />
             </div>
           </div>
-          <button onClick={addGoal} className={`${submitClass} !py-3 mt-4`}>Add Goal</button>
+          {goalError && (
+            <div className="text-red-500 text-[11px] font-bold bg-red-500/10 border border-red-500/20 px-3 py-2.5 rounded-xl animate-fade-in flex items-center justify-center">
+              {goalError}
+            </div>
+          )}
+          <button onClick={addGoal} className={`${submitClass} mt-3`}>Add Goal</button>
         </div>
       </Modal>
 

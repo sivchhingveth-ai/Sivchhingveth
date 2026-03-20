@@ -35,16 +35,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const todayStr = getEffectiveDateStr();
   const today = getEffectiveDate();
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // Auto-hide header on scroll
-  React.useEffect(() => {
-    const main = document.querySelector('main');
-    if (!main) return;
-    const handleScroll = () => setIsScrolled(main.scrollTop > 20);
-    main.addEventListener('scroll', handleScroll, { passive: true });
-    return () => main.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Week navigation
   const [weekOffset, setWeekOffset] = useState(0);
@@ -209,8 +199,9 @@ export const Analytics: React.FC<AnalyticsProps> = ({
       {/* Header */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}`}>
-          <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      </div>
+      <div>
+        <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">
             {/* Row 1: Title */}
             <div className="min-w-0">
               <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">Analytics</h2>
@@ -259,7 +250,6 @@ export const Analytics: React.FC<AnalyticsProps> = ({
             </div>
           </div>
         </div>
-      </div>
 
       <div className="p-5 md:p-6 space-y-7 pb-32">
 
