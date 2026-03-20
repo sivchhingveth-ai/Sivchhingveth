@@ -16,10 +16,10 @@ interface HabitsProps {
 
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'morning',   label: 'Morning',   time: '08:00', icon: Sun,      color: '#ffad1f' },
+  { key: 'morning', label: 'Morning', time: '08:00', icon: Sun, color: '#ffad1f' },
   { key: 'afternoon', label: 'Afternoon', time: '14:00', icon: CloudSun, color: '#ff6b00' },
-  { key: 'night',     label: 'Night',     time: '20:00', icon: Moon,     color: '#7856ff' },
-  { key: 'midnight',  label: 'Midnight',  time: '02:00', icon: Stars,    color: '#1d9bf0' },
+  { key: 'night', label: 'Night', time: '20:00', icon: Moon, color: '#7856ff' },
+  { key: 'midnight', label: 'Midnight', time: '02:00', icon: Stars, color: '#1d9bf0' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -31,19 +31,20 @@ const getPhaseForHabit = (habit: Habit) => {
 export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange }) => {
   const [activeHeatmapCell, setActiveHeatmapCell] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showActionsId, setShowActionsId] = useState<string | null>(null);
   const heatmapRef = useRef<HTMLDivElement>(null);
 
   // Group habits by time phase
   const groupedByPhase = useMemo(() => {
     const groups: Record<string, { phase: typeof TIME_PHASES[number]; habits: Habit[] }> = {};
-    
+
     // Initialize groups in order
     TIME_PHASES.forEach(p => {
       groups[p.key] = { phase: p, habits: [] };
     });
 
     const searchLower = searchTerm.trim().toLowerCase();
-    const filteredHabits = habits.filter(h => 
+    const filteredHabits = habits.filter(h =>
       h.name.toLowerCase().includes(searchLower)
     );
 
@@ -139,10 +140,10 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
       const d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() - i);
       const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       let completedCount = 0;
-      habits.forEach(h => { if(h.history[dStr]) completedCount++; });
-      data.push({ 
-        date: dStr, 
-        count: completedCount, 
+      habits.forEach(h => { if (h.history[dStr]) completedCount++; });
+      data.push({
+        date: dStr,
+        count: completedCount,
         level: habits.length > 0 ? (completedCount / habits.length) : 0,
         label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       });
@@ -152,7 +153,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
 
   return (
     <div className="max-w-[1200px] mx-auto border-x border-[#2f3336] min-h-full bg-black text-[#eff3f4] p-5 md:p-6 space-y-6 pb-20 flex flex-col">
-      
+
       {/* Visual Header / Summary */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 border-b border-[#2f3336] pb-6 md:pb-8">
         <div className="text-center md:text-left">
@@ -163,23 +164,23 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
             Tracking {habits.length} daily goals
           </p>
         </div>
-        
+
         <div className="flex items-center gap-1 md:gap-2 bg-white/[0.03] p-1 md:p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
-          <button 
+          <button
             onClick={() => changeMonth(-1)}
             className="p-1.5 md:p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
           >
             <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </button>
-          <button 
+          <button
             onClick={() => onMonthChange(getEffectiveDate())}
             className="px-2 md:px-3 py-1 md:py-1.5 rounded-xl transition-all text-[9px] md:text-[11px] font-black text-[#71767b] hover:text-[#eff3f4] bg-white/[0.05] border border-white/5 uppercase"
           >
             TODAY
           </button>
           <div className="relative group/month">
-            <input 
-              type="month" 
+            <input
+              type="month"
               className="absolute inset-0 opacity-0 cursor-pointer z-10"
               value={`${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`}
               onChange={handleMonthSelect}
@@ -190,7 +191,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
               </span>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => changeMonth(1)}
             className="p-1.5 md:p-2 hover:bg-white/10 rounded-xl transition-all text-[#71767b] hover:text-[#eff3f4]"
           >
@@ -199,8 +200,8 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <button 
-            onClick={onAddHabit} 
+          <button
+            onClick={onAddHabit}
             className="x-button-primary shrink-0 py-3.5 md:py-3 px-5 text-[14px] md:text-[15px]"
           >
             <Plus className="w-5 h-5 md:w-4 md:h-4" strokeWidth={3} />
@@ -230,9 +231,9 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
               // Edge detection: first 3 and last 3 cells in any row
               const isNearLeftEdge = i < 3;
               const isNearRightEdge = i > 86;
-              const tooltipPositionClass = isNearLeftEdge 
-                ? 'left-0' 
-                : isNearRightEdge 
+              const tooltipPositionClass = isNearLeftEdge
+                ? 'left-0'
+                : isNearRightEdge
                   ? 'right-0'
                   : 'left-1/2 -translate-x-1/2';
               const arrowPositionClass = isNearLeftEdge
@@ -241,26 +242,26 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                   ? 'right-1.5'
                   : 'left-1/2 -translate-x-1/2';
               const isActive = activeHeatmapCell === i;
-              
+
               return (
-                <div 
+                <div
                   key={i}
                   onClick={() => handleCellTap(i)}
                   className={`aspect-square rounded-[2px] transition-all cursor-pointer relative group border
-                    ${d.level === 0 ? 'bg-transparent border-[#2f3336]' : 
-                      d.level < 0.3 ? 'bg-[#00ba7c]/20 border-[#00ba7c]/10' : 
-                      d.level < 0.7 ? 'bg-[#00ba7c]/50 border-[#00ba7c]/20' : 
-                      'bg-[#00ba7c] border-transparent'
+                    ${d.level === 0 ? 'bg-transparent border-[#2f3336]' :
+                      d.level < 0.3 ? 'bg-[#00ba7c]/20 border-[#00ba7c]/10' :
+                        d.level < 0.7 ? 'bg-[#00ba7c]/50 border-[#00ba7c]/20' :
+                          'bg-[#00ba7c] border-transparent'
                     }`}
                 >
                   <div className={`absolute bottom-full ${tooltipPositionClass} mb-2 ${isActive ? 'flex' : 'hidden group-hover:flex'} flex-col ${isNearLeftEdge ? 'items-start' : isNearRightEdge ? 'items-end' : 'items-center'} pointer-events-none z-50 animate-slide-up`}>
                     <div className="px-3 py-1.5 bg-[#16181c] text-[#eff3f4] text-[11px] font-bold rounded-lg border border-[#2f3336] shadow-2xl whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                         <span className="text-[#71767b]">
-                           {d.label}
-                         </span>
-                         <div className="w-1 h-1 rounded-full bg-[#2f3336]" />
-                         <span className="text-[#00ba7c] font-black">{d.count} done</span>
+                        <span className="text-[#71767b]">
+                          {d.label}
+                        </span>
+                        <div className="w-1 h-1 rounded-full bg-[#2f3336]" />
+                        <span className="text-[#00ba7c] font-black">{d.count} done</span>
                       </div>
                     </div>
                     <div className={`w-2 h-2 bg-[#16181c] border-r border-b border-[#2f3336] rotate-45 -mt-1 ${arrowPositionClass}`} />
@@ -301,7 +302,7 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
             <div key={phaseKey} className="space-y-4">
               {/* Phase Header - Same as Daily Habits */}
               <div className="flex items-center gap-3 px-1">
-                <div 
+                <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-lg"
                   style={{ backgroundColor: `${phase.color}15`, border: `1px solid ${phase.color}30` }}
                 >
@@ -325,15 +326,16 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                   const totalMonthly = days.filter(d => habit.history[d.dateStr]).length;
                   const target = habit.monthlyTarget || days.length;
                   const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
-                  
+
                   return (
-                    <div 
-                      key={habit.id} 
-                      className="w-full flex flex-row items-center justify-between gap-2 md:gap-4 p-3 md:p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 group relative overflow-hidden"
+                    <div
+                      key={habit.id}
+                      onClick={() => setShowActionsId(showActionsId === habit.id ? null : habit.id)}
+                      className="w-full flex flex-row items-center justify-between gap-2 md:gap-4 p-3 md:p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 group relative overflow-hidden cursor-pointer"
                     >
                       {/* Background Progress Glow */}
-                      <div 
-                        className="absolute left-0 top-0 bottom-0 transition-all duration-1000 opacity-[0.03]" 
+                      <div
+                        className="absolute left-0 top-0 bottom-0 transition-all duration-1000 opacity-[0.03]"
                         style={{ width: `${completionRate}%`, backgroundColor: phase.color }}
                       />
 
@@ -342,11 +344,11 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                         <div className="relative w-10 h-10 md:w-12 md:h-12 shrink-0">
                           <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
                             <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
-                            <circle 
-                              cx="24" cy="24" r="21" 
-                              fill="transparent" 
-                              stroke={phase.color} 
-                              strokeWidth="4" 
+                            <circle
+                              cx="24" cy="24" r="21"
+                              fill="transparent"
+                              stroke={phase.color}
+                              strokeWidth="4"
                               strokeDasharray={2 * Math.PI * 21}
                               strokeDashoffset={2 * Math.PI * 21 * (1 - completionRate / 100)}
                               strokeLinecap="round"
@@ -378,20 +380,22 @@ export const Habits: React.FC<HabitsProps> = ({ habits, onToggleHabit, onDeleteH
                           <p className="text-[8px] md:text-[9px] font-black text-[#71767b] uppercase tracking-widest mt-1">Consistency</p>
                         </div>
 
-                        <div className="flex items-center gap-1 border-l border-[#2f3336] pl-3">
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
-                            className="p-2.5 text-[#71767b] hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10 rounded-xl transition-all"
-                          >
-                            <Edit2 className="w-4.5 h-4.5" />
-                          </button>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
-                            className="p-2.5 text-[#71767b] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
-                          >
-                            <Trash2 className="w-4.5 h-4.5" />
-                          </button>
-                        </div>
+                        {showActionsId === habit.id && (
+                          <div className="flex items-center gap-1 border-l border-[#2f3336] pl-3 animate-in fade-in slide-in-from-right-2 duration-300 z-20">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
+                              className="p-2 md:p-2.5 text-[#71767b] hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10 rounded-xl transition-all"
+                            >
+                              <Edit2 className="w-4 h-4 md:w-[18px] md:h-[18px]" />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
+                              className="p-2 md:p-2.5 text-[#71767b] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                            >
+                              <Trash2 className="w-4 h-4 md:w-[18px] md:h-[18px]" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
