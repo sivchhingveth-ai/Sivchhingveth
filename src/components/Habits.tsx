@@ -40,11 +40,9 @@ export const Habits: React.FC<HabitsProps> = ({
   habits, onToggleHabit, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange,
   tabs, activeTab, onTabChange, onLogout, isLoggingOut
 }) => {
-  const [activeHeatmapCell, setActiveHeatmapCell] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showActionsId, setShowActionsId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const heatmapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 50);
@@ -80,25 +78,6 @@ export const Habits: React.FC<HabitsProps> = ({
     return result;
   }, [habits, searchTerm]);
 
-  // Dismiss tooltip when tapping outside the heatmap
-  useEffect(() => {
-    if (activeHeatmapCell === null) return;
-    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
-      if (heatmapRef.current && !heatmapRef.current.contains(e.target as Node)) {
-        setActiveHeatmapCell(null);
-      }
-    };
-    document.addEventListener('mousedown', handleOutsideClick);
-    document.addEventListener('touchstart', handleOutsideClick);
-    return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
-      document.removeEventListener('touchstart', handleOutsideClick);
-    };
-  }, [activeHeatmapCell]);
-
-  const handleCellTap = useCallback((index: number) => {
-    setActiveHeatmapCell(prev => prev === index ? null : index);
-  }, []);
   // Get days in current month
   const daysInMonth = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -155,25 +134,6 @@ export const Habits: React.FC<HabitsProps> = ({
 
   const sortedCategoryNames = ['HEALTH', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'];
 
-  // Calculate consistency for heatmap (last 90 days relative to current viewed month)
-  const heatmapData = useMemo(() => {
-    const data = [];
-    const baseDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0); // End of selected month
-    for (let i = 89; i >= 0; i--) {
-      const d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() - i);
-      const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      let completedCount = 0;
-      habits.forEach(h => { if (h.history[dStr]) completedCount++; });
-      data.push({
-        date: dStr,
-        count: completedCount,
-        level: habits.length > 0 ? (completedCount / habits.length) : 0,
-        label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      });
-    }
-    return data;
-  }, [habits, currentMonth]);
-
   return (
     <div className="flex flex-col relative w-full h-full">
 
@@ -195,50 +155,13 @@ export const Habits: React.FC<HabitsProps> = ({
 
             {/* Row 2: Controls */}
             <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
-              <div className="flex items-center justify-between w-full md:w-auto gap-3">
-                <div className="flex items-center gap-0.5 bg-[#16181c] p-0.5 rounded-full border border-[#2f3336]">
-                  <button
-                    onClick={() => changeMonth(-1)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-[#71767b] hover:text-[#eff3f4] active:scale-90"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onMonthChange(getEffectiveDate())}
-                    className={`px-2.5 h-8 rounded-full transition-all text-[9px] font-black uppercase tracking-widest ${isCurrentOrFutureMonth
-                      ? 'bg-[#1d9bf0]/15 text-[#1d9bf0] border border-[#1d9bf0]/30'
-                      : 'text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5'
-                      }`}
-                  >
-                    To Present
-                  </button>
-                  <MonthPicker value={currentMonth} onChange={onMonthChange}>
-                    <div className="h-8 flex items-center min-w-[90px] px-3 rounded-full hover:bg-white/5 transition-colors cursor-pointer">
-                      <span className="block text-[11px] font-black text-[#eff3f4] tracking-wide whitespace-nowrap mx-auto">
-                        {monthYearLabel}
-                      </span>
-                    </div>
-                  </MonthPicker>
-                  {!isCurrentOrFutureMonth ? (
-                    <button
-                      onClick={() => changeMonth(1)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-[#71767b] hover:text-[#eff3f4] active:scale-90"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <div className="w-8" />
-                  )}
-                </div>
-
-                <button
-                  onClick={onAddHabit}
-                  className="x-button-primary shrink-0 w-[42px] h-[42px] md:w-auto md:h-auto !p-0 md:!py-2.5 md:!px-8 flex items-center justify-center gap-3 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:scale-105 active:scale-95"
-                >
-                  <Plus className="w-4 h-4" strokeWidth={3} />
-                  <span className="hidden md:inline font-black tracking-tight">Add Habit</span>
-                </button>
-              </div>
+              <button
+                onClick={onAddHabit}
+                className="w-full md:w-auto bg-[#eff3f4] text-[#0f1419] py-2.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:opacity-90 active:scale-[0.98]"
+              >
+                <Plus className="w-5 h-5" strokeWidth={3} />
+                <span className="font-black tracking-tight text-[13px] md:text-[14px]">Add Habit</span>
+              </button>
 
               <div className="relative flex-1 md:max-w-[280px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
@@ -264,71 +187,8 @@ export const Habits: React.FC<HabitsProps> = ({
 
 
       <div className="p-5 md:p-6 space-y-6 pb-20 text-[#eff3f4] animate-slide-up duration-[3000ms]">
-        {/* Yearly Heatmap (GitHub Style) */}
-        <section className="space-y-3">
-        <h3 className="text-[11px] font-black text-[#71767b] uppercase tracking-[0.3em] px-1 opacity-80">
-          Activity Map (90 Days)
-        </h3>
-        <div ref={heatmapRef} className="bg-white/[0.02] border border-[#2f3336] p-3 md:p-5 pt-4 md:pt-5 rounded-2xl relative lg:max-w-2xl" style={{ overflowX: 'clip', overflowY: 'visible' }}>
-          <div className="grid gap-[5px]" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(13px, 1fr))' }}>
-            {heatmapData.map((d, i) => {
-              // Edge detection: first 3 and last 3 cells in any row
-              const isNearLeftEdge = i < 3;
-              const isNearRightEdge = i > 86;
-              const tooltipPositionClass = isNearLeftEdge
-                ? 'left-0'
-                : isNearRightEdge
-                  ? 'right-0'
-                  : 'left-1/2 -translate-x-1/2';
-              const arrowPositionClass = isNearLeftEdge
-                ? 'left-1.5'
-                : isNearRightEdge
-                  ? 'right-1.5'
-                  : 'left-1/2 -translate-x-1/2';
-              const isActive = activeHeatmapCell === i;
-
-              return (
-                <div
-                  key={i}
-                  onClick={() => handleCellTap(i)}
-                  className={`aspect-square rounded-[2px] transition-all cursor-pointer relative group border
-                    ${d.level === 0 ? 'bg-transparent border-[#2f3336]' :
-                      d.level < 0.3 ? 'bg-[#00ba7c]/20 border-[#00ba7c]/10' :
-                        d.level < 0.7 ? 'bg-[#00ba7c]/50 border-[#00ba7c]/20' :
-                          'bg-[#00ba7c] border-transparent'
-                    }`}
-                >
-                  <div className={`absolute bottom-full ${tooltipPositionClass} mb-2 ${isActive ? 'flex' : 'hidden group-hover:flex'} flex-col ${isNearLeftEdge ? 'items-start' : isNearRightEdge ? 'items-end' : 'items-center'} pointer-events-none z-50 animate-slide-up`}>
-                    <div className="px-3 py-1.5 bg-[#16181c] text-[#eff3f4] text-[11px] font-bold rounded-lg border border-[#2f3336] shadow-2xl whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#71767b]">
-                          {d.label}
-                        </span>
-                        <div className="w-1 h-1 rounded-full bg-[#2f3336]" />
-                        <span className="text-[#00ba7c] font-black">{d.count} done</span>
-                      </div>
-                    </div>
-                    <div className={`w-2 h-2 bg-[#16181c] border-r border-b border-[#2f3336] rotate-45 -mt-1 ${arrowPositionClass}`} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-4 flex items-center justify-end gap-2 text-[10px] font-black text-[#71767b]">
-            <span>Less</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 bg-transparent border border-[#2f3336] rounded-[1px]" />
-              <div className="w-3 h-3 bg-[#00ba7c]/20 rounded-[1px]" />
-              <div className="w-3 h-3 bg-[#00ba7c]/50 rounded-[1px]" />
-              <div className="w-3 h-3 bg-[#00ba7c] rounded-[1px]" />
-            </div>
-            <span>More</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Habit List - Balanced Row Layout */}
-      {/* Habit List - Grouped by Time Phase to match Daily Habits */}
+        {/* Habit List - Balanced Row Layout */}
+        {/* Habit List - Grouped by Time Phase to match Daily Habits */}
       <div className="flex flex-col gap-8 pb-32">
         {Object.entries(groupedByPhase).length === 0 && (
           <div className="text-center py-16 bg-white/[0.01] border border-dashed border-[#2f3336] rounded-3xl">
