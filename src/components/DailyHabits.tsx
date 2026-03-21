@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Habit } from '../types';
-import { Check, Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock } from 'lucide-react';
+import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -148,16 +148,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     return streak;
   }, [habits, totalCount, todayDate]);
 
-  // Motivational message
-  const getMessage = () => {
-    if (totalCount === 0) return "Add some routines to get started!";
-    if (completionPct === 100) return "Perfect day! All routines completed!";
-    if (completionPct >= 75) return "Almost there! Keep pushing!";
-    if (completionPct >= 50) return "Great progress — over halfway!";
-    if (completionPct > 0) return "Good start! Keep going!";
-    return "Let's crush it today!";
-  };
-
   const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
   const isLongPressRef = React.useRef(false);
   const [showTopSignal, setShowTopSignal] = React.useState(false);
@@ -183,6 +173,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       longPressTimer.current = null;
     }
   };
+
+  let globalIdx = 0;
 
   return (
     <div className="flex flex-col relative w-full h-full">
@@ -226,56 +218,56 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
           </button>
         </div>
       )}
+
       {/* Header with inline navigation + stats */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
+
       <div>
         <div className="px-5 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 border-b border-[#2f3336]">
-            <div className="min-w-0">
-              <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] leading-tight tracking-tight">
-                To-Do List
-              </h2>
-              <div className="flex items-center gap-2 mt-0.5">
-                <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
-                <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
-                  {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
-                </span>
+          <div className="min-w-0">
+            <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] leading-tight tracking-tight">
+              To-Do List
+            </h2>
+            <div className="flex items-center gap-2 mt-0.5">
+              <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
+              <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
+                {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
+            {/* Done Chip */}
+            <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
+              <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#00ba7c]/10 border border-[#00ba7c]/20 flex items-center justify-center">
+                <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#00ba7c]" />
+              </div>
+              <div className="text-right pr-1">
+                <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">
+                  {completedCount}<span className="text-[#71767b] text-[9px] md:text-[11px]">/{totalCount}</span>
+                </p>
+                <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-0.5 tracking-wider">Done</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4 shrink-0">
-              {/* Done Chip */}
-              <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
-                <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#00ba7c]/10 border border-[#00ba7c]/20 flex items-center justify-center">
-                  <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#00ba7c]" />
-                </div>
-                <div className="text-right pr-1">
-                  <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">
-                    {completedCount}<span className="text-[#71767b] text-[9px] md:text-[11px]">/{totalCount}</span>
-                  </p>
-                  <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-0.5 tracking-wider">Done</p>
-                </div>
+            {/* Streak Chip */}
+            <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
+              <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
+                <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#ff6b00]" />
               </div>
-
-              {/* Streak Chip */}
-              <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
-                <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
-                  <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#ff6b00]" />
-                </div>
-                <div className="text-right pr-1">
-                  <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">{currentStreak}</p>
-                  <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-0.5 tracking-wider">Streak</p>
-                </div>
+              <div className="text-right pr-1">
+                <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">{currentStreak}</p>
+                <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-0.5 tracking-wider">Streak</p>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-
-      {/* Habit Checklist — Grouped by Time Phase */}
       <div className="p-5 md:p-6 space-y-7 pb-32">
-        {habits.length === 0 && (
+        {totalCount === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
             <p className="text-[#71767b] text-base font-bold">No routines yet</p>
@@ -290,7 +282,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
           return (
             <div key={phase.key} className="space-y-1.5">
-              {/* Phase Header */}
               <div className={`flex items-center gap-2.5 px-1 mb-2 py-1.5 rounded-xl ${isCurrentPhase ? 'bg-white/[0.02]' : ''}`}>
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
@@ -318,15 +309,15 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 </span>
               </div>
 
-               {/* Habit Items - Grid on Desktop */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
-                {phaseHabits.map((habit, idx) => {
+                {phaseHabits.map((habit) => {
                   const isDone = !!habit.history[todayStr];
+                  const animationDelay = `${globalIdx++ * 60}ms`;
                   return (
                     <div
                       key={habit.id}
-                      className="animate-slide-up duration-[2000ms] fill-mode-backwards"
-                      style={{ animationDelay: `${idx * 100}ms` }}
+                      className="animate-pop-in fill-mode-backwards"
+                      style={{ animationDelay }}
                     >
                       <button
                         id={`habit-${habit.id}`}
@@ -342,7 +333,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           '--shine-color': focusedHabitId === habit.id ? `${phase.color}60` : 'transparent'
                         } as React.CSSProperties}
                       >
-                        {/* Checkbox */}
                         <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
                           ? 'border-transparent scale-100 animate-check-pop'
                           : 'border-[#2f3336] group-hover:border-[#71767b]'
@@ -358,7 +348,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           )}
                         </div>
 
-                        {/* Habit Info */}
                         <div className="flex-1 text-left min-w-0">
                           <p className={`text-[14px] md:text-[15px] font-bold transition-all duration-300 ease-in-out truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'
                             }`}>
@@ -366,7 +355,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           </p>
                         </div>
 
-                        {/* Done indicator */}
                         {isDone && (
                           <div className="shrink-0 animate-fade-in flex items-center justify-center">
                             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phase.color }} />
