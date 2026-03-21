@@ -138,11 +138,44 @@ export const Analytics: React.FC<AnalyticsProps> = ({
     return { weeks, year, month, daysInMonth, label: `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}` };
   }, [habits, monthOffset, today, todayStr]);
 
+  const yearlyData = useMemo(() => {
+    const currentYear = today.getFullYear() + monthOffset;
+    const months = [];
+    for (let i = 0; i < 12; i++) {
+      const firstDay = new Date(currentYear, i, 1);
+      const lastDay = new Date(currentYear, i + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      
+      let sumPct = 0;
+      let count = 0;
+      
+      for(let dNum = 1; dNum <= daysInMonth; dNum++) {
+        const d = new Date(currentYear, i, dNum);
+        if (d > today) break;
+        const dateStr = formatDateStr(d);
+        const completed = habits.filter(h => h.history[dateStr]).length;
+        const pct = habits.length > 0 ? (completed / habits.length) * 100 : 0;
+        sumPct += pct;
+        count++;
+      }
+      
+      months.push({
+        label: firstDay.toLocaleString('default', { month: 'short' }),
+        fullLabel: firstDay.toLocaleString('default', { month: 'long', year: 'numeric' }),
+        pct: count > 0 ? Math.round(sumPct / count) : 0,
+        isCurrent: firstDay.getMonth() === today.getMonth() && currentYear === today.getFullYear(),
+        isFuture: firstDay > today,
+      });
+    }
+
+    return { months, year: currentYear };
+  }, [habits, monthOffset, today]);
+
   const monthAvg = useMemo(() => {
-    const allDays = monthData.weeks.flat().filter(d => d.isCurrentMonth && !d.isFuture);
-    if (allDays.length === 0) return 0;
-    return Math.round(allDays.reduce((a, d) => a + d.pct, 0) / allDays.length);
-  }, [monthData]);
+    const validMonths = yearlyData.months.filter(m => !m.isFuture);
+    if (validMonths.length === 0) return 0;
+    return Math.round(validMonths.reduce((a, m) => a + m.pct, 0) / validMonths.length);
+  }, [yearlyData]);
 
 
 
@@ -240,7 +273,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
                   className={`px-1.5 md:px-2 py-1 rounded-xl text-[9px] md:text-[10px] font-black transition-all min-w-[90px] md:w-[150px] text-center ${navOffset === 0 ? 'bg-white/10 text-[#eff3f4] border border-white/20' : 'text-[#71767b] bg-white/[0.05] border border-white/5'
                     }`}
                 >
-                  {navLabel}
+                  {view === 'weekly' ? weekLabel : monthData.label}
                 </button>
                 {navOffset < 0 ? (
                   <button
@@ -316,22 +349,38 @@ export const Analytics: React.FC<AnalyticsProps> = ({
               </div>
 
               {/* Productivity Legend */}
-              <div className="border-t border-[#2f3336] pt-4 flex flex-wrap items-center justify-center gap-y-2.5 gap-x-4 md:gap-x-8">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#00ba7c]" />
-                  <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest">ELITE <span className="text-[#eff3f4]/40 ml-0.5">(75+)</span></span>
+              {/* Productivity Legend - Symmetrical Layout */}
+              <div className="border-t border-[#2f3336] pt-5 flex justify-between items-start px-2 md:px-6">
+                {/* Left Column (Right-to-Left feel) */}
+                <div className="flex flex-col gap-2.5">
+                  <div className="flex items-center gap-2 justify-end">
+                    <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest text-right">
+                      ELITE <span className="text-[#eff3f4]/40 ml-0.5">(75+)</span>
+                    </span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#00ba7c]" />
+                  </div>
+                  <div className="flex items-center gap-2 justify-end">
+                    <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest text-right">
+                      STEADY <span className="text-[#eff3f4]/40 ml-0.5">(25-50)</span>
+                    </span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#1d9bf0]" />
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#ffad1f]" />
-                  <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest">HIGH <span className="text-[#eff3f4]/40 ml-0.5">(50-75)</span></span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#1d9bf0]" />
-                  <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest">STEADY <span className="text-[#eff3f4]/40 ml-0.5">(25-50)</span></span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#ef4444]" />
-                  <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest">LOW <span className="text-[#eff3f4]/40 ml-0.5">(0-25)</span></span>
+
+                {/* Right Column (Left-to-Right feel) */}
+                <div className="flex flex-col gap-2.5">
+                  <div className="flex items-center gap-2 justify-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#ffad1f]" />
+                    <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest text-left">
+                      HIGH <span className="text-[#eff3f4]/40 ml-0.5">(50-75)</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 justify-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" />
+                    <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest text-left">
+                      LOW <span className="text-[#eff3f4]/40 ml-0.5">(0-25)</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -410,56 +459,95 @@ export const Analytics: React.FC<AnalyticsProps> = ({
         {/* ═══════ MONTHLY VIEW ═══════ */}
         {view === 'monthly' && (
           <div key="monthly" className="space-y-4 animate-slide-up">
-            {/* Calendar Grid */}
-            <div className="bg-white/[0.02] border border-[#2f3336] rounded-3xl p-4 md:p-6">
-              {/* Day names header */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                  <div key={day} className="text-center text-[9px] md:text-[10px] font-black text-[#71767b] uppercase py-1">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              {/* Calendar weeks */}
-              {monthData.weeks.map((week, wi) => (
-                <div key={wi} className="grid grid-cols-7 gap-1 mb-1">
-                  {week.map((d, di) => (
-                    <button
-                      key={di}
-                      onClick={() => !d.isFuture && d.isCurrentMonth && setSelectedDay(d.dateStr === selectedDay ? null : d.dateStr)}
-                      disabled={d.isFuture || !d.isCurrentMonth}
-                      className={`aspect-square rounded-xl flex flex-col items-center justify-center transition-all relative ${!d.isCurrentMonth ? 'opacity-20' :
-                        d.isFuture ? 'opacity-30' :
-                          d.dateStr === selectedDay ? 'ring-2 ring-[#1d9bf0] bg-white/[0.06]' :
-                            'hover:bg-white/[0.04] cursor-pointer'
-                        }`}
-                      style={d.isCurrentMonth && !d.isFuture && d.pct > 0 ? {
-                        backgroundColor: `${getBarColor(d.pct)}${Math.round(d.pct * 0.3).toString(16).padStart(2, '0')}`,
-                      } : {}}
-                    >
-                      {d.dateStr === selectedDay && (
-                        <div className="absolute top-1 right-1">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#1d9bf0] animate-ping" />
-                        </div>
-                      )}
-                      <span className={`text-[11px] md:text-[13px] font-black ${d.isToday ? 'text-[#1d9bf0]' : d.isCurrentMonth ? 'text-[#eff3f4]' : 'text-[#71767b]'
-                        }`}>
-                        {d.dayNum}
-                      </span>
-                      {d.isCurrentMonth && !d.isFuture && (
-                        <span className="text-[7px] md:text-[8px] font-bold text-[#71767b]">
-                          {d.completed}/{d.total}
-                        </span>
-                      )}
-                      {d.isToday && !selectedDay && (
-                        <div className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#1d9bf0]" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
+            {/* Monthly Bar Chart */}
+            <div className="bg-white/[0.02] border border-[#2f3336] p-4 md:p-6 rounded-3xl group/chart">
+              <div className="overflow-x-auto no-scrollbar pb-2">
+                <div className="flex items-end justify-between h-[160px] md:h-[220px] mb-4 min-w-[600px] md:min-w-full px-1">
+                  {monthData.weeks.flat().filter(d => d.isCurrentMonth).map((d, i) => {
+                    const isToday = d.dateStr === todayStr;
+                    const barColor = getBarColor(d.pct);
 
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => !d.isFuture && setSelectedDay(d.dateStr === selectedDay ? null : d.dateStr)}
+                        disabled={d.isFuture}
+                        className={`flex flex-col items-center gap-2 flex-1 h-full justify-end group/bar relative ${d.isFuture ? 'opacity-20' : 'cursor-pointer'}`}
+                      >
+                        {/* Tooltip on Hover */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover/bar:opacity-100 transition-all z-50 pointer-events-none translate-y-2 group-hover/bar:translate-y-0 text-center whitespace-nowrap">
+                          <div className="bg-[#16181c] border border-[#2f3336] px-3 py-1.5 rounded-xl shadow-2xl">
+                            <span className="text-[14px] font-black text-[#eff3f4]">
+                              {d.completed}/{d.total}
+                            </span>
+                            <div className="text-[10px] font-bold text-[#71767b] uppercase mt-0.5">{d.pct}% Done</div>
+                            <div className="text-[8px] text-[#71767b] mt-0.5">
+                              {new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </div>
+                          </div>
+                          <div className="w-2 h-2 bg-[#16181c] border-r border-b border-[#2f3336] rotate-45 mx-auto -mt-1" />
+                        </div>
+
+                        <div className="w-full flex justify-center items-end h-full px-0.5">
+                          <div
+                            className={`w-full max-w-[14px] md:max-w-[20px] rounded-t-[4px] md:rounded-t-[6px] transition-all duration-700 relative overflow-hidden group-hover/bar:brightness-125 ${d.dateStr === selectedDay ? 'ring-2 ring-white/30' : ''}`}
+                            style={{
+                              height: `${isLoaded ? Math.max(d.pct, 4) : 0}%`,
+                              backgroundColor: barColor,
+                              boxShadow: d.pct > 0 && isLoaded ? `0 0 10px ${barColor}20` : 'none'
+                            }}
+                          >
+                            {isToday && (
+                              <div className="absolute inset-0 bg-white/10 animate-pulse" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <p className={`text-[8px] md:text-[9px] font-black mb-1 ${isToday ? 'text-[#1d9bf0]' : 'text-[#71767b]'}`}>
+                            {d.dayNum}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+               {/* Productivity Legend - Symmetrical Layout */}
+               <div className="border-t border-[#2f3336] pt-5 flex justify-between items-start px-2 md:px-6">
+                {/* Left Column (Right-to-Left feel) */}
+                <div className="flex flex-col gap-2.5">
+                  <div className="flex items-center gap-2 justify-end">
+                    <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest text-right">
+                      ELITE <span className="text-[#eff3f4]/40 ml-0.5">(75+)</span>
+                    </span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#00ba7c]" />
+                  </div>
+                  <div className="flex items-center gap-2 justify-end">
+                    <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest text-right">
+                      STEADY <span className="text-[#eff3f4]/40 ml-0.5">(25-50)</span>
+                    </span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#1d9bf0]" />
+                  </div>
+                </div>
+
+                {/* Right Column (Left-to-Right feel) */}
+                <div className="flex flex-col gap-2.5">
+                  <div className="flex items-center gap-2 justify-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#ffad1f]" />
+                    <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest text-left">
+                      HIGH <span className="text-[#eff3f4]/40 ml-0.5">(50-75)</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 justify-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" />
+                    <span className="text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest text-left">
+                      LOW <span className="text-[#eff3f4]/40 ml-0.5">(0-25)</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

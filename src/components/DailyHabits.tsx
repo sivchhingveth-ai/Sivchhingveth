@@ -275,22 +275,16 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
           </div>
         )}
 
-        {groupedByPhase.map(({ phase, habits: phaseHabits }) => {
-          const PhaseIcon = phase.icon;
+        {groupedByPhase.map((phaseGroup) => {
+          const { phase, habits: phaseHabits } = phaseGroup as { phase: typeof TIME_PHASES[number]; habits: Habit[] };
           const isCurrentPhase = phase.key === currentPhaseKey;
           const phaseCompleted = phaseHabits.filter(h => h.history[todayStr]).length;
 
           return (
             <div key={phase.key} className="space-y-1.5">
-              <div className={`flex items-center gap-2.5 px-1 mb-2 py-1.5 rounded-xl ${isCurrentPhase ? 'bg-white/[0.02]' : ''}`}>
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: `${phase.color}15`, border: `1px solid ${phase.color}30` }}
-                >
-                  <PhaseIcon className="w-3.5 h-3.5" style={{ color: phase.color }} />
-                </div>
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.15em]" style={{ color: phase.color }}>
+              <div className={`flex items-center gap-3 px-1 mb-1.5 py-1 rounded-xl ${isCurrentPhase ? 'bg-white/[0.02]' : ''}`}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em] leading-none" style={{ color: phase.color }}>
                     {phase.label}{phase.key !== 'daily_rule' ? ' Phase' : ''}
                   </span>
                   <span className="text-[9px] font-bold text-[#71767b]/50">
@@ -325,12 +319,13 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           onToggleHabit(habit.id, todayStr);
                           setFocusedHabitId(habit.id);
                         }}
-                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-200 group border bit-click-spring ${isDone
-                          ? 'bg-white/[0.03] border-white/[0.06]'
+                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border bit-click-spring ${isDone
+                          ? 'border-transparent'
                           : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
                           } ${focusedHabitId === habit.id ? 'habit-shine' : 'z-10'}`}
                         style={{
-                          '--shine-color': focusedHabitId === habit.id ? `${phase.color}60` : 'transparent'
+                          '--shine-color': focusedHabitId === habit.id ? `${phase.color}60` : 'transparent',
+                          backgroundColor: isDone ? `${phase.color}15` : 'transparent',
                         } as React.CSSProperties}
                       >
                         <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone

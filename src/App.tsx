@@ -471,7 +471,22 @@ export default function App() {
             </div>
             <div>
               <label className={labelClass}>Monthly Target</label>
-              <input className={inputClass} type="number" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 10" value={newHabitMonthlyTarget} onChange={e => setNewHabitMonthlyTarget(e.target.value)} />
+              <input 
+                className={inputClass} 
+                type="number" 
+                inputMode="numeric" 
+                pattern="[0-9]*" 
+                min="1" 
+                max="31"
+                placeholder="e.g. 10" 
+                value={newHabitMonthlyTarget} 
+                onChange={e => {
+                  const val = e.target.value;
+                  if (val === "" || (parseInt(val) <= 31 && parseInt(val) >= 0)) {
+                    setNewHabitMonthlyTarget(val);
+                  }
+                }} 
+              />
             </div>
           </div>
           <button onClick={saveHabit} className={`${submitClass} mt-2`}>{editingHabitId ? "Update Routine & Rule" : "Add Routine & Rule"}</button>

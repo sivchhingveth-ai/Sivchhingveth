@@ -151,41 +151,14 @@ export const Habits: React.FC<HabitsProps> = ({
           <h2 className="text-[18px] md:text-[20px] font-black text-[#eff3f4] leading-tight tracking-tight whitespace-nowrap">
             Set Routine & Rule
           </h2>
-          
-          <div className="flex items-center gap-3 mt-1.5">
-            <div className="flex items-center bg-white/[0.03] p-0.5 rounded-lg border border-white/10 w-fit">
-              <button 
-                onClick={() => changeMonth(-1)} 
-                className="p-1 hover:bg-white/10 rounded-md transition-all text-[#71767b] hover:text-[#eff3f4]"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
-              <div className="px-2 text-[10px] md:text-[11px] font-black tracking-[0.1em] uppercase text-[#eff3f4] min-w-[100px] text-center">
-                {monthYearLabel}
-              </div>
-              <button 
-                onClick={() => changeMonth(1)} 
-                disabled={isCurrentOrFutureMonth}
-                className={`p-1 rounded-md transition-all ${
-                  isCurrentOrFutureMonth 
-                  ? 'opacity-20 cursor-not-allowed text-[#71767b]' 
-                  : 'hover:bg-white/10 text-[#71767b] hover:text-[#eff3f4]'
-                }`}
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            
-            <div className="h-4 w-px bg-[#2f3336]" />
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[#eff3f4] text-[9px] font-black uppercase tracking-widest leading-none">
-                {habits.filter(h => h.time !== 'any').length} routines
-              </span>
-              <span className="w-1 h-1 rounded-full bg-[#71767b]" />
-              <span className="text-[#34c759] text-[9px] font-black uppercase tracking-widest leading-none">
-                {habits.filter(h => h.time === 'any').length} rules
-              </span>
-            </div>
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="text-[#eff3f4] text-[9px] font-black uppercase tracking-widest leading-none">
+              {habits.filter(h => h.time !== 'any').length} routines
+            </span>
+            <span className="w-1 h-1 rounded-full bg-[#71767b]" />
+            <span className="text-[#34c759] text-[9px] font-black uppercase tracking-widest leading-none">
+              {habits.filter(h => h.time === 'any').length} rules
+            </span>
           </div>
         </div>
 
@@ -232,20 +205,13 @@ export const Habits: React.FC<HabitsProps> = ({
 
           {Object.entries(groupedByPhase).map(([phaseKey, phaseGroup]) => {
             const { phase, habits: phaseHabits } = phaseGroup as { phase: typeof TIME_PHASES[number]; habits: Habit[] };
-            const PhaseIcon = phase.icon;
 
             return (
               <div key={phaseKey} className="space-y-4">
                 {/* Phase Header - Compacted */}
-                <div className="flex items-center gap-2.5 px-0.5">
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-md"
-                    style={{ backgroundColor: `${phase.color}12`, border: `1px solid ${phase.color}25` }}
-                  >
-                    <PhaseIcon className="w-3.5 h-3.5" style={{ color: phase.color }} />
-                  </div>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.15em]" style={{ color: phase.color }}>
+                <div className="flex items-center gap-3 px-0.5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: phase.color }}>
                       {phase.label}{phase.key !== 'daily_rule' ? ' Phase' : ''}
                     </span>
                     <div className="h-px w-8 bg-[#2f3336] hidden md:block" />
@@ -304,13 +270,14 @@ export const Habits: React.FC<HabitsProps> = ({
                                   key={i}
                                   className={`w-3.5 md:w-4.5 h-3 md:h-4 rounded-[3px] border transition-all flex items-center justify-center overflow-hidden shrink-0 ${
                                     habit.history[d.dateStr] 
-                                    ? 'bg-[#1d9bf0]/20 border-[#1d9bf0]/40' 
+                                    ? '' 
                                     : 'bg-white/[0.04] border-white/5'
                                   }`}
+                                  style={habit.history[d.dateStr] ? { backgroundColor: `${phase.color}25`, borderColor: `${phase.color}50` } : {}}
                                   title={d.dateStr}
                                 >
                                   {habit.history[d.dateStr] && (
-                                    <div className="w-full h-full bg-[#1d9bf0] opacity-80" />
+                                    <div className="w-full h-full opacity-80" style={{ backgroundColor: phase.color }} />
                                   )}
                                   {!habit.history[d.dateStr] && (
                                     <span className="text-[6px] md:text-[7px] font-bold text-[#71767b] select-none">{d.label}</span>
