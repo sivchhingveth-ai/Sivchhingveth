@@ -3,8 +3,8 @@
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -13,7 +13,7 @@
 
 ::-webkit-scrollbar-thumb {
   background: #2f3336;
-  border-radius: 10px;
+  border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

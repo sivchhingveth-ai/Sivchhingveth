@@ -21,7 +21,7 @@ import { Modal } from './components/Modal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { DatePicker } from './components/DatePicker';
 import { Auth } from './components/Auth';
-import { Plus, Loader2, ShieldAlert } from 'lucide-react';
+import { Plus, Loader2, ShieldAlert, ArrowUp } from 'lucide-react';
 import { Habit, SavingGoal } from './types';
 import { getEffectiveDateStr, getEffectiveDate } from './utils/dateUtils';
 
@@ -32,13 +32,27 @@ export default function App() {
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['To-Do List', 'Set Routine', 'Savings', 'Analytics'];
+  const tabs = ['To-Do List', 'Set Routine & Rule', 'Savings', 'Analytics'];
 
-  // Scroll to top on tab change
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Scroll to top on tab change and initialize scroll listener
   useEffect(() => {
     const main = document.querySelector('main');
-    if (main) main.scrollTop = 0;
+    if (main) {
+      main.scrollTop = 0;
+      const handleScroll = () => setShowScrollTop(main.scrollTop > 300);
+      main.addEventListener('scroll', handleScroll);
+      return () => main.removeEventListener('scroll', handleScroll);
+    }
   }, [activeTab]);
+
+  const scrollToTop = () => {
+    const main = document.querySelector('main');
+    if (main) {
+      main.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Modal state
   const [modalOpen, setModalOpen] = useState<string | null>(null);
@@ -356,7 +370,7 @@ export default function App() {
           )}
 
 
-          {activeTab === 'Set Routine' && (
+          {activeTab === 'Set Routine & Rule' && (
             <div key={activeTab}>
               <Habits
                 habits={habits}
@@ -405,11 +419,27 @@ export default function App() {
             </div>
           )}
 
+          {/* Floating Scroll to Top Button — Global for Routine, Savings, and Analytics tabs */}
+          {activeTab !== 'To-Do List' && (
+            <div 
+              className={`fixed bottom-16 right-6 min-[1000px]:right-[calc(50%-465px)] z-[60] transition-all duration-500 transform ${
+                showScrollTop ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-75 pointer-events-none'
+              }`}
+            >
+              <button
+                onClick={scrollToTop}
+                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl hover:bg-white/20 active:scale-95 group transition-all"
+                aria-label="Scroll to top"
+              >
+                <ArrowUp className="w-6 h-6 text-[#eff3f4] group-hover:-translate-y-1 transition-transform duration-300" />
+              </button>
+            </div>
+          )}
         </div>
       </main>
 
       {/* Add Routine Modal */}
-      <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Routine" : "New Routine"}>
+      <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Routine & Rule" : "New Routine & Rule"}>
         <div className="pb-4 space-y-4 px-1">
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <label className={labelClass}>Name Routine & Rule</label>
@@ -444,7 +474,7 @@ export default function App() {
               <input className={inputClass} type="number" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 10" value={newHabitMonthlyTarget} onChange={e => setNewHabitMonthlyTarget(e.target.value)} />
             </div>
           </div>
-          <button onClick={saveHabit} className={`${submitClass} mt-2`}>{editingHabitId ? "Update Routine" : "Add Routine"}</button>
+          <button onClick={saveHabit} className={`${submitClass} mt-2`}>{editingHabitId ? "Update Routine & Rule" : "Add Routine & Rule"}</button>
 
         </div>
       </Modal>
