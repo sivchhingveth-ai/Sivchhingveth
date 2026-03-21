@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Habit } from '../types';
-import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock } from 'lucide-react';
+import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { getEffectiveDate } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -107,6 +107,36 @@ export const Habits: React.FC<HabitsProps> = ({
     });
   }, [daysInMonth, currentMonth]);
 
+  const currentWeekDates = useMemo(() => {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Monday
+    const startOfWeek = new Date(today.getFullYear(), today.getMonth(), diff);
+    
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      return {
+        dateStr: d.toISOString().split('T')[0],
+        label: d.toLocaleString('default', { weekday: 'narrow' })
+      };
+    });
+  }, []);
+
+  const changeMonth = (offset: number) => {
+    const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1);
+    const now = new Date();
+    const currentRealMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    if (offset > 0 && newDate > currentRealMonth) return;
+    onMonthChange(newDate);
+  };
+
+  const isCurrentOrFutureMonth = useMemo(() => {
+    const now = new Date();
+    return currentMonth.getFullYear() >= now.getFullYear() && currentMonth.getMonth() >= now.getMonth();
+  }, [currentMonth]);
+
   return (
     <div className="flex flex-col relative w-full h-full">
 
@@ -116,14 +146,47 @@ export const Habits: React.FC<HabitsProps> = ({
       </div>
 
       <div className="px-5 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">
-        {/* Row 1: Title */}
+        {/* Row 1: Title & Month Picker */}
         <div className="min-w-0">
           <h2 className="text-[18px] md:text-[20px] font-black text-[#eff3f4] leading-tight tracking-tight whitespace-nowrap">
             Set Routine & Rule
           </h2>
-          <p className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] mt-1 truncate">
-            Tracking {habits.length} daily goals
-          </p>
+          
+          <div className="flex items-center gap-3 mt-1.5">
+            <div className="flex items-center bg-white/[0.03] p-0.5 rounded-lg border border-white/10 w-fit">
+              <button 
+                onClick={() => changeMonth(-1)} 
+                className="p-1 hover:bg-white/10 rounded-md transition-all text-[#71767b] hover:text-[#eff3f4]"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <div className="px-2 text-[10px] md:text-[11px] font-black tracking-[0.1em] uppercase text-[#eff3f4] min-w-[100px] text-center">
+                {monthYearLabel}
+              </div>
+              <button 
+                onClick={() => changeMonth(1)} 
+                disabled={isCurrentOrFutureMonth}
+                className={`p-1 rounded-md transition-all ${
+                  isCurrentOrFutureMonth 
+                  ? 'opacity-20 cursor-not-allowed text-[#71767b]' 
+                  : 'hover:bg-white/10 text-[#71767b] hover:text-[#eff3f4]'
+                }`}
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            
+            <div className="h-4 w-px bg-[#2f3336]" />
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[#eff3f4] text-[9px] font-black uppercase tracking-widest leading-none">
+                {habits.filter(h => h.time !== 'any').length} routines
+              </span>
+              <span className="w-1 h-1 rounded-full bg-[#71767b]" />
+              <span className="text-[#34c759] text-[9px] font-black uppercase tracking-widest leading-none">
+                {habits.filter(h => h.time === 'any').length} rules
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 w-full md:w-auto">
@@ -231,9 +294,30 @@ export const Habits: React.FC<HabitsProps> = ({
                           </div>
 
                           <div className="min-w-0">
-                            <h4 className="text-[13px] md:text-[15px] font-black text-[#eff3f4] uppercase tracking-tight truncate mt-1">
+                            <h4 className="text-[13px] md:text-[15px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
                               {habit.name}
                             </h4>
+                            {/* Weekly Mini-Graph */}
+                            <div className="flex gap-1 mt-1.5 overflow-x-auto no-scrollbar scrollbar-hide pb-0.5">
+                              {currentWeekDates.map((d, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-3.5 md:w-4.5 h-3 md:h-4 rounded-[3px] border transition-all flex items-center justify-center overflow-hidden shrink-0 ${
+                                    habit.history[d.dateStr] 
+                                    ? 'bg-[#1d9bf0]/20 border-[#1d9bf0]/40' 
+                                    : 'bg-white/[0.04] border-white/5'
+                                  }`}
+                                  title={d.dateStr}
+                                >
+                                  {habit.history[d.dateStr] && (
+                                    <div className="w-full h-full bg-[#1d9bf0] opacity-80" />
+                                  )}
+                                  {!habit.history[d.dateStr] && (
+                                    <span className="text-[6px] md:text-[7px] font-bold text-[#71767b] select-none">{d.label}</span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </div>
 
