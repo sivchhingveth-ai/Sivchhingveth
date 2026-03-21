@@ -1,7 +1,6 @@
 export interface Habit {
   id: any;
   name: string;
-  category: string;
   history: Record<string, boolean>; // date string "YYYY-MM-DD" -> boolean
   streak: number;
   time?: string;

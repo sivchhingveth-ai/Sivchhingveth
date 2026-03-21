@@ -8,7 +8,7 @@ export default defineSchema({
   habits: defineTable({
     userId: v.string(),
     name: v.string(),
-    category: v.string(),
+    category: v.optional(v.string()),
     history: v.any(), // Record<string, boolean>
     streak: v.number(),
     time: v.optional(v.union(v.string(), v.null())),

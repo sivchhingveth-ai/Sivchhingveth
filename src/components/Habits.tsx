@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Habit } from '../types';
 import { Edit2, Trash2, Check, Plus, ChevronLeft, ChevronRight, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search } from 'lucide-react';
-import { getCategoryStyles } from '../utils/colors';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 import { MonthPicker } from './MonthPicker';
@@ -28,6 +27,7 @@ const TIME_PHASES = [
   { key: 'afternoon', label: 'Afternoon', time: '14:00', icon: CloudSun, color: '#ff6b00' },
   { key: 'night', label: 'Night', time: '20:00', icon: Moon, color: '#7856ff' },
   { key: 'midnight', label: 'Midnight', time: '02:00', icon: Stars, color: '#1d9bf0' },
+  { key: 'daily_rule', label: 'Daily Rule', time: 'any', icon: Activity, color: '#34c759' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -114,26 +114,6 @@ export const Habits: React.FC<HabitsProps> = ({
     onMonthChange(newDate);
   };
 
-  const handleMonthSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.value) return;
-    const parts = e.target.value.split('-').map(Number);
-    if (parts.length === 2 && !parts.some(isNaN)) {
-      onMonthChange(new Date(parts[0], parts[1] - 1, 1));
-    }
-  };
-
-  // Group habits by category
-  const categories = useMemo(() => {
-    const groups: Record<string, Habit[]> = {};
-    habits.forEach(habit => {
-      if (!groups[habit.category]) groups[habit.category] = [];
-      groups[habit.category].push(habit);
-    });
-    return groups;
-  }, [habits]);
-
-  const sortedCategoryNames = ['HEALTH', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'];
-
   return (
     <div className="flex flex-col relative w-full h-full">
 
@@ -146,7 +126,7 @@ export const Habits: React.FC<HabitsProps> = ({
             {/* Row 1: Title */}
             <div className="min-w-0">
               <h2 className="text-[18px] md:text-[20px] font-black text-[#eff3f4] leading-tight tracking-tight whitespace-nowrap">
-                Manual Habits
+                Set Routine
               </h2>
               <p className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] mt-1 truncate">
                 Tracking {habits.length} daily goals
@@ -160,14 +140,14 @@ export const Habits: React.FC<HabitsProps> = ({
                 className="w-full md:w-auto bg-[#eff3f4] text-[#0f1419] py-2.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:opacity-90 active:scale-[0.98]"
               >
                 <Plus className="w-5 h-5" strokeWidth={3} />
-                <span className="font-black tracking-tight text-[13px] md:text-[14px]">Add Habit</span>
+                <span className="font-black tracking-tight text-[13px] md:text-[14px]">Add Routine</span>
               </button>
 
               <div className="relative flex-1 md:max-w-[280px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
                 <input
                   type="text"
-                  placeholder="Search habits..."
+                  placeholder="Search routines..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-[#16181c] border border-[#2f3336] pl-9 pr-8 py-2.5 rounded-xl text-[13px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
@@ -193,8 +173,8 @@ export const Habits: React.FC<HabitsProps> = ({
         {Object.entries(groupedByPhase).length === 0 && (
           <div className="text-center py-16 bg-white/[0.01] border border-dashed border-[#2f3336] rounded-3xl">
             <TrendingUp className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
-            <p className="text-[#71767b] text-base font-bold">No habits tracked yet</p>
-            <p className="text-[#71767b]/60 text-sm mt-1">Click "Add Habit" to start your journey!</p>
+            <p className="text-[#71767b] text-base font-bold">No routines tracked yet</p>
+            <p className="text-[#71767b]/60 text-sm mt-1">Click "Add Routine" to start your journey!</p>
           </div>
         )}
 
@@ -218,7 +198,7 @@ export const Habits: React.FC<HabitsProps> = ({
                   </span>
                   <div className="h-px w-12 bg-[#2f3336] hidden md:block" />
                   <span className="text-[10px] font-bold text-[#71767b] uppercase tracking-widest whitespace-nowrap">
-                    {phaseHabits.length} {phaseHabits.length === 1 ? 'Habit' : 'Habits'}
+                    {phaseHabits.length} {phaseHabits.length === 1 ? 'Routine' : 'Routines'}
                   </span>
                 </div>
                 <div className="flex-1 h-px bg-gradient-to-r from-[#2f3336] to-transparent" />
@@ -265,13 +245,9 @@ export const Habits: React.FC<HabitsProps> = ({
                         </div>
 
                         <div className="min-w-0">
-                          <h4 className="text-[14px] md:text-[17px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
+                          <h4 className="text-[14px] md:text-[17px] font-black text-[#eff3f4] uppercase tracking-tight truncate mt-1">
                             {habit.name}
                           </h4>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: phase.color }} />
-                            <span className="text-[9px] md:text-[11px] font-bold text-[#71767b] uppercase tracking-wider truncate">{habit.category}</span>
-                          </div>
                         </div>
                       </div>
 

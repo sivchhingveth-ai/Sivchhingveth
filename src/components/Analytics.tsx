@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SavingGoal, Habit } from '../types';
 import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Check, X, TrendingUp, Target, Flame, Award } from 'lucide-react';
-import { getCategoryStyles } from '../utils/colors';
+
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -338,7 +338,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({
 
             {/* Per-Habit Weekly Breakdown */}
             <div className="space-y-2">
-              <p className="text-[10px] font-black text-[#71767b] uppercase tracking-[0.2em] px-1">Per Habit This Week</p>
+              <p className="text-[10px] font-black text-[#71767b] uppercase tracking-[0.2em] px-1">Per Routine This Week</p>
 
 
               {habits.map(habit => {

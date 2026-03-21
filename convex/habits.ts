@@ -17,7 +17,6 @@ export const list = query({
 export const create = mutation({
   args: {
     name: v.string(),
-    category: v.string(),
     time: v.optional(v.union(v.string(), v.null())),
     monthlyTarget: v.optional(v.union(v.number(), v.null())),
   },
@@ -27,7 +26,6 @@ export const create = mutation({
     return await ctx.db.insert("habits", {
       userId,
       name: args.name,
-      category: args.category,
       history: {},
       streak: 0,
       time: args.time,
@@ -40,7 +38,6 @@ export const update = mutation({
   args: {
     id: v.id("habits"),
     name: v.optional(v.string()),
-    category: v.optional(v.string()),
     time: v.optional(v.union(v.string(), v.null())),
     monthlyTarget: v.optional(v.union(v.number(), v.null())),
     history: v.optional(v.any()),

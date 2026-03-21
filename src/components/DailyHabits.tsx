@@ -21,6 +21,7 @@ const TIME_PHASES = [
   { key: 'afternoon', label: 'Afternoon', time: '14:00', range: '12 PM – 6 PM', icon: CloudSun, color: '#ff6b00', emoji: '🌤️' },
   { key: 'night', label: 'Night', time: '20:00', range: '6 PM – 12 AM', icon: Moon, color: '#7856ff', emoji: '🌙' },
   { key: 'midnight', label: 'Midnight', time: '02:00', range: '12 AM – 5 AM', icon: Stars, color: '#1d9bf0', emoji: '🌑' },
+  { key: 'daily_rule', label: 'Daily Rule', time: 'any', range: 'Anytime', icon: Target, color: '#34c759', emoji: '🎯' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -143,9 +144,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
   // Motivational message
   const getMessage = () => {
-    if (totalCount === 0) return "Add some habits to get started!";
-    if (completionPct === 100) return "🎉 Perfect day! All habits completed!";
-    if (completionPct >= 75) return "Almost there! Keep pushing! 💪";
+    if (totalCount === 0) return "Add some routines to get started!";
+    if (completionPct === 100) return "Perfect day! All routines completed!";
+    if (completionPct >= 75) return "Almost there! Keep pushing!";
     if (completionPct >= 50) return "Great progress — over halfway!";
     if (completionPct > 0) return "Good start! Keep going!";
     return "Let's crush it today!";
@@ -224,43 +225,38 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
       <div>
-        <div className="px-5 py-4 md:px-6 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">
+        <div className="px-5 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 border-b border-[#2f3336]">
             <div className="min-w-0">
-              <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight flex items-center gap-2">
-                <span className="truncate tracking-tight">Daily Habits</span>
-                {completedCount === totalCount && totalCount > 0 && (
-                  <div className="w-5 h-5 rounded-full bg-[#00ba7c] flex items-center justify-center animate-bounce-subtle shrink-0">
-                    <Check className="w-3 h-3 text-white" strokeWidth={4} />
-                  </div>
-                )}
+              <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] leading-tight tracking-tight">
+                To-Do List
               </h2>
-              <p className="text-[#8b98a5] text-[10px] md:text-[13px] font-black uppercase tracking-[0.2em] mt-1.5 truncate">
+              <p className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] mt-0.5 truncate">
                 {getMessage()}
               </p>
             </div>
 
             <div className="flex items-center gap-2 md:gap-4 shrink-0">
               {/* Done Chip */}
-              <div className="bg-[#16181c] border border-[#2f3336] rounded-xl md:rounded-2xl p-1.5 md:p-2 flex items-center gap-2 md:gap-3 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-[#00ba7c]/10 border border-[#00ba7c]/20 flex items-center justify-center">
-                  <Target className="w-4 h-4 md:w-5 md:h-5 text-[#00ba7c]" />
+              <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
+                <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#00ba7c]/10 border border-[#00ba7c]/20 flex items-center justify-center">
+                  <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#00ba7c]" />
                 </div>
-                <div className="text-right pr-1 md:pr-2">
-                  <p className="text-[14px] md:text-[17px] font-black text-[#eff3f4] leading-none">
-                    {completedCount}<span className="text-[#71767b] text-[10px] md:text-[12px]">/{totalCount}</span>
+                <div className="text-right pr-1">
+                  <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">
+                    {completedCount}<span className="text-[#71767b] text-[9px] md:text-[11px]">/{totalCount}</span>
                   </p>
-                  <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-1 tracking-wider">Done</p>
+                  <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-0.5 tracking-wider">Done</p>
                 </div>
               </div>
 
               {/* Streak Chip */}
-              <div className="bg-[#16181c] border border-[#2f3336] rounded-xl md:rounded-2xl p-1.5 md:p-2 flex items-center gap-2 md:gap-3 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
-                  <Flame className="w-4 h-4 md:w-5 md:h-5 text-[#ff6b00]" />
+              <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
+                <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
+                  <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#ff6b00]" />
                 </div>
-                <div className="text-right pr-1 md:pr-2">
-                  <p className="text-[14px] md:text-[17px] font-black text-[#eff3f4] leading-none">{currentStreak}</p>
-                  <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-1 tracking-wider">Streak</p>
+                <div className="text-right pr-1">
+                  <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">{currentStreak}</p>
+                  <p className="text-[7px] md:text-[8px] font-bold text-[#71767b] uppercase mt-0.5 tracking-wider">Streak</p>
                 </div>
               </div>
             </div>
@@ -273,8 +269,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         {habits.length === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
-            <p className="text-[#71767b] text-base font-bold">No habits yet</p>
-            <p className="text-[#71767b]/60 text-sm mt-1">Go to Manual Habits to add your first habit!</p>
+            <p className="text-[#71767b] text-base font-bold">No routines yet</p>
+            <p className="text-[#71767b]/60 text-sm mt-1">Go to Set Routine to add your first routine!</p>
           </div>
         )}
 
@@ -295,7 +291,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 </div>
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-[11px] md:text-[12px] font-black uppercase tracking-[0.15em]" style={{ color: phase.color }}>
-                    {phase.label}
+                    {phase.label}{phase.key !== 'daily_rule' ? ' Phase' : ''}
                   </span>
                   <span className="text-[9px] font-bold text-[#71767b]/50">
                     {phase.range}

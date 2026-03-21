@@ -27,12 +27,12 @@ import { getEffectiveDateStr, getEffectiveDate } from './utils/dateUtils';
 
 export default function App() {
   const todayStr = getEffectiveDateStr();
-  const [activeTab, setActiveTab] = useState('Daily Habits');
+  const [activeTab, setActiveTab] = useState('To-Do List');
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['Daily Habits', 'Manual Habits', 'Savings', 'Analytics'];
+  const tabs = ['To-Do List', 'Set Routine', 'Savings', 'Analytics'];
 
   // Scroll to top on tab change
   useEffect(() => {
@@ -58,7 +58,6 @@ export default function App() {
 
   // Form state
   const [newHabitName, setNewHabitName] = useState('');
-  const [newHabitCategory, setNewHabitCategory] = useState('OTHER');
   const [newGoalName, setNewGoalName] = useState('');
   const [newGoalAmount, setNewGoalAmount] = useState('');
   const [newGoalStartDate, setNewGoalStartDate] = useState(todayStr);
@@ -98,7 +97,6 @@ export default function App() {
   const habits: Habit[] = (rawHabits || []).map(h => ({
     id: h._id,
     name: h.name,
-    category: h.category,
     history: h.history || {},
     streak: h.streak,
     time: h.time ?? undefined,
@@ -147,8 +145,8 @@ export default function App() {
   const confirmDeleteHabit = (id: any) => {
     setConfirmModal({
       isOpen: true,
-      title: 'Delete Habit',
-      message: 'This will permanently delete this habit and all its history. This action cannot be undone.',
+      title: 'Delete Routine',
+      message: 'This will permanently delete this routine and all its history. This action cannot be undone.',
       onConfirm: () => deleteHabit(id)
     });
   };
@@ -187,14 +185,12 @@ export default function App() {
         await updateHabit({
           id: editingHabitId,
           name: trimmedName,
-          category: newHabitCategory,
           time: newHabitTime || null,
           monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
         });
       } else {
         await createHabit({
           name: trimmedName,
-          category: newHabitCategory,
           time: newHabitTime || null,
           monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
         });
@@ -257,7 +253,6 @@ export default function App() {
     setNewHabitName('');
     setNewHabitTime('');
     setNewHabitMonthlyTarget('');
-    setNewHabitCategory('OTHER');
     setModalOpen('habit');
   };
   const openEditHabit = (id: any) => {
@@ -267,7 +262,6 @@ export default function App() {
       setNewHabitName(habit.name);
       setNewHabitTime(habit.time || '');
       setNewHabitMonthlyTarget(habit.monthlyTarget?.toString() || '');
-      setNewHabitCategory(habit.category);
       setModalOpen('habit');
     }
   };
@@ -300,7 +294,7 @@ export default function App() {
         <div className="text-center space-y-3 relative z-10 px-6">
           <div className="space-y-1">
             <p className="text-[#71767b] font-black animate-pulse uppercase tracking-[0.2em] text-[10px]">Establishing Secure Link</p>
-            <p className="text-[#eff3f4] font-bold text-sm">Loading your habits...</p>
+            <p className="text-[#eff3f4] font-bold text-sm">Loading your routines...</p>
           </div>
 
           {loadingTimeout && (
@@ -341,7 +335,7 @@ export default function App() {
 
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain bg-black/50 overflow-x-hidden">
         <div className="max-w-[1000px] mx-auto border-x border-[#2f3336] min-h-full bg-black shadow-2xl relative flex flex-col w-full">
-          {activeTab === 'Daily Habits' && (
+          {activeTab === 'To-Do List' && (
             <div key={activeTab}>
               <DailyHabits
                 habits={habits}
@@ -357,7 +351,7 @@ export default function App() {
           )}
 
 
-          {activeTab === 'Manual Habits' && (
+          {activeTab === 'Set Routine' && (
             <div key={activeTab}>
               <Habits
                 habits={habits}
@@ -409,11 +403,11 @@ export default function App() {
         </div>
       </main>
 
-      {/* Add Habit Modal */}
-      <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Habit" : "New Habit"}>
+      {/* Add Routine Modal */}
+      <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Routine" : "New Routine"}>
         <div className="pb-4 space-y-4 px-1">
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <label className={labelClass}>Habit name</label>
+            <label className={labelClass}>Name Routine & Rule</label>
             <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
@@ -424,7 +418,8 @@ export default function App() {
                   { name: 'Morning', time: '08:00' },
                   { name: 'Afternoon', time: '14:00' },
                   { name: 'Night', time: '20:00' },
-                  { name: 'Midnight', time: '02:00' }
+                  { name: 'Midnight', time: '02:00' },
+                  { name: 'Daily Rule', time: 'any' }
                 ].map(phase => (
                   <button
                     key={phase.name}
@@ -444,24 +439,7 @@ export default function App() {
               <input className={inputClass} type="number" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 10" value={newHabitMonthlyTarget} onChange={e => setNewHabitMonthlyTarget(e.target.value)} />
             </div>
           </div>
-          <div>
-            <label className={labelClass}>Category</label>
-            <div className="flex flex-wrap gap-1.5">
-              {['HEALTH', 'BODY', 'FINANCE', 'LEARNING', 'OTHER'].map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setNewHabitCategory(cat)}
-                  className={`px-2.5 py-1.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-all border ${newHabitCategory === cat
-                    ? 'bg-white border-white text-black shadow-[0_0_10px_rgba(255,255,255,0.2)]'
-                    : 'bg-[#16181c] border-[#2f3336] text-[#71767b] hover:border-white/30 hover:text-[#eff3f4]'
-                    }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button onClick={saveHabit} className={`${submitClass} mt-2`}>{editingHabitId ? "Update Habit" : "Add Habit"}</button>
+          <button onClick={saveHabit} className={`${submitClass} mt-2`}>{editingHabitId ? "Update Routine" : "Add Routine"}</button>
 
         </div>
       </Modal>
