@@ -181,25 +181,30 @@ export default function App() {
         return;
       }
 
-      if (editingHabitId) {
-        await updateHabit({
-          id: editingHabitId,
-          name: trimmedName,
-          time: newHabitTime || null,
-          monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-        });
-      } else {
-        await createHabit({
-          name: trimmedName,
-          time: newHabitTime || null,
-          monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-        });
+      try {
+        if (editingHabitId) {
+          await updateHabit({
+            id: editingHabitId,
+            name: trimmedName,
+            time: newHabitTime || null,
+            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+          });
+        } else {
+          await createHabit({
+            name: trimmedName,
+            time: newHabitTime || null,
+            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+          });
+        }
+        setNewHabitName('');
+        setNewHabitTime('');
+        setNewHabitMonthlyTarget('');
+        setEditingHabitId(null);
+        setModalOpen(null);
+      } catch (error) {
+        console.error("Failed to save habit:", error);
+        alert("Failed to save. Check connection and try again.");
       }
-      setNewHabitName('');
-      setNewHabitTime('');
-      setNewHabitMonthlyTarget('');
-      setEditingHabitId(null);
-      setModalOpen(null);
     }
   };
 

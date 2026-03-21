@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Habit } from '../types';
-import { Check, Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus } from 'lucide-react';
+import { Check, Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -48,6 +48,12 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const currentPhaseKey = getCurrentPhaseKey();
   const [focusedHabitId, setFocusedHabitId] = React.useState<string | null>(null);
   const [canScrollMore, setCanScrollMore] = React.useState(true);
+  const [now, setNow] = React.useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Stats for today
   const completedCount = habits.filter(h => h.history[todayStr]).length;
@@ -230,9 +236,12 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] leading-tight tracking-tight">
                 To-Do List
               </h2>
-              <p className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] mt-0.5 truncate">
-                {getMessage()}
-              </p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
+                <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
+                  {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                </span>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 md:gap-4 shrink-0">

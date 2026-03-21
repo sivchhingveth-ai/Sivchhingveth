@@ -194,7 +194,7 @@ export const Habits: React.FC<HabitsProps> = ({
                 </div>
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-[12px] md:text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: phase.color }}>
-                    {phase.label} Phase
+                    {phase.label}{phase.key !== 'daily_rule' ? ' Phase' : ''}
                   </span>
                   <div className="h-px w-12 bg-[#2f3336] hidden md:block" />
                   <span className="text-[10px] font-bold text-[#71767b] uppercase tracking-widest whitespace-nowrap">
