@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SavingGoal } from '../types';
 import { Plus, Trash2, Calendar, ChevronDown, ChevronUp, ArrowUpRight, Sparkles } from 'lucide-react';
 
+import { formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
 interface SavingsProps {
@@ -27,7 +28,7 @@ const SavingItem: React.FC<{
   const [displayedPct, setDisplayedPct] = useState(0);
   const [savingAmount, setSavingAmount] = useState('');
   const [savingError, setSavingError] = useState('');
-  const [savingDate, setSavingDate] = useState(new Date().toISOString().split('T')[0]);
+  const [savingDate, setSavingDate] = useState(formatDateStr(new Date()));
   const addSavingRef = useRef<HTMLDivElement>(null);
 
   const goalPct = s.goal ? Math.round((s.saved / s.goal) * 100) : 0;
@@ -80,7 +81,7 @@ const SavingItem: React.FC<{
     const curr = new Date(start);
 
     while (curr <= end) {
-      dates.push(curr.toISOString().split('T')[0]);
+      dates.push(formatDateStr(curr));
       curr.setDate(curr.getDate() + 1);
       if (dates.length > 365) break;
     }
@@ -106,7 +107,7 @@ const SavingItem: React.FC<{
             <button
               onClick={() => {
                 if (!showAddSaving) {
-                  setSavingDate(new Date().toISOString().split('T')[0]);
+                  setSavingDate(formatDateStr(new Date()));
                 }
                 setShowAddSaving(!showAddSaving);
               }}
@@ -234,7 +235,7 @@ const SavingItem: React.FC<{
 };
 
 export const Savings: React.FC<SavingsProps> = ({
-  savings, onDeleteGoal, onAddGoal, onAddSaving, onLoadDemo,
+  savings, onDeleteGoal, onAddGoal, onAddSaving,
   tabs, activeTab, onTabChange, onLogout, isLoggingOut
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());

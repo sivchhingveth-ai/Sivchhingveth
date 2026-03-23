@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { SavingGoal, Habit } from '../types';
 import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, Check, X, TrendingUp, Target, Flame, Award } from 'lucide-react';
 
-import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
+import { getEffectiveDateStr, getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
 interface AnalyticsProps {
@@ -18,9 +18,6 @@ interface AnalyticsProps {
 
 type ViewMode = 'weekly' | 'monthly';
 
-const formatDateStr = (d: Date): string => {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-};
 
 export const Analytics: React.FC<AnalyticsProps> = ({
   habits: rawHabits, savings = [],

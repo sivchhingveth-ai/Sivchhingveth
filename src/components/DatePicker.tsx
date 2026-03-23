@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatDateStr } from '../utils/dateUtils';
 
 interface DatePickerProps {
   value: string; // YYYY-MM-DD
@@ -20,7 +21,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
 
   const handleSelect = (day: number) => {
     const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
-    const dateStr = `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, '0')}-${String(newDate.getDate()).padStart(2, '0')}`;
+    const dateStr = formatDateStr(newDate);
     onChange(dateStr);
     setIsOpen(false);
   };
@@ -97,7 +98,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
               {daysArray.map(day => {
                 const currentDateStr = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const isSelected = currentDateStr === value;
-                const isToday = currentDateStr === new Date().toISOString().split('T')[0];
+                const isToday = currentDateStr === formatDateStr(new Date());
 
                 return (
                   <button

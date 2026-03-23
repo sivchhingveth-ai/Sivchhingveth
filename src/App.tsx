@@ -23,18 +23,44 @@ import { DatePicker } from './components/DatePicker';
 import { Auth } from './components/Auth';
 import { Plus, Loader2, ShieldAlert, ArrowUp } from 'lucide-react';
 import { Habit, SavingGoal } from './types';
-import { getEffectiveDateStr, getEffectiveDate } from './utils/dateUtils';
+import { getEffectiveDateStr, getEffectiveDate, formatDateStr } from './utils/dateUtils';
+import { 
+  isGuestMode, 
+  setGuestMode, 
+  getLocalHabits, 
+  toggleLocalHabit, 
+  deleteLocalHabit, 
+  addLocalHabit,
+  updateLocalHabit,
+  getLocalSavings,
+  addLocalGoal,
+  updateLocalGoal,
+  deleteLocalGoal
+} from './utils/localData';
 
 export default function App() {
   const todayStr = getEffectiveDateStr();
   const [activeTab, setActiveTab] = useState('To-Do List');
   const { isAuthenticated, isLoading } = useConvexAuth();
+  const [isGuest, setIsGuest] = useState(isGuestMode());
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const tabs = ['To-Do List', 'Set Routine & Rule', 'Savings', 'Analytics'];
 
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isOnline, setIsOnline] = useState(window.navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Scroll to top on tab change and initialize scroll listener
   useEffect(() => {
@@ -96,8 +122,13 @@ export default function App() {
   const [editingHabitId, setEditingHabitId] = useState<Id<"habits"> | null>(null);
 
   // Convex queries — only run when authenticated
-  const rawHabits = useQuery(api.habits.list, isAuthenticated ? {} : "skip");
-  const rawSavings = useQuery(api.savingGoals.list, isAuthenticated ? {} : "skip");
+  // State for guest mode
+  const [localHabits, setLocalHabits] = useState<Habit[]>(isGuest ? getLocalHabits() : []);
+  const [localSavings, setLocalSavings] = useState<SavingGoal[]>(isGuest ? getLocalSavings() : []);
+
+  // Convex queries — only run when authenticated AND not in guest mode
+  const rawHabits = useQuery(api.habits.list, (isAuthenticated && !isGuest) ? {} : "skip");
+  const rawSavings = useQuery(api.savingGoals.list, (isAuthenticated && !isGuest) ? {} : "skip");
 
   // Convex mutations
   const createHabit = useMutation(api.habits.create);
@@ -107,35 +138,43 @@ export default function App() {
   const updateGoal = useMutation(api.savingGoals.update);
   const removeGoal = useMutation(api.savingGoals.remove);
 
-  // Map Convex data to app types
-  const habits: Habit[] = (rawHabits || []).map(h => ({
-    id: h._id,
-    name: h.name,
-    history: h.history || {},
-    streak: h.streak,
-    time: h.time ?? undefined,
-    monthlyTarget: h.monthlyTarget ?? undefined,
-  }));
+  // Map data correctly based on current mode
+  const habits: Habit[] = isGuest 
+    ? localHabits 
+    : (rawHabits || []).map(h => ({
+        id: h._id,
+        name: h.name,
+        history: h.history || {},
+        streak: h.streak,
+        time: h.time ?? undefined,
+        monthlyTarget: h.monthlyTarget ?? undefined,
+      }));
 
-  const savings: SavingGoal[] = (rawSavings || []).map(s => ({
-    id: s._id,
-    name: s.name,
-    goal: s.goal,
-    saved: s.saved,
-    color: s.color,
-    startDate: s.startDate,
-    targetDate: s.targetDate,
-    history: s.history || {},
-  }));
+  const savings: SavingGoal[] = isGuest 
+    ? localSavings 
+    : (rawSavings || []).map(s => ({
+        id: s._id,
+        name: s.name,
+        goal: s.goal,
+        saved: s.saved,
+        color: s.color,
+        startDate: s.startDate,
+        targetDate: s.targetDate,
+        history: s.history || {},
+      }));
 
 
 
   // Toggle functions
   const toggleHabit = React.useCallback(async (id: any, dateStr: string = todayStr) => {
+    if (isGuest) {
+      setLocalHabits(toggleLocalHabit(id, dateStr));
+      return;
+    }
+    
     if (!isAuthenticated) return;
 
-    // Use the latest habits from the query result directly in the callback
-    // or trigger the mutation which handles logic on the server side
+    // Trigger Convex update
     const habit = (rawHabits || []).find(h => h._id === id);
     if (!habit) return;
 
@@ -146,12 +185,16 @@ export default function App() {
       id: id as Id<"habits">,
       history: updatedHistory,
     });
-  }, [isAuthenticated, rawHabits, todayStr, updateHabit]);
+  }, [isGuest, isAuthenticated, rawHabits, todayStr, updateHabit]);
 
 
 
   // Delete functions
   const deleteHabit = async (id: any) => {
+    if (isGuest) {
+      setLocalHabits(deleteLocalHabit(id));
+      return;
+    }
     if (!isAuthenticated) return;
     await removeHabit({ id: id as Id<"habits"> });
   };
@@ -166,6 +209,10 @@ export default function App() {
   };
 
   const deleteGoal = async (id: any) => {
+    if (isGuest) {
+      setLocalSavings(deleteLocalGoal(id));
+      return;
+    }
     if (!isAuthenticated) return;
     await removeGoal({ id: id as Id<"savingGoals"> });
   };
@@ -196,19 +243,32 @@ export default function App() {
       }
 
       try {
-        if (editingHabitId) {
-          await updateHabit({
-            id: editingHabitId,
-            name: trimmedName,
-            time: newHabitTime || null,
-            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-          });
+        if (isGuest) {
+          if (editingHabitId) {
+            setLocalHabits(updateLocalHabit(editingHabitId as any, {
+               name: trimmedName,
+               time: newHabitTime || undefined,
+               monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : undefined
+            }));
+          } else {
+            const h = addLocalHabit(trimmedName, newHabitTime, newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null);
+            setLocalHabits(prev => [...prev, h]);
+          }
         } else {
-          await createHabit({
-            name: trimmedName,
-            time: newHabitTime || null,
-            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-          });
+          if (editingHabitId) {
+            await updateHabit({
+              id: editingHabitId as Id<"habits">,
+              name: trimmedName,
+              time: newHabitTime || null,
+              monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+            });
+          } else {
+            await createHabit({
+              name: trimmedName,
+              time: newHabitTime || null,
+              monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+            });
+          }
         }
         setNewHabitName('');
         setNewHabitTime('');
@@ -234,13 +294,18 @@ export default function App() {
 
     const colors = ['#34c759', '#007aff', '#ff9500', '#ff3b30', '#af52de', '#5ac8fa'];
 
-    await createGoal({
-      name: newGoalName.trim(),
-      goal: parseFloat(newGoalAmount),
-      color: colors[savings.length % colors.length],
-      startDate: newGoalStartDate,
-      targetDate: newGoalTargetDate,
-    });
+    if (isGuest) {
+       const g = addLocalGoal(newGoalName.trim(), parseFloat(newGoalAmount), colors[localSavings.length % colors.length], newGoalStartDate, newGoalTargetDate);
+       setLocalSavings(prev => [...prev, g]);
+    } else {
+      await createGoal({
+        name: newGoalName.trim(),
+        goal: parseFloat(newGoalAmount),
+        color: colors[savings.length % colors.length],
+        startDate: newGoalStartDate,
+        targetDate: newGoalTargetDate,
+      });
+    }
 
     setNewGoalName('');
     setNewGoalAmount('');
@@ -256,11 +321,15 @@ export default function App() {
     const newHistory = { ...goal.history, [date]: (goal.history[date] || 0) + amount };
     const newSaved = goal.saved + (amount || 0);
 
-    await updateGoal({
-      id: goalId as Id<"savingGoals">,
-      saved: newSaved,
-      history: newHistory,
-    });
+    if (isGuest) {
+      setLocalSavings(updateLocalGoal(goalId, amount, date));
+    } else {
+      await updateGoal({
+        id: goalId as Id<"savingGoals">,
+        saved: newSaved,
+        history: newHistory,
+      });
+    }
   };
 
 
@@ -294,7 +363,13 @@ export default function App() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await signOut();
+      if (isGuest) {
+        setGuestMode(false);
+        setIsGuest(false);
+        window.location.reload();
+      } else {
+        await signOut();
+      }
     } catch (err) {
       console.error('Logout failed:', err);
     } finally {
@@ -334,9 +409,15 @@ export default function App() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isGuest) {
     return <Auth />;
   }
+
+  const exitGuestMode = () => {
+    setGuestMode(false);
+    setIsGuest(false);
+    window.location.reload();
+  };
 
   const inputClass = "w-full bg-[#16181c] border border-[#2f3336] px-3 py-2.5 md:py-3 rounded-xl text-[13px] md:text-[14px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all focus:bg-black";
   const labelClass = "text-[9px] md:text-[10px] font-black text-[#71767b] uppercase tracking-widest mb-1.5 block px-1";
@@ -344,13 +425,38 @@ export default function App() {
 
   return (
     <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative w-full">
+      {/* Offline/Guest Notice */}
+      {isGuest ? (
+        <div className="bg-[#1d9bf0]/10 border-b border-[#1d9bf0]/20 py-2 px-4 flex items-center justify-between z-[100]">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-[#1d9bf0]" />
+            <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-[#eff3f4]">
+              Guest Mode — Data saved locally only
+            </p>
+          </div>
+          <button 
+            onClick={exitGuestMode}
+            className="text-[10px] font-black text-[#1d9bf0] hover:underline uppercase tracking-wide"
+          >
+            Create Account
+          </button>
+        </div>
+      ) : !isOnline && (
+        <div className="bg-red-500/10 border-b border-red-500/20 py-2 px-4 flex items-center gap-2 z-[100]">
+          <ShieldAlert className="w-4 h-4 text-red-500" />
+          <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-100">
+            Offline — Progress will sync when reconnected
+          </p>
+        </div>
+      )}
+
+
       {/* Premium Background Ambiance — Wrapped to prevent horizontal overflow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#1d9bf0]/10 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7856ff]/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30%] h-[30%] bg-[#22c55e]/5 rounded-full blur-[100px]" />
       </div>
-
 
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain bg-black/50 overflow-x-hidden">
         <div className="max-w-[1000px] mx-auto border-x border-[#2f3336] min-h-full bg-black shadow-2xl relative flex flex-col w-full">

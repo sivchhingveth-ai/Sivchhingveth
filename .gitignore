@@ -1,10 +1,14 @@
+.vercel
+dev-dist/
+dist/
 node_modules/
 build/
-dist/
 coverage/
 .DS_Store
 *.log
 .env*
 !.env.example
-
-.vercel
+*.pem
+jwks.json
+decode_jwt.py
+generate-keys.cjs

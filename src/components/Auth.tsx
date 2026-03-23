@@ -192,12 +192,30 @@ export const Auth: React.FC = () => {
                     </button>
                 </form>
 
-                <div className="mt-8 text-center">
+                <div className="mt-8 text-center space-y-4">
                     <button 
                         onClick={() => { setIsSignUp(!isSignUp); setError(null); setMessage(null); }}
-                        className="text-[#1d9bf0] font-bold hover:underline transition-all"
+                        className="text-[#1d9bf0] font-bold hover:underline transition-all block w-full"
                     >
                         {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                    </button>
+                    
+                    <div className="flex items-center gap-4 py-2">
+                        <div className="flex-1 h-px bg-[#2f3336]" />
+                        <span className="text-[10px] font-black text-[#71767b] uppercase tracking-widest">or</span>
+                        <div className="flex-1 h-px bg-[#2f3336]" />
+                    </div>
+
+                    <button 
+                        onClick={() => {
+                            import('../utils/localData').then(m => {
+                                m.setGuestMode(true);
+                                window.location.reload();
+                            });
+                        }}
+                        className="text-[#eff3f4] text-sm font-bold bg-white/5 border border-white/10 w-full py-3 rounded-xl hover:bg-white/10 transition-all"
+                    >
+                        Continue as Guest (Local Only)
                     </button>
                 </div>
             </div>

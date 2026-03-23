@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Habit } from '../types';
 import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock } from 'lucide-react';
-import { getEffectiveDateStr, getEffectiveDate } from '../utils/dateUtils';
+import { getEffectiveDateStr, getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
 interface DailyHabitsProps {
@@ -135,8 +135,16 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     if (totalCount === 0) return 0;
     let streak = 0;
     const d = new Date(todayDate);
+    
+    // If today is completed, it counts toward the streak
+    const todayStr = formatDateStr(d);
+    const todayCompleted = habits.every(h => h.history[todayStr]);
+    if (todayCompleted) streak++;
+    
+    // Check previous days consecutively
+    d.setDate(d.getDate() - 1);
     for (let i = 0; i < 365; i++) {
-      const dStr = d.toISOString().split('T')[0];
+      const dStr = formatDateStr(d);
       const allDone = habits.every(h => h.history[dStr]);
       if (allDone) {
         streak++;

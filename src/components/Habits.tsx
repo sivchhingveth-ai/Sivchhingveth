@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Habit } from '../types';
 import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check } from 'lucide-react';
-import { getEffectiveDate } from '../utils/dateUtils';
+import { getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
 interface HabitsProps {
@@ -101,7 +101,7 @@ export const Habits: React.FC<HabitsProps> = ({
       return {
         dayNum: i + 1,
         dayName: date.toLocaleString('default', { weekday: 'short' }).slice(0, 2),
-        dateStr: date.toISOString().split('T')[0],
+        dateStr: formatDateStr(date),
         label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       };
     });
@@ -117,7 +117,7 @@ export const Habits: React.FC<HabitsProps> = ({
       const d = new Date(startOfWeek);
       d.setDate(startOfWeek.getDate() + i);
       return {
-        dateStr: d.toISOString().split('T')[0],
+        dateStr: formatDateStr(d),
         label: d.toLocaleString('default', { weekday: 'narrow' })
       };
     });

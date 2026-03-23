@@ -37,7 +37,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
                     {tab}
                   </span>
                   {activeTab === tab && (
-                    <div className="absolute bottom-[2px] left-1/2 -translate-x-1/2 h-[3.5px] w-[36px] md:w-[52px] bg-gradient-to-r from-[#1d9bf0] via-[#4d91ff] to-[#7856ff] rounded-full shadow-[0_0_20px_rgba(29,155,240,0.7)] animate-in fade-in zoom-in-[0.8] duration-300 ease-out" />
+                    <div className="absolute bottom-[2px] left-1/2 -translate-x-1/2 h-[3.5px] w-[36px] md:w-[52px] bg-[#eff3f4] rounded-full shadow-[0_0_15px_rgba(255,255,255,0.6)] animate-in fade-in zoom-in-[0.8] duration-300 ease-out" />
                   )}
                 </div>
               </button>
