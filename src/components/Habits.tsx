@@ -193,7 +193,7 @@ export const Habits: React.FC<HabitsProps> = ({
         </div>
       </div>
 
-      <div className="px-5 md:px-6 py-4 space-y-6 pb-20 text-[#eff3f4] animate-slide-up duration-[3000ms]">
+      <div className="px-5 md:px-6 py-4 space-y-6 pb-20 text-[#eff3f4] animate-slide-up duration-[400ms]">
         <div className="flex flex-col gap-8 pb-32 mt-4 text-[#eff3f4]">
           {Object.entries(groupedByPhase).length === 0 && (
             <div className="text-center py-16 bg-white/[0.01] border border-dashed border-[#2f3336] rounded-3xl">

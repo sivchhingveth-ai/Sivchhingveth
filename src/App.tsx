@@ -89,7 +89,7 @@ export default function App() {
     if (isLoading) {
       const timer = setTimeout(() => {
         setLoadingTimeout(true);
-      }, 8000);
+      }, 3000);
       return () => clearTimeout(timer);
     } else {
       setLoadingTimeout(false);
@@ -231,7 +231,7 @@ export default function App() {
   // Add functions
   const saveHabit = async () => {
     const trimmedName = newHabitName.trim();
-    if (trimmedName && isAuthenticated) {
+    if (trimmedName && (isAuthenticated || isGuest)) {
       // Prevent duplicate habit names
       const isDuplicate = habits.some(
         h => h.name.toLowerCase() === trimmedName.toLowerCase() && h.id !== editingHabitId
@@ -283,7 +283,7 @@ export default function App() {
   };
 
   const addGoal = async () => {
-    if (!newGoalName.trim() || !newGoalAmount || !isAuthenticated) return;
+    if (!newGoalName.trim() || !newGoalAmount || (!isAuthenticated && !isGuest)) return;
     
     if (newGoalStartDate > newGoalTargetDate) {
       setGoalError("Target date must be after the start date.");
@@ -377,7 +377,7 @@ export default function App() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !isGuest) {
     return (
       <div className="h-[100dvh] bg-black flex flex-col items-center justify-center gap-6 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-[#1d9bf0]/10 rounded-full blur-[80px] pointer-events-none" />
