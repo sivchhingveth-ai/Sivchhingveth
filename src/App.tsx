@@ -49,18 +49,6 @@ export default function App() {
   const tabs = ['To-Do List', 'Set Routine & Rule', 'Savings', 'Analytics'];
 
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [isOnline, setIsOnline] = useState(window.navigator.onLine);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
 
   // Scroll to top on tab change and initialize scroll listener
   useEffect(() => {
@@ -218,18 +206,18 @@ export default function App() {
   // Map data correctly based on current mode
   const habits: Habit[] = isGuest 
     ? localHabits 
-    : (rawHabits !== undefined) ? rawHabits.map(h => ({
+    : (rawHabits || []).map(h => ({
         id: h._id,
         name: h.name,
         history: h.history || {},
         streak: h.streak,
         time: h.time ?? undefined,
         monthlyTarget: h.monthlyTarget ?? undefined,
-      })) : getLocalHabits();
+      }));
 
   const savings: SavingGoal[] = isGuest 
     ? localSavings 
-    : (rawSavings !== undefined) ? rawSavings.map(s => ({
+    : (rawSavings || []).map(s => ({
         id: s._id,
         name: s.name,
         goal: s.goal,
@@ -238,127 +226,21 @@ export default function App() {
         startDate: s.startDate,
         targetDate: s.targetDate,
         history: s.history || {},
-      })) : getLocalSavings();
-
-  // TWO-WAY SYNC ENGINE: Keeps Offline/Guest Data and Cloud Data perfectly mirrored
-  useEffect(() => {
-    if (isOnline && isAuthenticated && rawHabits !== undefined && rawSavings !== undefined) {
-      let cloudUpdated = false;
-
-      // 1. Sync Local -> Cloud (Habits)
-      const currentLocalHabits = getLocalHabits();
-      for (const lh of currentLocalHabits) {
-        const existingCloud = rawHabits.find(rh => rh.name.toLowerCase() === lh.name.toLowerCase());
-        if (!existingCloud) {
-          createHabit({
-            name: lh.name,
-            time: lh.time || null,
-            monthlyTarget: lh.monthlyTarget || null,
-          }).catch(console.error);
-          cloudUpdated = true;
-        } else {
-          let merged = false;
-          const newHistory = { ...existingCloud.history };
-          for (const [date, val] of Object.entries(lh.history)) {
-            if (val === true && !newHistory[date]) {
-              newHistory[date] = true;
-              merged = true;
-            }
-          }
-          if (merged) {
-            updateHabit({
-              id: existingCloud._id as Id<"habits">,
-              history: newHistory,
-            }).catch(console.error);
-            cloudUpdated = true;
-          }
-        }
-      }
-
-      // 2. Sync Local -> Cloud (Savings)
-      const currentLocalSavings = getLocalSavings();
-      for (const ls of currentLocalSavings) {
-        const existingCloud = rawSavings.find(rs => rs.name.toLowerCase() === ls.name.toLowerCase());
-        if (!existingCloud) {
-          createGoal({
-            name: ls.name,
-            goal: ls.goal,
-            color: ls.color || '#34c759',
-            startDate: ls.startDate,
-            targetDate: ls.targetDate,
-          }).catch(console.error);
-          cloudUpdated = true;
-        } else {
-          let merged = false;
-          const newHistory = { ...existingCloud.history };
-          let extraSaved = 0;
-          for (const [date, amount] of Object.entries(ls.history)) {
-            if (!newHistory[date]) {
-              newHistory[date] = amount;
-              extraSaved += amount as number;
-              merged = true;
-            } else if ((amount as number) > (newHistory[date] as number)) {
-              const diff = (amount as number) - (newHistory[date] as number);
-              newHistory[date] = amount;
-              extraSaved += diff;
-              merged = true;
-            }
-          }
-          if (merged) {
-            updateGoal({
-              id: existingCloud._id as Id<"savingGoals">,
-              history: newHistory,
-              saved: (existingCloud.saved || 0) + extraSaved,
-            }).catch(console.error);
-            cloudUpdated = true;
-          }
-        }
-      }
-
-      // 3. Mirror Cloud -> Local (Only if cloud wasn't just updated, to prevent overwriting new local states before they bounce back)
-      if (!cloudUpdated) {
-        const formattedHabits = rawHabits.map(h => ({
-          id: h._id as string,
-          name: h.name,
-          history: h.history || {},
-          streak: h.streak,
-          time: h.time ?? undefined,
-          monthlyTarget: h.monthlyTarget ?? undefined,
-        }));
-        localStorage.setItem('elite_habit_tracker_habits', JSON.stringify(formattedHabits));
-        if (!isGuest && !isOnline) setLocalHabits(formattedHabits);
-
-        const formattedSavings = rawSavings.map(s => ({
-          id: s._id as string,
-          name: s.name,
-          goal: s.goal,
-          saved: s.saved,
-          color: s.color,
-          startDate: s.startDate,
-          targetDate: s.targetDate,
-          history: s.history || {},
-        }));
-        localStorage.setItem('elite_habit_tracker_savings', JSON.stringify(formattedSavings));
-        if (!isGuest && !isOnline) setLocalSavings(formattedSavings);
-      }
-    }
-  }, [isOnline, isAuthenticated, rawHabits, rawSavings, createHabit, updateHabit, createGoal, updateGoal]);
+      }));
 
 
 
   // Toggle functions
   const toggleHabit = React.useCallback(async (id: any, dateStr: string = todayStr) => {
-    // If guest OR offline logged in, instantly update local storage
-    if (isGuest || (!isOnline && isAuthenticated)) {
+    if (isGuest) {
       setLocalHabits(toggleLocalHabit(id, dateStr));
-      if (isGuest) return; // Guests stop here
+      return;
     }
     
-    // Cloud users continue to update the server
     if (!isAuthenticated) return;
 
     // Trigger Convex update
-    const habit = (rawHabits || []).find(h => h._id === id) || habits.find(h => h.id === id);
+    const habit = (rawHabits || []).find(h => h._id === id);
     if (!habit) return;
 
     const updatedHistory = { ...habit.history };
@@ -374,9 +256,9 @@ export default function App() {
 
   // Delete functions
   const deleteHabit = async (id: any) => {
-    if (isGuest || (!isOnline && isAuthenticated)) {
+    if (isGuest) {
       setLocalHabits(deleteLocalHabit(id));
-      if (isGuest) return;
+      return;
     }
     if (!isAuthenticated) return;
     removeHabit({ id: id as Id<"habits"> });
@@ -392,9 +274,9 @@ export default function App() {
   };
 
   const deleteGoal = async (id: any) => {
-    if (isGuest || (!isOnline && isAuthenticated)) {
+    if (isGuest) {
       setLocalSavings(deleteLocalGoal(id));
-      if (isGuest) return;
+      return;
     }
     if (!isAuthenticated) return;
     removeGoal({ id: id as Id<"savingGoals"> });
@@ -426,7 +308,7 @@ export default function App() {
       }
 
       try {
-        if (isGuest || (!isOnline && isAuthenticated)) {
+        if (isGuest) {
           if (editingHabitId) {
             setLocalHabits(updateLocalHabit(editingHabitId as any, {
                name: trimmedName,
@@ -437,9 +319,7 @@ export default function App() {
             const h = addLocalHabit(trimmedName, newHabitTime, newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null);
             setLocalHabits(prev => [...prev, h]);
           }
-        } 
-        
-        if (isAuthenticated) {
+        } else {
           if (editingHabitId) {
             updateHabit({
               id: editingHabitId as Id<"habits">,
@@ -479,12 +359,10 @@ export default function App() {
 
     const colors = ['#34c759', '#007aff', '#ff9500', '#ff3b30', '#af52de', '#5ac8fa'];
 
-    if (isGuest || (!isOnline && isAuthenticated)) {
+    if (isGuest) {
        const g = addLocalGoal(newGoalName.trim(), parseFloat(newGoalAmount), colors[localSavings.length % colors.length], newGoalStartDate, newGoalTargetDate);
        setLocalSavings(prev => [...prev, g]);
-    } 
-    
-    if (isAuthenticated) {
+    } else {
       createGoal({
         name: newGoalName.trim(),
         goal: parseFloat(newGoalAmount),
@@ -508,11 +386,9 @@ export default function App() {
     const newHistory = { ...goal.history, [date]: (goal.history[date] || 0) + amount };
     const newSaved = goal.saved + (amount || 0);
 
-    if (isGuest || (!isOnline && isAuthenticated)) {
+    if (isGuest) {
       setLocalSavings(updateLocalGoal(goalId, amount, date));
-    } 
-    
-    if (isAuthenticated) {
+    } else {
       updateGoal({
         id: goalId as Id<"savingGoals">,
         saved: newSaved,
@@ -615,7 +491,7 @@ export default function App() {
   return (
     <div className="h-[100dvh] flex flex-col bg-black text-white font-sans antialiased overflow-hidden relative w-full">
       {/* Offline/Guest Notice */}
-      {isGuest ? (
+      {isGuest && (
         <div className="bg-[#1d9bf0]/10 border-b border-[#1d9bf0]/20 py-2 px-4 flex items-center justify-between z-[100]">
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 text-[#1d9bf0]" />
@@ -629,13 +505,6 @@ export default function App() {
           >
             Create Account
           </button>
-        </div>
-      ) : !isOnline && (
-        <div className="bg-red-500/10 border-b border-red-500/20 py-2 px-4 flex items-center gap-2 z-[100]">
-          <ShieldAlert className="w-4 h-4 text-red-500" />
-          <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-red-100">
-            Offline — Progress will sync when reconnected
-          </p>
         </div>
       )}
 
