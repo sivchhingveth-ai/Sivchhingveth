@@ -131,12 +131,89 @@ export default function App() {
   const rawSavings = useQuery(api.savingGoals.list, (isAuthenticated && !isGuest) ? {} : "skip");
 
   // Convex mutations
-  const createHabit = useMutation(api.habits.create);
-  const updateHabit = useMutation(api.habits.update);
-  const removeHabit = useMutation(api.habits.remove);
-  const createGoal = useMutation(api.savingGoals.create);
-  const updateGoal = useMutation(api.savingGoals.update);
-  const removeGoal = useMutation(api.savingGoals.remove);
+  const createHabit = useMutation(api.habits.create).withOptimisticUpdate(
+    (localStore, args) => {
+      const existing = localStore.getQuery(api.habits.list, {});
+      if (existing !== undefined) {
+        localStore.setQuery(api.habits.list, {}, [
+          ...existing,
+          {
+            _id: `temp-${Date.now()}` as any,
+            _creationTime: Date.now(),
+            userId: "temp",
+            name: args.name,
+            history: {},
+            streak: 0,
+            time: args.time ?? undefined,
+            monthlyTarget: args.monthlyTarget ?? undefined,
+          }
+        ]);
+      }
+    }
+  );
+
+  const updateHabit = useMutation(api.habits.update).withOptimisticUpdate(
+    (localStore, args) => {
+      const existing = localStore.getQuery(api.habits.list, {});
+      if (existing !== undefined) {
+        localStore.setQuery(api.habits.list, {}, existing.map(h => 
+          h._id === args.id ? { ...h, history: args.history ?? h.history, name: args.name ?? h.name, time: args.time ?? h.time, monthlyTarget: args.monthlyTarget ?? h.monthlyTarget } : h
+        ));
+      }
+    }
+  );
+
+  const removeHabit = useMutation(api.habits.remove).withOptimisticUpdate(
+    (localStore, args) => {
+      const existing = localStore.getQuery(api.habits.list, {});
+      if (existing !== undefined) {
+        localStore.setQuery(api.habits.list, {}, existing.filter(h => h._id !== args.id));
+      }
+    }
+  );
+
+  const createGoal = useMutation(api.savingGoals.create).withOptimisticUpdate(
+    (localStore, args) => {
+      const existing = localStore.getQuery(api.savingGoals.list, {});
+      if (existing !== undefined) {
+        localStore.setQuery(api.savingGoals.list, {}, [
+          ...existing,
+          {
+            _id: `temp-${Date.now()}` as any,
+            _creationTime: Date.now(),
+            userId: "temp",
+            name: args.name,
+            goal: args.goal,
+            saved: 0,
+            color: args.color,
+            startDate: args.startDate,
+            targetDate: args.targetDate,
+            history: {},
+          }
+        ]);
+      }
+    }
+  );
+
+  const updateGoal = useMutation(api.savingGoals.update).withOptimisticUpdate(
+    (localStore, args) => {
+      const existing = localStore.getQuery(api.savingGoals.list, {});
+      if (existing !== undefined) {
+        localStore.setQuery(api.savingGoals.list, {}, existing.map(s => 
+          s._id === args.id ? { ...s, saved: args.saved ?? s.saved, history: args.history ?? s.history } : s
+        ));
+      }
+    }
+  );
+
+  const removeGoal = useMutation(api.savingGoals.remove).withOptimisticUpdate(
+    (localStore, args) => {
+      const existing = localStore.getQuery(api.savingGoals.list, {});
+      if (existing !== undefined) {
+        localStore.setQuery(api.savingGoals.list, {}, existing.filter(s => s._id !== args.id));
+      }
+    }
+  );
 
   // Map data correctly based on current mode
   const habits: Habit[] = isGuest 
@@ -181,7 +258,7 @@ export default function App() {
     const updatedHistory = { ...habit.history };
     updatedHistory[dateStr] = !updatedHistory[dateStr];
 
-    await updateHabit({
+    updateHabit({
       id: id as Id<"habits">,
       history: updatedHistory,
     });
@@ -196,7 +273,7 @@ export default function App() {
       return;
     }
     if (!isAuthenticated) return;
-    await removeHabit({ id: id as Id<"habits"> });
+    removeHabit({ id: id as Id<"habits"> });
   };
 
   const confirmDeleteHabit = (id: any) => {
@@ -214,7 +291,7 @@ export default function App() {
       return;
     }
     if (!isAuthenticated) return;
-    await removeGoal({ id: id as Id<"savingGoals"> });
+    removeGoal({ id: id as Id<"savingGoals"> });
   };
 
   const confirmDeleteGoal = (id: any) => {
@@ -256,18 +333,18 @@ export default function App() {
           }
         } else {
           if (editingHabitId) {
-            await updateHabit({
+            updateHabit({
               id: editingHabitId as Id<"habits">,
               name: trimmedName,
               time: newHabitTime || null,
               monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-            });
+            }).catch(console.error);
           } else {
-            await createHabit({
+            createHabit({
               name: trimmedName,
               time: newHabitTime || null,
               monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-            });
+            }).catch(console.error);
           }
         }
         setNewHabitName('');
@@ -298,13 +375,13 @@ export default function App() {
        const g = addLocalGoal(newGoalName.trim(), parseFloat(newGoalAmount), colors[localSavings.length % colors.length], newGoalStartDate, newGoalTargetDate);
        setLocalSavings(prev => [...prev, g]);
     } else {
-      await createGoal({
+      createGoal({
         name: newGoalName.trim(),
         goal: parseFloat(newGoalAmount),
         color: colors[savings.length % colors.length],
         startDate: newGoalStartDate,
         targetDate: newGoalTargetDate,
-      });
+      }).catch(console.error);
     }
 
     setNewGoalName('');
@@ -324,11 +401,11 @@ export default function App() {
     if (isGuest) {
       setLocalSavings(updateLocalGoal(goalId, amount, date));
     } else {
-      await updateGoal({
+      updateGoal({
         id: goalId as Id<"savingGoals">,
         saved: newSaved,
         history: newHistory,
-      });
+      }).catch(console.error);
     }
   };
 
