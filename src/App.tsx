@@ -325,7 +325,7 @@ export default function App() {
           time: h.time ?? undefined,
           monthlyTarget: h.monthlyTarget ?? undefined,
         }));
-        localStorage.setItem('elite_habits', JSON.stringify(formattedHabits));
+        localStorage.setItem('elite_habit_tracker_habits', JSON.stringify(formattedHabits));
         if (!isGuest && !isOnline) setLocalHabits(formattedHabits);
 
         const formattedSavings = rawSavings.map(s => ({
@@ -338,7 +338,7 @@ export default function App() {
           targetDate: s.targetDate,
           history: s.history || {},
         }));
-        localStorage.setItem('elite_savings', JSON.stringify(formattedSavings));
+        localStorage.setItem('elite_habit_tracker_savings', JSON.stringify(formattedSavings));
         if (!isGuest && !isOnline) setLocalSavings(formattedSavings);
       }
     }
