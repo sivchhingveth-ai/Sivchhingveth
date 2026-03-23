@@ -87,15 +87,16 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     const scrollContainer = document.querySelector('main');
     const checkVisibility = () => {
       if (pendingHabitList.length === 0) {
-        setCanScrollMore(false); // No pending habits, so no more to scroll to
+        setCanScrollMore(false);
         return;
       }
 
       const center = window.innerHeight / 2;
       const lastId = pendingHabitList[pendingHabitList.length - 1].id;
-      const rect = document.getElementById(`habit-${lastId}`)?.getBoundingClientRect();
+      const el = document.getElementById(`habit-${lastId}`);
+      const rect = el?.getBoundingClientRect();
 
-      // If the top of the last pending habit is at or above viewport center, we are "done" scrolling
+      // If the last habit is already above the center line + small buffer, we can't scroll "down" anymore
       if (rect && rect.top <= center + 50) setCanScrollMore(false);
       else setCanScrollMore(true);
     };
@@ -113,14 +114,15 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     const targetHabit = pendingHabitList.find(h => {
       const el = document.getElementById(`habit-${h.id}`);
       const top = el?.getBoundingClientRect().top ?? 0;
-      return top > viewportCenter + 20;
+      // Find the first pending habit that is significantly below the center
+      return top > viewportCenter + 40; 
     });
 
-    if (targetHabit) {
+    const main = document.querySelector('main');
+    if (targetHabit && main) {
       setFocusedHabitId(targetHabit.id);
       const el = document.getElementById(`habit-${targetHabit.id}`);
-      const main = document.querySelector('main');
-      if (el && main) {
+      if (el) {
         const elRect = el.getBoundingClientRect();
         const mainRect = main.getBoundingClientRect();
         main.scrollTo({
@@ -128,6 +130,10 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
           behavior: 'smooth'
         });
       }
+    } else if (main) {
+      // If we're already at the end of the scrollable pending habits, reset to top
+      main.scrollTo({ top: 0, behavior: 'smooth' });
+      setFocusedHabitId(null);
     }
   };
   // Streak: consecutive days up to today

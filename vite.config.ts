@@ -16,7 +16,7 @@ export default defineConfig(({mode}) => {
           enabled: true
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webmanifest}'],
           // Cache fonts and other external resources
           runtimeCaching: [
             {
@@ -55,7 +55,7 @@ export default defineConfig(({mode}) => {
           start_url: "/",
           display: "standalone",
           background_color: "#000000",
-          theme_color: "#1d9bf0",
+          theme_color: "#000000",
           icons: [
             {
               src: "/icon-192.png",
