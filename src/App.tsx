@@ -233,7 +233,7 @@ export default function App() {
       id: id as Id<"habits">,
       history: updatedHistory,
     });
-  }, [isGuest, isAuthenticated, rawHabits, todayStr, updateHabit]);
+  }, [isAuthenticated, rawHabits, todayStr, updateHabit]);
 
 
 
