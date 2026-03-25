@@ -28,3 +28,30 @@ export const getEffectiveDate = (date: Date = new Date()): Date => {
 export const getEffectiveDateStr = (date: Date = new Date()): string => {
   return formatDateStr(getEffectiveDate(date));
 };
+
+/**
+ * Calculates the streak for a habit history.
+ * A streak is the number of consecutive days (backwards from today or yesterday)
+ * that the habit was completed.
+ */
+export const calculateStreak = (history: Record<string, boolean>, todayStr: string): number => {
+  let streak = 0;
+  const [y, m, day] = todayStr.split('-').map(Number);
+  const curr = new Date(y, m - 1, day);
+
+  // If done today, start from today
+  if (history[todayStr]) {
+    streak++;
+    curr.setDate(curr.getDate() - 1);
+  } else {
+    // If NOT done today, start checking from yesterday to keep an existing streak alive
+    curr.setDate(curr.getDate() - 1);
+  }
+
+  while (history[formatDateStr(curr)]) {
+    streak++;
+    curr.setDate(curr.getDate() - 1);
+    if (streak > 365) break; // sanity cap
+  }
+  return streak;
+};

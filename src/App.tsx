@@ -16,14 +16,13 @@ import { Savings } from './components/Savings';
 import { DailyHabits } from './components/DailyHabits';
 
 
-import { Analytics } from './components/Analytics';
 import { Modal } from './components/Modal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { DatePicker } from './components/DatePicker';
 import { Auth } from './components/Auth';
 import { Plus, Loader2, ShieldAlert, ArrowUp } from 'lucide-react';
 import { Habit, SavingGoal } from './types';
-import { getEffectiveDateStr, getEffectiveDate, formatDateStr } from './utils/dateUtils';
+import { getEffectiveDateStr, getEffectiveDate, formatDateStr, calculateStreak } from './utils/dateUtils';
 
 export default function App() {
   const todayStr = getEffectiveDateStr();
@@ -32,7 +31,7 @@ export default function App() {
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['To-Do List', 'Set Routine & Rule', 'Savings', 'Analytics'];
+  const tabs = ['To-Do List', 'Set Routine & Rule', 'Savings'];
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isOnline, setIsOnline] = useState(window.navigator.onLine);
@@ -138,7 +137,15 @@ export default function App() {
       const existing = localStore.getQuery(api.habits.list, {});
       if (existing !== undefined) {
         localStore.setQuery(api.habits.list, {}, existing.map(h => 
-          h._id === args.id ? { ...h, history: args.history ?? h.history, name: args.name ?? h.name, time: args.time ?? h.time, monthlyTarget: args.monthlyTarget ?? h.monthlyTarget } : h
+          h._id === args.id ? { 
+            ...h, 
+            history: args.history ?? h.history, 
+            name: args.name ?? h.name, 
+            time: args.time ?? h.time, 
+            monthlyTarget: args.monthlyTarget ?? h.monthlyTarget,
+            // Optimistically update streak if history is changed
+            streak: args.history ? calculateStreak(args.history, args.todayStr || todayStr) : h.streak
+          } : h
         ));
       }
     }
@@ -232,6 +239,7 @@ export default function App() {
     updateHabit({
       id: id as Id<"habits">,
       history: updatedHistory,
+      todayStr: todayStr,
     });
   }, [isAuthenticated, rawHabits, todayStr, updateHabit]);
 
@@ -502,21 +510,8 @@ export default function App() {
             </div>
           )}
 
-          {activeTab === 'Analytics' && (
-            <div key={activeTab}>
-              <Analytics
-                habits={habits}
-                savings={savings}
-                tabs={tabs}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                onLogout={handleLogout}
-                isLoggingOut={isLoggingOut}
-              />
-            </div>
-          )}
 
-          {/* Floating Scroll to Top Button — Global for Routine, Savings, and Analytics tabs */}
+          {/* Floating Scroll to Top Button — Global for Routine and Savings tabs */}
           {activeTab !== 'To-Do List' && (
             <div 
               className={`fixed bottom-16 right-6 min-[1000px]:right-[calc(50%-465px)] z-[60] transition-all duration-500 transform ${
@@ -547,10 +542,9 @@ export default function App() {
               <label className={labelClass}>Time Phase (Optional)</label>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {[
-                  { name: 'Morning', time: '08:00' },
-                  { name: 'Afternoon', time: '14:00' },
-                  { name: 'Night', time: '20:00' },
-                  { name: 'Midnight', time: '02:00' },
+                  { name: 'Reset', time: 'reset' },
+                  { name: 'Growth', time: 'growth' },
+                  { name: 'Distraction', time: 'distraction' },
                   { name: 'Daily Rule', time: 'any' }
                 ].map(phase => (
                   <button

@@ -17,6 +17,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
   const [y, m, d] = value ? value.split('-').map(Number) : [new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate()];
   const [viewDate, setViewDate] = useState(new Date(y, (m || 1) - 1, d || 1));
 
+  // Sync viewDate when value changes
+  useEffect(() => {
+    if (value) {
+      const [vy, vm, vd] = value.split('-').map(Number);
+      setViewDate(new Date(vy, vm - 1, vd));
+    }
+  }, [value]);
+
 
 
   const handleSelect = (day: number) => {

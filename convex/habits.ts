@@ -42,6 +42,7 @@ export const update = mutation({
     monthlyTarget: v.optional(v.union(v.number(), v.null())),
     history: v.optional(v.any()),
     streak: v.optional(v.number()),
+    todayStr: v.optional(v.string()), // For proper streak context - updated
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -50,7 +51,7 @@ export const update = mutation({
     const habit = await ctx.db.get(args.id);
     if (!habit || habit.userId !== userId) throw new Error("Not found");
 
-    const { id, ...updates } = args;
+    const { id, todayStr, ...updates } = args;
     // Filter out undefined values
     const cleanUpdates: Record<string, any> = {};
     for (const [key, value] of Object.entries(updates)) {
@@ -59,6 +60,34 @@ export const update = mutation({
       }
     }
     
+    // Recalculate streak if history is updated
+    if (cleanUpdates.history) {
+      const history = cleanUpdates.history as Record<string, boolean>;
+      const today = todayStr || new Date().toISOString().split('T')[0];
+      
+      let streak = 0;
+      const [y, m, day] = today.split('-').map(Number);
+      const curr = new Date(y, m - 1, day);
+
+      const toStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      // If done today, start from today
+      if (history[today]) {
+        streak++;
+        curr.setDate(curr.getDate() - 1);
+      } else {
+        // If NOT done today, start checking from yesterday to keep an existing streak alive
+        curr.setDate(curr.getDate() - 1);
+      }
+
+      while (history[toStr(curr)]) {
+        streak++;
+        curr.setDate(curr.getDate() - 1);
+        if (streak > 365) break; 
+      }
+      cleanUpdates.streak = streak;
+    }
+
     await ctx.db.patch(args.id, cleanUpdates);
   },
 });

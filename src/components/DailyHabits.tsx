@@ -17,26 +17,31 @@ interface DailyHabitsProps {
 
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'morning', label: 'Morning', time: '08:00', range: '5 AM – 12 PM', icon: Sun, color: '#ffad1f', emoji: '☀️' },
-  { key: 'afternoon', label: 'Afternoon', time: '14:00', range: '12 PM – 6 PM', icon: CloudSun, color: '#ff6b00', emoji: '🌤️' },
-  { key: 'night', label: 'Night', time: '20:00', range: '6 PM – 12 AM', icon: Moon, color: '#7856ff', emoji: '🌙' },
-  { key: 'midnight', label: 'Midnight', time: '02:00', range: '12 AM – 5 AM', icon: Stars, color: '#1d9bf0', emoji: '🌑' },
-  { key: 'daily_rule', label: 'Daily Rule', time: 'any', range: 'Anytime', icon: Target, color: '#34c759', emoji: '🎯' },
+  { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759', emoji: '🌱' },
+  { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#ffad1f', emoji: '🚀' },
+  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30', emoji: '🚫' },
+  { key: 'daily_rule', label: 'Daily Rule', time: 'any', icon: Circle, color: '#1d9bf0', emoji: '🎯' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
-  if (!habit.time) return TIME_PHASES[0]; // Default to morning
-  const phase = TIME_PHASES.find(p => p.time === habit.time);
+  if (!habit.time) return TIME_PHASES[0];
+  const time = habit.time;
+  // Support both old time strings and new phase keys
+  if (time === 'reset' || time === '08:00') return TIME_PHASES[0];
+  if (time === 'growth' || time === '14:00') return TIME_PHASES[1];
+  if (time === 'distraction' || time === '20:00' || time === '02:00') return TIME_PHASES[2];
+  if (time === 'any') return TIME_PHASES[3];
+  
+  const phase = TIME_PHASES.find(p => p.time === time);
   return phase || TIME_PHASES[0];
 };
 
-// Get which phase is currently active based on real clock time
-const getCurrentPhaseKey = (): string => {
+// Phase selection is no longer strictly time-based as requested
+const getCurrentPhaseKey = (): string | null => {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return 'morning';
-  if (hour >= 12 && hour < 18) return 'afternoon';
-  if (hour >= 18 && hour < 24) return 'night';
-  return 'midnight'; // 0-4
+  if (hour >= 5 && hour < 12) return 'reset';
+  if (hour >= 12 && hour < 18) return 'growth';
+  return 'distraction';
 };
 
 export const DailyHabits: React.FC<DailyHabitsProps> = ({
@@ -299,10 +304,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               <div className={`flex items-center gap-3 px-1 mb-1.5 py-1 rounded-xl ${isCurrentPhase ? 'bg-white/[0.02]' : ''}`}>
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em] leading-none" style={{ color: phase.color }}>
-                    {phase.label}{phase.key !== 'daily_rule' ? ' Phase' : ''}
-                  </span>
-                  <span className="text-[9px] font-bold text-[#71767b]/50">
-                    {phase.range}
+                    {phase.label}
                   </span>
                   {isCurrentPhase && (
                     <span className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full animate-pulse"
@@ -358,10 +360,18 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         </div>
 
                         <div className="flex-1 text-left min-w-0">
-                          <p className={`text-[14px] md:text-[15px] font-bold transition-all duration-300 ease-in-out truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'
-                            }`}>
-                            {habit.name}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className={`text-[14px] md:text-[15px] font-bold transition-all duration-300 ease-in-out truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'
+                              }`}>
+                              {habit.name}
+                            </p>
+                            {habit.streak > 0 && (
+                              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20 shrink-0">
+                                <Flame className="w-2.5 h-2.5 text-[#ff6b00]" />
+                                <span className="text-[9px] font-black text-[#ff6b00]">{habit.streak}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         {isDone && (

@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Habit } from '../types';
-import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check, Sparkles, Circle } from 'lucide-react';
 import { getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -22,16 +22,22 @@ interface HabitsProps {
 
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'morning', label: 'Morning', time: '08:00', icon: Sun, color: '#ffad1f' },
-  { key: 'afternoon', label: 'Afternoon', time: '14:00', icon: CloudSun, color: '#ff6b00' },
-  { key: 'night', label: 'Night', time: '20:00', icon: Moon, color: '#7856ff' },
-  { key: 'midnight', label: 'Midnight', time: '02:00', icon: Stars, color: '#1d9bf0' },
-  { key: 'daily_rule', label: 'Daily Rule', time: 'any', icon: Target, color: '#34c759' },
+  { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759' },
+  { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#ffad1f' },
+  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30' },
+  { key: 'daily_rule', label: 'Daily Rule', time: 'any', icon: Circle, color: '#1d9bf0' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
-  if (!habit.time) return TIME_PHASES[0]; // Default to morning
-  const phase = TIME_PHASES.find(p => p.time === habit.time);
+  if (!habit.time) return TIME_PHASES[0];
+  const time = habit.time;
+  // Support both old time strings and new phase keys
+  if (time === 'reset' || time === '08:00') return TIME_PHASES[0];
+  if (time === 'growth' || time === '14:00') return TIME_PHASES[1];
+  if (time === 'distraction' || time === '20:00' || time === '02:00') return TIME_PHASES[2];
+  if (time === 'any') return TIME_PHASES[3];
+  
+  const phase = TIME_PHASES.find(p => p.time === time);
   return phase || TIME_PHASES[0];
 };
 
@@ -212,7 +218,7 @@ export const Habits: React.FC<HabitsProps> = ({
                 <div className="flex items-center gap-3 px-0.5">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: phase.color }}>
-                      {phase.label}{phase.key !== 'daily_rule' ? ' Phase' : ''}
+                      {phase.label}
                     </span>
                     <div className="h-px w-8 bg-[#2f3336] hidden md:block" />
                     <span className="text-[9px] font-bold text-[#71767b] uppercase tracking-widest whitespace-nowrap">
