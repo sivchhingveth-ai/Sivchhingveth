@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Habit } from '../types';
-import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check, Sparkles, Circle } from 'lucide-react';
+import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check, Sparkles, Circle, CircleDollarSign } from 'lucide-react';
 import { getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -18,14 +18,16 @@ interface HabitsProps {
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
+  startDate?: string;
 }
 
 // Time phase definitions
 const TIME_PHASES = [
   { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759' },
-  { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#ffad1f' },
+  { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
   { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30' },
   { key: 'daily_rule', label: 'Daily Rule', time: 'any', icon: Circle, color: '#1d9bf0' },
+  { key: 'spending', label: 'Spending', time: 'spending', icon: CircleDollarSign, color: '#ff9500' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -35,7 +37,7 @@ const getPhaseForHabit = (habit: Habit) => {
   if (time === 'reset' || time === '08:00') return TIME_PHASES[0];
   if (time === 'growth' || time === '14:00') return TIME_PHASES[1];
   if (time === 'distraction' || time === '20:00' || time === '02:00') return TIME_PHASES[2];
-  if (time === 'any') return TIME_PHASES[3];
+  if (time === 'spending') return TIME_PHASES[4];
   
   const phase = TIME_PHASES.find(p => p.time === time);
   return phase || TIME_PHASES[0];
@@ -43,7 +45,7 @@ const getPhaseForHabit = (habit: Habit) => {
 
 export const Habits: React.FC<HabitsProps> = ({
   habits, onDeleteHabit, onAddHabit, onEditHabit, currentMonth, onMonthChange,
-  tabs, activeTab, onTabChange, onLogout, isLoggingOut
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut, startDate
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showActionsId, setShowActionsId] = useState<string | null>(null);
@@ -143,6 +145,12 @@ export const Habits: React.FC<HabitsProps> = ({
     return currentMonth.getFullYear() >= now.getFullYear() && currentMonth.getMonth() >= now.getMonth();
   }, [currentMonth]);
 
+  const isStartMonth = useMemo(() => {
+    if (!startDate) return true;
+    const start = new Date(startDate);
+    return currentMonth.getFullYear() <= start.getFullYear() && currentMonth.getMonth() <= start.getMonth();
+  }, [currentMonth, startDate]);
+
   return (
     <div className="flex flex-col relative w-full h-full">
 
@@ -155,16 +163,22 @@ export const Habits: React.FC<HabitsProps> = ({
         {/* Row 1: Title & Month Picker */}
         <div className="min-w-0">
           <h2 className="text-[18px] md:text-[20px] font-black text-[#eff3f4] leading-tight tracking-tight whitespace-nowrap">
-            Set Routine & Rule
+            Add Workspace
           </h2>
-          <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[#eff3f4] text-[9px] font-black uppercase tracking-widest leading-none">
-              {habits.filter(h => h.time !== 'any').length} routines
-            </span>
-            <span className="w-1 h-1 rounded-full bg-[#71767b]" />
-            <span className="text-[#34c759] text-[9px] font-black uppercase tracking-widest leading-none">
-              {habits.filter(h => h.time === 'any').length} rules
-            </span>
+          <div className="flex flex-wrap items-center gap-y-1.5 gap-x-2 mt-1.5">
+            {TIME_PHASES.map((phase, idx) => (
+              <React.Fragment key={phase.key}>
+                <span 
+                  className="text-[9px] font-black uppercase tracking-widest leading-none"
+                  style={{ color: phase.color }}
+                >
+                  {habits.filter(h => getPhaseForHabit(h).key === phase.key).length} {phase.label}
+                </span>
+                {idx < TIME_PHASES.length - 1 && (
+                  <span className="w-1 h-1 rounded-full bg-[#71767b]" />
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
 
@@ -174,27 +188,60 @@ export const Habits: React.FC<HabitsProps> = ({
             className="w-full md:w-auto bg-[#eff3f4] text-[#0f1419] py-2.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:opacity-90 active:scale-[0.98]"
           >
             <Plus className="w-5 h-5" strokeWidth={3} />
-            <span className="font-black tracking-tight text-[13px] md:text-[14px]">Add Routine & Rule</span>
+            <span className="font-black tracking-tight text-[13px] md:text-[14px]">Add Workspace</span>
           </button>
 
-          <div className="relative w-full md:w-[280px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
-            <input
-              type="text"
-              placeholder="Search routines..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#16181c] border border-[#2f3336] pl-9 pr-8 py-2.5 rounded-xl text-[13px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#71767b]/30 hover:bg-[#71767b]/50 transition-colors"
-                aria-label="Clear search"
-              >
-                <span className="text-[#eff3f4] text-[10px] font-bold leading-none">✕</span>
-              </button>
-            )}
+          <div className="flex flex-col md:flex-row gap-3 items-center">
+            {/* Month Picker */}
+            <div className="flex items-center gap-1 bg-[#16181c] border border-[#2f3336] p-1 rounded-xl w-full md:w-auto h-10">
+              <div className="flex items-center justify-center w-8">
+                {!isStartMonth ? (
+                  <button
+                    onClick={() => changeMonth(-1)}
+                    className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-[#71767b] hover:text-[#eff3f4]"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                ) : null}
+              </div>
+
+              <div className="flex-1 text-center px-2 min-w-[100px]">
+                <span className="text-[11px] font-black uppercase tracking-widest text-[#eff3f4]">
+                  {monthYearLabel}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-center w-8">
+                {!isCurrentOrFutureMonth ? (
+                  <button
+                    onClick={() => changeMonth(1)}
+                    className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-[#71767b] hover:text-[#eff3f4]"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : null}
+              </div>
+            </div>
+            
+            <div className="relative w-full md:w-[280px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-[#16181c] border border-[#2f3336] pl-9 pr-8 py-2.5 rounded-xl text-[13px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#71767b]/30 hover:bg-[#71767b]/50 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <span className="text-[#eff3f4] text-[10px] font-bold leading-none">✕</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -204,8 +251,8 @@ export const Habits: React.FC<HabitsProps> = ({
           {Object.entries(groupedByPhase).length === 0 && (
             <div className="text-center py-16 bg-white/[0.01] border border-dashed border-[#2f3336] rounded-3xl">
               <TrendingUp className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
-              <p className="text-[#71767b] text-base font-bold">No routines tracked yet</p>
-              <p className="text-[#71767b]/60 text-sm mt-1">Click "Add Routine" to start your journey!</p>
+              <p className="text-[#71767b] text-base font-bold">No categories tracked yet</p>
+              <p className="text-[#71767b]/60 text-sm mt-1">Click "Add Workspace" to start your journey!</p>
             </div>
           )}
 
@@ -222,7 +269,7 @@ export const Habits: React.FC<HabitsProps> = ({
                     </span>
                     <div className="h-px w-8 bg-[#2f3336] hidden md:block" />
                     <span className="text-[9px] font-bold text-[#71767b] uppercase tracking-widest whitespace-nowrap">
-                      {phaseHabits.length} {phaseHabits.length === 1 ? 'Routine' : 'Routines'}
+                      {phaseHabits.length} {phaseHabits.length === 1 ? 'Category' : 'Categories'}
                     </span>
                   </div>
                   <div className="flex-1 h-px bg-gradient-to-r from-[#2f3336] to-transparent" />

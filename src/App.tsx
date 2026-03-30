@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -26,12 +26,13 @@ import { getEffectiveDateStr, getEffectiveDate, formatDateStr, calculateStreak }
 
 export default function App() {
   const todayStr = getEffectiveDateStr();
-  const [activeTab, setActiveTab] = useState('To-Do List');
+  const [activeTab, setActiveTab] = useState('Daily Rule');
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['To-Do List', 'Set Routine & Rule', 'Savings'];
+  const tabs = ['Daily Rule', 'Reset', 'Growth', 'Distraction', 'Spending', 'Add Workspace', 'History'];
+  const [historyDate, setHistoryDate] = useState(todayStr);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isOnline, setIsOnline] = useState(window.navigator.onLine);
@@ -87,9 +88,10 @@ export default function App() {
   const [newGoalAmount, setNewGoalAmount] = useState('');
   const [newGoalStartDate, setNewGoalStartDate] = useState(todayStr);
   const [newGoalTargetDate, setNewGoalTargetDate] = useState(todayStr);
-  const [goalError, setGoalError] = useState('');
+  const [spendingError, setSpendingError] = useState('');
   const [newHabitTime, setNewHabitTime] = useState('');
   const [newHabitMonthlyTarget, setNewHabitMonthlyTarget] = useState('');
+  const [habitError, setHabitError] = useState('');
 
 
   // Confirmation state
@@ -109,6 +111,14 @@ export default function App() {
   // Convex queries — only run when authenticated
   const rawHabits = useQuery(api.habits.list, isAuthenticated ? {} : "skip");
   const rawSavings = useQuery(api.savingGoals.list, isAuthenticated ? {} : "skip");
+
+  // Determine account start date based on earliest creationTime
+  const accountStartDateStr = useMemo(() => {
+    const allItems = [...(rawHabits ?? []), ...(rawSavings ?? [])];
+    if (allItems.length === 0) return todayStr;
+    const earliest = Math.min(...allItems.map(item => item._creationTime));
+    return formatDateStr(new Date(earliest));
+  }, [rawHabits, rawSavings, todayStr]);
 
   // Convex mutations
   const createHabit = useMutation(api.habits.create).withOptimisticUpdate(
@@ -268,8 +278,8 @@ export default function App() {
   const confirmDeleteGoal = (id: any) => {
     setConfirmModal({
       isOpen: true,
-      title: 'Delete Goal',
-      message: 'Are you sure you want to delete this saving goal?',
+      title: 'Delete Spending Item',
+      message: 'Are you sure you want to delete this spending?',
       onConfirm: () => deleteGoal(id)
     });
   };
@@ -286,10 +296,11 @@ export default function App() {
       );
 
       if (isDuplicate) {
-        alert('A habit with this exact name already exists. Please choose a different name.');
+        setHabitError('A routine with this name already exists.');
         return;
       }
 
+      setHabitError('');
       try {
         if (editingHabitId) {
           updateHabit({
@@ -297,13 +308,19 @@ export default function App() {
             name: trimmedName,
             time: newHabitTime || null,
             monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-          }).catch(console.error);
+          }).catch(err => {
+            console.error(err);
+            setHabitError('Failed to update routine.');
+          });
         } else {
           createHabit({
             name: trimmedName,
             time: newHabitTime || null,
             monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
-          }).catch(console.error);
+          }).catch(err => {
+            console.error(err);
+            setHabitError('Failed to create routine.');
+          });
         }
         setNewHabitName('');
         setNewHabitTime('');
@@ -312,7 +329,7 @@ export default function App() {
         setModalOpen(null);
       } catch (error) {
         console.error("Failed to save habit:", error);
-        alert("Failed to save. Check connection and try again.");
+        setHabitError("Failed to save. Check connection and try again.");
       }
     }
   };
@@ -321,11 +338,11 @@ export default function App() {
     if (!newGoalName.trim() || !newGoalAmount || !isAuthenticated) return;
     
     if (newGoalStartDate > newGoalTargetDate) {
-      setGoalError("Target date must be after the start date.");
+      setSpendingError("Limit reached for this spending.");
       return;
     }
 
-    setGoalError('');
+    setSpendingError('');
 
     const colors = ['#34c759', '#007aff', '#ff9500', '#ff3b30', '#af52de', '#5ac8fa'];
 
@@ -344,7 +361,7 @@ export default function App() {
     setModalOpen(null);
   };
 
-  const addDailySaving = async (goalId: any, amount: number, date: string) => {
+  const addDailySpending = async (goalId: any, amount: number, date: string) => {
     const goal = savings.find(s => s.id === goalId);
     if (!goal) return;
 
@@ -367,6 +384,7 @@ export default function App() {
     setNewHabitName('');
     setNewHabitTime('');
     setNewHabitMonthlyTarget('');
+    setHabitError('');
     setModalOpen('habit');
   };
   const openEditHabit = (id: any) => {
@@ -376,25 +394,33 @@ export default function App() {
       setNewHabitName(habit.name);
       setNewHabitTime(habit.time || '');
       setNewHabitMonthlyTarget(habit.monthlyTarget?.toString() || '');
+      setHabitError('');
       setModalOpen('habit');
     }
   };
   const openAddGoal = () => {
     setNewGoalStartDate(todayStr);
-    setGoalError('');
+    setSpendingError('');
     setNewGoalTargetDate(todayStr);
     setModalOpen('goal');
   };
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
-      await signOut();
-    } catch (err) {
-      console.error('Logout failed:', err);
-    } finally {
-      setIsLoggingOut(false);
-    }
+  const handleLogout = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Sign Out',
+      message: 'Are you sure you want to sign out?',
+      onConfirm: async () => {
+        setIsLoggingOut(true);
+        try {
+          await signOut();
+        } catch (err) {
+          console.error('Logout failed:', err);
+        } finally {
+          setIsLoggingOut(false);
+        }
+      }
+    });
   };
 
   if (isLoading) {
@@ -408,7 +434,7 @@ export default function App() {
         <div className="text-center space-y-3 relative z-10 px-6">
           <div className="space-y-1">
             <p className="text-[#71767b] font-black animate-pulse uppercase tracking-[0.2em] text-[10px]">Establishing Secure Link</p>
-            <p className="text-[#eff3f4] font-bold text-sm">Loading your routines...</p>
+            <p className="text-[#eff3f4] font-bold text-sm">Loading your categories...</p>
           </div>
 
           {loadingTimeout && (
@@ -459,23 +485,94 @@ export default function App() {
 
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain bg-black/50 overflow-x-hidden">
         <div className="max-w-[1000px] mx-auto border-x border-[#2f3336] min-h-full bg-black shadow-2xl relative flex flex-col w-full">
-          {activeTab === 'To-Do List' && (
+          {activeTab === 'Daily Rule' && (
             <div key={activeTab}>
               <DailyHabits
                 habits={habits}
                 onToggleHabit={toggleHabit}
-
                 tabs={tabs}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
+                filterPhase="daily_rule"
               />
             </div>
           )}
-
-
-          {activeTab === 'Set Routine & Rule' && (
+          {activeTab === 'Reset' && (
+            <div key={activeTab}>
+              <DailyHabits
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+                filterPhase="reset"
+              />
+            </div>
+          )}
+          {activeTab === 'Growth' && (
+            <div key={activeTab}>
+              <DailyHabits
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+                filterPhase="growth"
+              />
+            </div>
+          )}
+          {activeTab === 'Distraction' && (
+            <div key={activeTab}>
+              <DailyHabits
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+                filterPhase="distraction"
+              />
+            </div>
+          )}
+          {activeTab === 'Spending' && (
+            <div key={activeTab}>
+              <DailyHabits 
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+                filterPhase="spending"
+              />
+            </div>
+          )}
+          {activeTab === 'History' && (
+            <div key={activeTab}>
+              <DailyHabits 
+                habits={habits}
+                onToggleHabit={toggleHabit}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                onLogout={handleLogout}
+                isLoggingOut={isLoggingOut}
+                historyDate={historyDate}
+                onDateChange={setHistoryDate}
+                startDate={accountStartDateStr}
+                maxDate={todayStr}
+              />
+            </div>
+          )}
+          {activeTab === 'Add Workspace' && (
             <div key={activeTab}>
               <Habits
                 habits={habits}
@@ -490,51 +587,34 @@ export default function App() {
                 onTabChange={setActiveTab}
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
-              />
-            </div>
-          )}
-          {activeTab === 'Savings' && (
-            <div key={activeTab}>
-              <Savings
-                savings={savings}
-                onDeleteGoal={confirmDeleteGoal}
-                onAddGoal={openAddGoal}
-                onAddSaving={addDailySaving}
-
-                tabs={tabs}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                onLogout={handleLogout}
-                isLoggingOut={isLoggingOut}
+                startDate={accountStartDateStr}
               />
             </div>
           )}
 
 
-          {/* Floating Scroll to Top Button — Global for Routine and Savings tabs */}
-          {activeTab !== 'To-Do List' && (
-            <div 
-              className={`fixed bottom-16 right-6 min-[1000px]:right-[calc(50%-465px)] z-[60] transition-all duration-500 transform ${
-                showScrollTop ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-75 pointer-events-none'
-              }`}
+          {/* Floating Scroll to Top Button — Global for all tabs */}
+          <div 
+            className={`fixed bottom-16 right-6 min-[1000px]:right-[calc(50%-465px)] z-[60] transition-all duration-500 transform ${
+              showScrollTop ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-75 pointer-events-none'
+            }`}
+          >
+            <button
+              onClick={scrollToTop}
+              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl hover:bg-white/20 active:scale-95 group transition-all"
+              aria-label="Scroll to top"
             >
-              <button
-                onClick={scrollToTop}
-                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl hover:bg-white/20 active:scale-95 group transition-all"
-                aria-label="Scroll to top"
-              >
-                <ArrowUp className="w-6 h-6 text-[#eff3f4] group-hover:-translate-y-1 transition-transform duration-300" />
-              </button>
-            </div>
-          )}
+              <ArrowUp className="w-6 h-6 text-[#eff3f4] group-hover:-translate-y-1 transition-transform duration-300" />
+            </button>
+          </div>
         </div>
       </main>
 
       {/* Add Routine Modal */}
-      <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Routine & Rule" : "New Routine & Rule"}>
+      <Modal isOpen={modalOpen === 'habit'} onClose={() => { setModalOpen(null); setEditingHabitId(null); }} title={editingHabitId ? "Edit Workspace" : "New Workspace"}>
         <div className="pb-4 space-y-4 px-1">
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <label className={labelClass}>Name Routine & Rule</label>
+            <label className={labelClass}>Name Workspace</label>
             <input className={inputClass} placeholder="e.g. Drink 8 glasses of water" value={newHabitName} onChange={e => setNewHabitName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
@@ -545,7 +625,8 @@ export default function App() {
                   { name: 'Reset', time: 'reset' },
                   { name: 'Growth', time: 'growth' },
                   { name: 'Distraction', time: 'distraction' },
-                  { name: 'Daily Rule', time: 'any' }
+                  { name: 'Daily Rule', time: 'any' },
+                  { name: 'Spending', time: 'spending' }
                 ].map(phase => (
                   <button
                     key={phase.name}
@@ -580,38 +661,43 @@ export default function App() {
               />
             </div>
           </div>
-          <button onClick={saveHabit} className={`${submitClass} mt-2`}>{editingHabitId ? "Update Routine & Rule" : "Add Routine & Rule"}</button>
+          {habitError && (
+            <div className="text-red-500 text-[11px] font-bold bg-red-500/10 border border-red-500/20 px-3 py-2.5 rounded-xl animate-fade-in flex items-center justify-center">
+              {habitError}
+            </div>
+          )}
+          <button onClick={saveHabit} className={`${submitClass} mt-2`}>{editingHabitId ? "Update Workspace" : "Add Workspace"}</button>
 
         </div>
       </Modal>
 
       {/* Add Goal Modal */}
-      <Modal isOpen={modalOpen === 'goal'} onClose={() => setModalOpen(null)} title="New Saving Goal">
+      <Modal isOpen={modalOpen === 'goal'} onClose={() => setModalOpen(null)} title="New Spending">
         <div className="space-y-3">
           <div>
-            <label className={labelClass}>Goal name</label>
-            <input className={inputClass} placeholder="e.g. New Phone" value={newGoalName} onChange={e => setNewGoalName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
+            <label className={labelClass}>Spending name</label>
+            <input className={inputClass} placeholder="e.g. Shopping" value={newGoalName} onChange={e => setNewGoalName(e.target.value)} autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} />
           </div>
           <div>
-            <label className={labelClass}>Target amount ($)</label>
+            <label className={labelClass}>The limit ($)</label>
             <input className={inputClass} type="number" placeholder="500" value={newGoalAmount} onChange={e => setNewGoalAmount(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-3 md:gap-4">
             <div>
               <label className={labelClass}>Start Date</label>
-              <DatePicker value={newGoalStartDate} onChange={val => { setNewGoalStartDate(val); setGoalError(''); }} className={inputClass} />
+              <DatePicker value={newGoalStartDate} onChange={val => { setNewGoalStartDate(val); setSpendingError(''); }} className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Target Date</label>
-              <DatePicker value={newGoalTargetDate} onChange={val => { setNewGoalTargetDate(val); setGoalError(''); }} className={inputClass} />
+              <DatePicker value={newGoalTargetDate} onChange={val => { setNewGoalTargetDate(val); setSpendingError(''); }} className={inputClass} />
             </div>
           </div>
-          {goalError && (
+          {spendingError && (
             <div className="text-red-500 text-[11px] font-bold bg-red-500/10 border border-red-500/20 px-3 py-2.5 rounded-xl animate-fade-in flex items-center justify-center">
-              {goalError}
+              {spendingError}
             </div>
           )}
-          <button onClick={addGoal} className={`${submitClass} mt-3`}>Add Goal</button>
+          <button onClick={addGoal} className={`${submitClass} mt-3`}>Add Spending</button>
         </div>
       </Modal>
 

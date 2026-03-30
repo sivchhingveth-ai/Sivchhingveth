@@ -1,5 +1,8 @@
-import { describe, it, expect } from 'vitest';
+/**
+ * @vitest-environment node
+ */
 import { formatDateStr, getEffectiveDate, getEffectiveDateStr } from './dateUtils';
+
 
 describe('dateUtils', () => {
   it('should format a date as YYYY-MM-DD', () => {

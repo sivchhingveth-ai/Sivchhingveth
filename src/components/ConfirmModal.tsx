@@ -29,13 +29,13 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           {message}
         </p>
         
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2.5">
           <button
             onClick={() => {
               onConfirm();
               onClose();
             }}
-            className={`w-full py-4 text-[17px] font-black transition-all rounded-2xl ${
+            className={`w-full py-3 md:py-3.5 text-[15px] md:text-[16px] font-black transition-all rounded-2xl ${
               isDestructive 
                 ? 'bg-[#f4212e] text-white hover:bg-[#d71e28]' 
                 : 'x-button-primary'
@@ -45,7 +45,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </button>
           <button
             onClick={onClose}
-            className="w-full py-4 text-[17px] font-bold x-button-glass justify-center"
+            className="w-full py-3 md:py-3.5 text-[15px] md:text-[16px] font-bold x-button-glass justify-center"
           >
             {cancelText}
           </button>

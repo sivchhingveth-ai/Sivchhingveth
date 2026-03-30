@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Habit } from '../types';
-import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock } from 'lucide-react';
+import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -13,14 +13,20 @@ interface DailyHabitsProps {
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
+  filterPhase?: string;
+  historyDate?: string;
+  onDateChange?: (dateStr: string) => void;
+  startDate?: string;
+  maxDate?: string;
 }
 
 // Time phase definitions
 const TIME_PHASES = [
   { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759', emoji: '🌱' },
-  { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#ffad1f', emoji: '🚀' },
+  { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0', emoji: '🚀' },
   { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30', emoji: '🚫' },
   { key: 'daily_rule', label: 'Daily Rule', time: 'any', icon: Circle, color: '#1d9bf0', emoji: '🎯' },
+  { key: 'spending', label: 'Spending', time: 'spending', icon: CircleDollarSign, color: '#ff9500', emoji: '💰' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -30,7 +36,7 @@ const getPhaseForHabit = (habit: Habit) => {
   if (time === 'reset' || time === '08:00') return TIME_PHASES[0];
   if (time === 'growth' || time === '14:00') return TIME_PHASES[1];
   if (time === 'distraction' || time === '20:00' || time === '02:00') return TIME_PHASES[2];
-  if (time === 'any') return TIME_PHASES[3];
+  if (time === 'spending') return TIME_PHASES[4];
   
   const phase = TIME_PHASES.find(p => p.time === time);
   return phase || TIME_PHASES[0];
@@ -46,24 +52,19 @@ const getCurrentPhaseKey = (): string | null => {
 
 export const DailyHabits: React.FC<DailyHabitsProps> = ({
   habits, onToggleHabit,
-  tabs, activeTab, onTabChange, onLogout, isLoggingOut
+  tabs, activeTab, onTabChange, onLogout, isLoggingOut, filterPhase,
+  historyDate, onDateChange, startDate, maxDate
 }) => {
-  const todayStr = getEffectiveDateStr();
-  const todayDate = getEffectiveDate();
+  const isHistory = !!historyDate;
+  const todayStr = isHistory ? historyDate : getEffectiveDateStr();
+  const todayDate = isHistory ? new Date(historyDate) : getEffectiveDate();
   const currentPhaseKey = getCurrentPhaseKey();
-  const [focusedHabitId, setFocusedHabitId] = React.useState<string | null>(null);
-  const [canScrollMore, setCanScrollMore] = React.useState(true);
   const [now, setNow] = React.useState(new Date());
 
   React.useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  // Stats for today
-  const completedCount = habits.filter(h => h.history[todayStr]).length;
-  const totalCount = habits.length;
-  const completionPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   // Group habits by time phase
   const groupedByPhase = useMemo(() => {
@@ -78,69 +79,24 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       if (group) group.habits.push(h);
     });
 
-    // Only return phases that have habits
-    return groups.filter(g => g.habits.length > 0);
-  }, [habits]);
-
-  // Scroll to Pending Tool Logic
-  const pendingHabitList = useMemo(() => {
-    return groupedByPhase.flatMap(group => group.habits).filter(h => !h.history[todayStr]);
-  }, [groupedByPhase, todayStr]);
-
-  // Use a refined position detection to toggle the tool state
-  React.useEffect(() => {
-    const scrollContainer = document.querySelector('main');
-    const checkVisibility = () => {
-      if (pendingHabitList.length === 0) {
-        setCanScrollMore(false);
-        return;
-      }
-
-      const center = window.innerHeight / 2;
-      const lastId = pendingHabitList[pendingHabitList.length - 1].id;
-      const el = document.getElementById(`habit-${lastId}`);
-      const rect = el?.getBoundingClientRect();
-
-      // If the last habit is already above the center line + small buffer, we can't scroll "down" anymore
-      if (rect && rect.top <= center + 50) setCanScrollMore(false);
-      else setCanScrollMore(true);
-    };
-
-    scrollContainer?.addEventListener('scroll', checkVisibility, { passive: true });
-    checkVisibility(); // Initial check
-    return () => scrollContainer?.removeEventListener('scroll', checkVisibility);
-  }, [pendingHabitList]);
-
-  const handleScrollToPending = () => {
-    if (pendingHabitList.length === 0) return;
-
-    // Position-aware down-only logic
-    const viewportCenter = window.innerHeight / 2;
-    const targetHabit = pendingHabitList.find(h => {
-      const el = document.getElementById(`habit-${h.id}`);
-      const top = el?.getBoundingClientRect().top ?? 0;
-      // Find the first pending habit that is significantly below the center
-      return top > viewportCenter + 40; 
+    // Filter phases based on selection
+    return groups.filter(g => {
+      if (g.habits.length === 0) return false;
+      if (filterPhase) return g.phase.key === filterPhase;
+      return true;
     });
+  }, [habits, filterPhase]);
 
-    const main = document.querySelector('main');
-    if (targetHabit && main) {
-      setFocusedHabitId(targetHabit.id);
-      const el = document.getElementById(`habit-${targetHabit.id}`);
-      if (el) {
-        const elRect = el.getBoundingClientRect();
-        const mainRect = main.getBoundingClientRect();
-        main.scrollTo({
-          top: main.scrollTop + (elRect.top - mainRect.top) - (mainRect.height / 2) + (elRect.height / 2),
-          behavior: 'smooth'
-        });
-      }
-    } else if (main) {
-      // If we're already at the end of the scrollable pending habits, reset to top
-      main.scrollTo({ top: 0, behavior: 'smooth' });
-      setFocusedHabitId(null);
-    }
-  };
+  // Derived habits to show based on filter
+  const visibleHabits = useMemo(() => {
+    return groupedByPhase.flatMap(g => g.habits);
+  }, [groupedByPhase]);
+
+  // Stats for today
+  const completedCount = visibleHabits.filter(h => h.history[todayStr]).length;
+  const totalCount = visibleHabits.length;
+  const completionPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
   // Streak: consecutive days up to today
   const currentStreak = useMemo(() => {
     if (totalCount === 0) return 0;
@@ -149,14 +105,14 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     
     // If today is completed, it counts toward the streak
     const todayStr = formatDateStr(d);
-    const todayCompleted = habits.every(h => h.history[todayStr]);
+    const todayCompleted = visibleHabits.every(h => h.history[todayStr]);
     if (todayCompleted) streak++;
     
     // Check previous days consecutively
     d.setDate(d.getDate() - 1);
     for (let i = 0; i < 365; i++) {
       const dStr = formatDateStr(d);
-      const allDone = habits.every(h => h.history[dStr]);
+      const allDone = visibleHabits.every(h => h.history[dStr]);
       if (allDone) {
         streak++;
         d.setDate(d.getDate() - 1);
@@ -165,104 +121,91 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       }
     }
     return streak;
-  }, [habits, totalCount, todayDate]);
+  }, [visibleHabits, totalCount, todayDate]);
 
-  const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
-  const isLongPressRef = React.useRef(false);
-  const [showTopSignal, setShowTopSignal] = React.useState(false);
-
-  const handlePointerDown = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-    }
-    isLongPressRef.current = false;
-    longPressTimer.current = setTimeout(() => {
-      const scrollTarget = document.querySelector('main') || window;
-      scrollTarget.scrollTo({ top: 0, behavior: 'smooth' });
-      setFocusedHabitId(null);
-      isLongPressRef.current = true;
-      setShowTopSignal(true);
-      setTimeout(() => setShowTopSignal(false), 800);
-    }, 450);
-  };
-
-  const handlePointerUp = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
+  const activePhase = filterPhase ? TIME_PHASES.find(p => p.key === filterPhase) : null;
+  const chipColor = activePhase ? (isHistory ? '#71767b' : activePhase.color) : '#eff3f4';
+  const ChipIcon = activePhase ? activePhase.icon : Target;
 
   let globalIdx = 0;
 
   return (
     <div className="flex flex-col relative w-full h-full">
 
-      {/* Scroll to Top Signal Overlay */}
-      {showTopSignal && (
-        <div className="fixed inset-x-0 top-0 z-[100] pointer-events-none flex justify-center pt-24 animate-fade-in">
-          <div className="bg-white px-3 py-1.5 rounded-full text-black font-black text-[9px] tracking-[0.2em] shadow-[0_0_50px_rgba(255,255,255,0.4)] flex items-center gap-1.5 transition-all">
-            <ChevronUp className="w-3 h-3" />
-            GO TO TOP
-          </div>
-        </div>
-      )}
-
-      {/* Scroll to Pending Tool */}
-      {completedCount < totalCount && totalCount > 0 && (
-        <div className="fixed bottom-12 md:bottom-24 right-5 md:right-8 z-50">
-          {showTopSignal && (
-            <div className="absolute inset-0 rounded-full bg-white opacity-50 animate-ping-once" />
-          )}
-          <button
-            onPointerDown={handlePointerDown}
-            onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
-            onContextMenu={(e) => e.preventDefault()}
-            onClick={(e) => {
-              if (isLongPressRef.current) {
-                isLongPressRef.current = false;
-                return;
-              }
-              handleScrollToPending();
-            }}
-            className="w-11 h-11 rounded-full bg-white text-black shadow-[0_8px_32px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-95 transition-all animate-bounce-subtle flex items-center justify-center border border-white/40 touch-none select-none relative z-10"
-            title="Click to cycle, hold to go to top"
-          >
-            {canScrollMore ? (
-              <ChevronDown className="w-6 h-6" strokeWidth={3} />
-            ) : (
-              <Minus className="w-6 h-6" strokeWidth={3} />
-            )}
-          </button>
-        </div>
-      )}
-
       {/* Header with inline navigation + stats */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
 
+      {/* History Date Picker (if in history mode) */}
+      {isHistory && (
+        <div className="bg-[#16181c] border-b border-[#2f3336] p-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {startDate !== todayStr ? (
+              <button 
+                onClick={() => {
+                  const d = new Date(todayStr);
+                  d.setDate(d.getDate() - 1);
+                  onDateChange?.(formatDateStr(d));
+                }}
+                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4]"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            ) : (
+              <div className="w-10 h-10" />
+            )}
+          </div>
+          
+          <div className="flex flex-col items-center">
+            <span className="text-[#eff3f4] font-black text-sm">{formatDateStr(new Date(todayStr))}</span>
+            <span className="text-[#8b98a5] text-[10px] font-bold uppercase tracking-widest">{new Date(todayStr).toLocaleDateString(undefined, { weekday: 'long' })}</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {maxDate !== todayStr ? (
+              <button 
+                 onClick={() => {
+                  const d = new Date(todayStr);
+                  d.setDate(d.getDate() + 1);
+                  onDateChange?.(formatDateStr(d));
+                }}
+                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4]"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            ) : (
+              <div className="w-10 h-10" />
+            )}
+          </div>
+        </div>
+      )}
+
       <div>
         <div className="px-5 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 border-b border-[#2f3336]">
           <div className="min-w-0">
             <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] leading-tight tracking-tight">
-              To-Do List
+              {activeTab}
             </h2>
-            <div className="flex items-center gap-2 mt-0.5">
-              <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
-              <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
-                {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
-              </span>
-            </div>
+            {!isHistory && (
+              <div className="flex items-center gap-2 mt-0.5">
+                <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
+                <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
+                  {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             {/* Done Chip */}
             <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
-              <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#00ba7c]/10 border border-[#00ba7c]/20 flex items-center justify-center">
-                <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#00ba7c]" />
-              </div>
+                <div 
+                  className="w-6 h-6 md:w-8 md:h-8 rounded-lg border flex items-center justify-center transition-colors"
+                  style={{ backgroundColor: `${chipColor}10`, borderColor: `${chipColor}20` }}
+                >
+                  <Target className="w-3.5 h-3.5 md:w-4 md:h-4 transition-colors" style={{ color: chipColor }} />
+                </div>
               <div className="text-right pr-1">
                 <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">
                   {completedCount}<span className="text-[#71767b] text-[9px] md:text-[11px]">/{totalCount}</span>
@@ -289,21 +232,21 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         {totalCount === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
-            <p className="text-[#71767b] text-base font-bold">No routines yet</p>
-            <p className="text-[#71767b]/60 text-sm mt-1">Go to Set Routine to add your first routine!</p>
+            <p className="text-[#71767b] text-base font-bold">No {activeTab} tracked yet</p>
+            <p className="text-[#71767b]/60 text-sm mt-1">Go to Add Workspace to add your first {activeTab.toLowerCase()}!</p>
           </div>
         )}
 
         {groupedByPhase.map((phaseGroup) => {
           const { phase, habits: phaseHabits } = phaseGroup as { phase: typeof TIME_PHASES[number]; habits: Habit[] };
-          const isCurrentPhase = phase.key === currentPhaseKey;
+          const isCurrentPhase = !isHistory && phase.key === currentPhaseKey;
           const phaseCompleted = phaseHabits.filter(h => h.history[todayStr]).length;
 
           return (
             <div key={phase.key} className="space-y-1.5">
               <div className={`flex items-center gap-3 px-1 mb-1.5 py-1 rounded-xl ${isCurrentPhase ? 'bg-white/[0.02]' : ''}`}>
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em] leading-none" style={{ color: phase.color }}>
+                  <span className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em] leading-none" style={{ color: isHistory ? '#71767b' : phase.color }}>
                     {phase.label}
                   </span>
                   {isCurrentPhase && (
@@ -314,8 +257,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   )}
                 </div>
                 <div className="flex-1 h-px bg-[#2f3336]" />
-                <span className="text-[10px] font-bold text-[#71767b]">
-                  {phaseCompleted}/{phaseHabits.length}
+                <span className="text-[10px] font-black text-[#71767b] uppercase tracking-wider">
+                  {phaseHabits.length} {phaseHabits.length === 1 ? 'CATEGORY' : 'CATEGORIES'}
                 </span>
               </div>
 
@@ -332,23 +275,25 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                       <button
                         id={`habit-${habit.id}`}
                         onClick={() => {
-                          onToggleHabit(habit.id, todayStr);
-                          setFocusedHabitId(habit.id);
+                          if (!isHistory) onToggleHabit(habit.id, todayStr);
                         }}
                         className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border bit-click-spring ${isDone
                           ? 'border-transparent'
                           : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
-                          } ${focusedHabitId === habit.id ? 'habit-shine' : 'z-10'}`}
+                          } ${isHistory ? 'cursor-default' : ''}`}
                         style={{
-                          '--shine-color': focusedHabitId === habit.id ? `${phase.color}60` : 'transparent',
-                          backgroundColor: isDone ? `${phase.color}15` : 'transparent',
+                          backgroundColor: isDone ? (isHistory ? '#71767b20' : `${phase.color}15`) : 'transparent',
                         } as React.CSSProperties}
+                        disabled={isHistory}
                       >
                         <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
                           ? 'border-transparent scale-100 animate-check-pop'
                           : 'border-[#2f3336] group-hover:border-[#71767b]'
                           }`}
-                          style={isDone ? { backgroundColor: phase.color, boxShadow: `0 0 16px ${phase.color}44` } : {}}
+                          style={isDone ? { 
+                            backgroundColor: isHistory ? '#71767b' : phase.color, 
+                            boxShadow: isHistory ? 'none' : `0 0 16px ${phase.color}44` 
+                          } : {}}
                         >
                           {isDone ? (
                             <svg className="w-4 h-4 text-white animate-check-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
@@ -376,7 +321,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
                         {isDone && (
                           <div className="shrink-0 animate-fade-in flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phase.color }} />
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: isHistory ? '#71767b' : phase.color }} />
                           </div>
                         )}
                       </button>

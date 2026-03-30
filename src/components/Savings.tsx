@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SavingGoal } from '../types';
 import { Plus, Trash2, Calendar, ChevronDown, ChevronUp, ArrowUpRight, Sparkles } from 'lucide-react';
 
-import { formatDateStr } from '../utils/dateUtils';
+import { formatDateStr, getEffectiveDate } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
 interface SavingsProps {
@@ -28,7 +28,7 @@ const SavingItem: React.FC<{
   const [displayedPct, setDisplayedPct] = useState(0);
   const [savingAmount, setSavingAmount] = useState('');
   const [savingError, setSavingError] = useState('');
-  const [savingDate, setSavingDate] = useState(formatDateStr(new Date()));
+  const [savingDate, setSavingDate] = useState(formatDateStr(getEffectiveDate()));
   const addSavingRef = useRef<HTMLDivElement>(null);
 
   const goalPct = s.goal ? Math.round((s.saved / s.goal) * 100) : 0;
@@ -64,7 +64,7 @@ const SavingItem: React.FC<{
     const remaining = s.goal - s.saved;
     if (!isNaN(amt) && amt > 0) {
       if (amt > remaining) {
-        setSavingError(`Max you can add is $${remaining.toLocaleString()}`);
+        setSavingError(`Max you can spend is $${remaining.toLocaleString()}`);
         return;
       }
       setSavingError('');
@@ -164,14 +164,14 @@ const SavingItem: React.FC<{
               onClick={handleAddSaving}
               className="w-full py-2.5 bg-[#eff3f4] text-black font-extrabold text-[13px] md:text-sm rounded-xl hover:bg-white transition-all uppercase tracking-wider active:scale-[0.95]"
             >
-              Record Saving
+              Record Spending
             </button>
           </div>
         )}
 
         <div className="space-y-1.5 md:space-y-2">
           <div className="flex justify-between items-end gap-2">
-            <span className="text-[11px] md:text-[13px] font-black text-[#eff3f4] whitespace-nowrap">{goalPct}% Complete</span>
+            <span className="text-[11px] md:text-[13px] font-black text-[#eff3f4] whitespace-nowrap">{goalPct}% Used</span>
             <p className="text-[10px] md:text-[12px] font-medium text-[#71767b] text-right truncate">
               <span className="text-[#00ba7c] font-black">${s.saved.toLocaleString()}</span> of <span className="text-white/40">${s.goal.toLocaleString()}</span>
             </p>
@@ -201,7 +201,7 @@ const SavingItem: React.FC<{
       {isExpanded && (
         <div className="border-t border-[#2f3336] bg-white/[0.01] animate-fade-in">
           <div className="p-3 md:p-4 space-y-2 md:space-y-3">
-            <p className="text-[9px] md:text-[11px] font-bold text-[#71767b] uppercase tracking-wider px-2">Saving History</p>
+            <p className="text-[9px] md:text-[11px] font-bold text-[#71767b] uppercase tracking-wider px-2">Spending History</p>
             <div className="max-h-[250px] md:max-h-[300px] overflow-y-auto pr-1 space-y-0.5 custom-scrollbar">
               {getDisplayDates().map(date => {
                 const amount = s.history[date] || 0;
@@ -262,7 +262,7 @@ export const Savings: React.FC<SavingsProps> = ({
         <div className="px-5 py-4 md:px-6 md:py-6 flex items-center justify-between border-b border-[#2f3336]">
             <div className="min-w-0">
               <h2 className="text-[20px] md:text-[28px] font-black text-[#eff3f4] leading-tight tracking-tight">
-                Savings
+                Spending
               </h2>
               <p className="text-[#8b98a5] text-[10px] md:text-[13px] font-black uppercase tracking-[0.2em] mt-1.5 truncate">
                 {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -270,13 +270,13 @@ export const Savings: React.FC<SavingsProps> = ({
             </div>
             <button onClick={onAddGoal} className="x-button-glass !py-1 !px-2.5 !text-[9px] shrink-0 font-black uppercase tracking-widest">
               <Plus className="w-3 h-3" strokeWidth={3} />
-              <span className="ml-1">Add Goal</span>
+              <span className="ml-1">Add Spending</span>
             </button>
           </div>
         </div>
 
       {/* Saving Goals List - Grid on Desktop */}
-      <div className="p-3 md:p-5 grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-5 animate-slide-up duration-[3000ms]">
+      <div className="p-3 md:p-5 grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-5 animate-slide-up">
         {savings.map(s => (
           <SavingItem key={s.id} s={s} onDelete={onDeleteGoal} onAddSaving={onAddSaving} />
         ))}
@@ -284,7 +284,7 @@ export const Savings: React.FC<SavingsProps> = ({
 
       {savings.length === 0 && (
         <div className="p-10 text-center">
-          <p className="text-[#71767b] text-base md:text-lg mb-4">No saving goals yet. Time to plan ahead!</p>
+          <p className="text-[#71767b] text-base md:text-lg mb-4">No spending tracked yet.</p>
         </div>
       )}
 
