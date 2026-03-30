@@ -26,12 +26,12 @@ import { getEffectiveDateStr, getEffectiveDate, formatDateStr, calculateStreak }
 
 export default function App() {
   const todayStr = getEffectiveDateStr();
-  const [activeTab, setActiveTab] = useState('Daily Rule');
+  const [activeTab, setActiveTab] = useState('Rules');
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['Daily Rule', 'Reset', 'Growth', 'Distraction', 'Spending', 'Add Workspace', 'History'];
+  const tabs = ['Rules', 'Reset', 'Growth', 'Distraction', 'Spending', 'Add Workspace', 'History'];
   const [historyDate, setHistoryDate] = useState(todayStr);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -485,7 +485,7 @@ export default function App() {
 
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain bg-black/50 overflow-x-hidden">
         <div className="max-w-[1000px] mx-auto border-x border-[#2f3336] min-h-full bg-black shadow-2xl relative flex flex-col w-full">
-          {activeTab === 'Daily Rule' && (
+          {activeTab === 'Rules' && (
             <div key={activeTab}>
               <DailyHabits
                 habits={habits}
@@ -625,7 +625,7 @@ export default function App() {
                   { name: 'Reset', time: 'reset' },
                   { name: 'Growth', time: 'growth' },
                   { name: 'Distraction', time: 'distraction' },
-                  { name: 'Daily Rule', time: 'any' },
+                  { name: 'Rules', time: 'any' },
                   { name: 'Spending', time: 'spending' }
                 ].map(phase => (
                   <button
