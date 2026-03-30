@@ -239,7 +239,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
         {groupedByPhase.map((phaseGroup) => {
           const { phase, habits: phaseHabits } = phaseGroup as { phase: typeof TIME_PHASES[number]; habits: Habit[] };
-          const isCurrentPhase = !isHistory && phase.key === currentPhaseKey;
+          const isCurrentPhase = !isHistory && (filterPhase ? phase.key === filterPhase : phase.key === currentPhaseKey);
           const phaseCompleted = phaseHabits.filter(h => h.history[todayStr]).length;
 
           return (
