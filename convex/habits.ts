@@ -105,4 +105,32 @@ export const remove = mutation({
   },
 });
 
+export const resetAccount = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    // Delete all habits
+    const userHabits = await ctx.db
+      .query("habits")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+      
+    for (const habit of userHabits) {
+      await ctx.db.delete(habit._id);
+    }
+
+    // Delete all saving goals
+    const userGoals = await ctx.db
+      .query("savingGoals")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+      
+    for (const goal of userGoals) {
+      await ctx.db.delete(goal._id);
+    }
+  },
+});
+
 

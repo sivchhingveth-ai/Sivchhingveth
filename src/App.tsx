@@ -212,6 +212,9 @@ export default function App() {
       }
     }
   );
+
+  const resetAccount = useMutation(api.habits.resetAccount);
+
   // Map data correctly based on current mode
   const habits: Habit[] = (rawHabits || []).map(h => ({
         id: h._id,
@@ -475,6 +478,20 @@ export default function App() {
         </div>
       )}
 
+      {/* Temporary Debug Button for Data Seeding */}
+      <div className="absolute top-4 right-4 z-[1000]">
+        <button 
+          onClick={() => {
+            if (confirm('Warning: This will permanently delete ALL your tracking data, history, and goals. Are you absolutely sure you want to start over?')) {
+              resetAccount();
+              alert("All data wiped successfully. Refresh the page to start clean.");
+            }
+          }}
+          className="bg-red-500 text-white px-4 py-2 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg opacity-20 hover:opacity-100 transition-opacity"
+        >
+          Reset Account Data
+        </button>
+      </div>
 
       {/* Premium Background Ambiance — Wrapped to prevent horizontal overflow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
