@@ -31,7 +31,7 @@ export default function App() {
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['Rules', 'Reset', 'Growth', 'Distraction', 'Spending', 'Add Workspace', 'History'];
+  const tabs = ['Rules', 'Reset & Distraction', 'Growth', 'Spending', 'Add Workspace', 'History'];
   const [historyDate, setHistoryDate] = useState(todayStr);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -91,6 +91,7 @@ export default function App() {
   const [spendingError, setSpendingError] = useState('');
   const [newHabitTime, setNewHabitTime] = useState('');
   const [newHabitMonthlyTarget, setNewHabitMonthlyTarget] = useState('');
+  const [newHabitDescription, setNewHabitDescription] = useState('');
   const [habitError, setHabitError] = useState('');
 
 
@@ -136,6 +137,7 @@ export default function App() {
             streak: 0,
             time: args.time ?? undefined,
             monthlyTarget: args.monthlyTarget ?? undefined,
+            description: args.description ?? undefined,
           }
         ]);
       }
@@ -153,6 +155,7 @@ export default function App() {
             name: args.name ?? h.name, 
             time: args.time ?? h.time, 
             monthlyTarget: args.monthlyTarget ?? h.monthlyTarget,
+            description: args.description ?? h.description,
             // Optimistically update streak if history is changed
             streak: args.history ? calculateStreak(args.history, args.todayStr || todayStr) : h.streak
           } : h
@@ -222,6 +225,7 @@ export default function App() {
         streak: h.streak,
         time: h.time ?? undefined,
         monthlyTarget: h.monthlyTarget ?? undefined,
+        description: h.description ?? undefined,
       }));
 
   const savings: SavingGoal[] = (rawSavings || []).map(s => ({
@@ -309,7 +313,8 @@ export default function App() {
             id: editingHabitId as Id<"habits">,
             name: trimmedName,
             time: newHabitTime || null,
-            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null,
+            description: newHabitDescription.trim() || null
           }).catch(err => {
             console.error(err);
             setHabitError('Failed to update routine.');
@@ -318,7 +323,8 @@ export default function App() {
           createHabit({
             name: trimmedName,
             time: newHabitTime || null,
-            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null,
+            description: newHabitDescription.trim() || null
           }).catch(err => {
             console.error(err);
             setHabitError('Failed to create routine.');
@@ -327,6 +333,7 @@ export default function App() {
         setNewHabitName('');
         setNewHabitTime('');
         setNewHabitMonthlyTarget('');
+        setNewHabitDescription('');
         setEditingHabitId(null);
         setModalOpen(null);
       } catch (error) {
@@ -386,6 +393,7 @@ export default function App() {
     setNewHabitName('');
     setNewHabitTime('');
     setNewHabitMonthlyTarget('');
+    setNewHabitDescription('');
     setHabitError('');
     setModalOpen('habit');
   };
@@ -396,6 +404,7 @@ export default function App() {
       setNewHabitName(habit.name);
       setNewHabitTime(habit.time || '');
       setNewHabitMonthlyTarget(habit.monthlyTarget?.toString() || '');
+      setNewHabitDescription(habit.description || '');
       setHabitError('');
       setModalOpen('habit');
     }
@@ -500,7 +509,7 @@ export default function App() {
               />
             </div>
           )}
-          {activeTab === 'Reset' && (
+          {activeTab === 'Reset & Distraction' && (
             <div key={activeTab}>
               <DailyHabits
                 habits={habits}
@@ -510,7 +519,7 @@ export default function App() {
                 onTabChange={setActiveTab}
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
-                filterPhase="reset"
+                filterPhase={['reset', 'distraction']}
               />
             </div>
           )}
@@ -525,20 +534,6 @@ export default function App() {
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
                 filterPhase="growth"
-              />
-            </div>
-          )}
-          {activeTab === 'Distraction' && (
-            <div key={activeTab}>
-              <DailyHabits
-                habits={habits}
-                onToggleHabit={toggleHabit}
-                tabs={tabs}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                onLogout={handleLogout}
-                isLoggingOut={isLoggingOut}
-                filterPhase="distraction"
               />
             </div>
           )}
@@ -662,6 +657,17 @@ export default function App() {
               />
             </div>
           </div>
+
+          <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <label className={labelClass}>Detail Description (Rules / Info)</label>
+            <textarea 
+              className={`${inputClass} min-h-[100px] resize-none py-2`} 
+              placeholder="Explain the rules or details of this task..." 
+              value={newHabitDescription} 
+              onChange={e => setNewHabitDescription(e.target.value)}
+            />
+          </div>
+
           {habitError && (
             <div className="text-red-500 text-[11px] font-bold bg-red-500/10 border border-red-500/20 px-3 py-2.5 rounded-xl animate-fade-in flex items-center justify-center">
               {habitError}

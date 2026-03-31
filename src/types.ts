@@ -3,6 +3,7 @@ export interface Habit {
   name: string;
   history: Record<string, boolean>; // date string "YYYY-MM-DD" -> boolean
   streak: number;
+  description?: string;
   time?: string;
   monthlyTarget?: number;
 }

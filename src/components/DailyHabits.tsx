@@ -13,7 +13,7 @@ interface DailyHabitsProps {
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
-  filterPhase?: string;
+  filterPhase?: string | string[];
   historyDate?: string;
   onDateChange?: (dateStr: string) => void;
   startDate?: string;
@@ -82,7 +82,12 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     // Filter phases based on selection
     return groups.filter(g => {
       if (g.habits.length === 0) return false;
-      if (filterPhase) return g.phase.key === filterPhase;
+      if (filterPhase) {
+        if (Array.isArray(filterPhase)) {
+          return filterPhase.includes(g.phase.key);
+        }
+        return g.phase.key === filterPhase;
+      }
       return true;
     });
   }, [habits, filterPhase]);

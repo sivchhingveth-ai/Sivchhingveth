@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Habit } from '../types';
-import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check, Sparkles, Circle, CircleDollarSign } from 'lucide-react';
+import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check, Sparkles, Circle, CircleDollarSign, AlignLeft, Info, Flame, Pencil } from 'lucide-react';
 import { getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -254,9 +254,7 @@ export const Habits: React.FC<HabitsProps> = ({
               <p className="text-[#71767b] text-base font-bold">No categories tracked yet</p>
               <p className="text-[#71767b]/60 text-sm mt-1">Click "Add Workspace" to start your journey!</p>
             </div>
-          )}
-
-          {Object.entries(groupedByPhase).map(([phaseKey, phaseGroup]) => {
+          )}          {Object.entries(groupedByPhase).map(([phaseKey, phaseGroup]) => {
             const { phase, habits: phaseHabits } = phaseGroup as { phase: typeof TIME_PHASES[number]; habits: Habit[] };
 
             return (
@@ -280,92 +278,131 @@ export const Habits: React.FC<HabitsProps> = ({
                     const totalMonthly = days.filter(d => habit.history[d.dateStr]).length;
                     const target = habit.monthlyTarget || days.length;
                     const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
+                    const isExpanded = showActionsId === habit.id;
 
                     return (
                       <div
                         key={habit.id}
-                        onClick={() => setShowActionsId(showActionsId === habit.id ? null : habit.id)}
-                        className="w-full flex flex-row items-center justify-between gap-2 md:gap-4 p-3 md:p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300 group relative overflow-hidden cursor-pointer"
+                        onClick={() => setShowActionsId(isExpanded ? null : habit.id)}
+                        className={`w-full flex flex-col rounded-[24px] transition-all duration-500 group relative overflow-hidden cursor-pointer border ${
+                          isExpanded 
+                          ? 'bg-[#0a0a0a] border-white/10 shadow-2xl z-[1]' 
+                          : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'
+                        }`}
                       >
+                        {/* Background Accent Progress */}
                         <div
-                          className="absolute left-0 top-0 bottom-0 transition-all duration-1000 opacity-[0.03]"
+                          className="absolute left-0 top-0 bottom-0 transition-all duration-1000 opacity-[0.02]"
                           style={{ width: `${isLoaded ? completionRate : 0}%`, backgroundColor: phase.color }}
                         />
 
-                        <div className="flex items-center gap-3 flex-1 min-w-0 relative z-10">
-                          <div className="relative w-10 h-10 md:w-12 md:h-12 shrink-0">
-                            <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-                              <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
-                               <circle
-                                cx="24" cy="24" r="21"
-                                fill="transparent"
-                                stroke={phase.color}
-                                strokeWidth="4"
-                                strokeDasharray={2 * Math.PI * 21}
-                                strokeDashoffset={2 * Math.PI * 21 * (1 - (isLoaded ? completionRate : 0) / 100)}
-                                strokeLinecap="round"
-                                className="transition-all duration-1000"
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-[9px] md:text-[11px] font-black" style={{ color: phase.color }}>{completionRate}%</span>
+                        {/* Card Front Content */}
+                        <div className="flex flex-row items-center justify-between p-4 md:p-6 relative z-10 w-full">
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            <div className="relative w-12 h-12 shrink-0">
+                              <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+                                <circle cx="24" cy="24" r="21" fill="transparent" stroke="white" strokeOpacity="0.05" strokeWidth="4" />
+                                <circle
+                                  cx="24" cy="24" r="21"
+                                  fill="transparent"
+                                  stroke={phase.color}
+                                  strokeWidth="4"
+                                  strokeDasharray={2 * Math.PI * 21}
+                                  strokeDashoffset={2 * Math.PI * 21 * (1 - (isLoaded ? completionRate : 0) / 100)}
+                                  strokeLinecap="round"
+                                  className="transition-all duration-1000"
+                                />
+                              </svg>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-[10px] md:text-[11px] font-black" style={{ color: phase.color }}>{completionRate}%</span>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="min-w-0">
-                            <h4 className="text-[13px] md:text-[15px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
-                              {habit.name}
-                            </h4>
-                            {/* Weekly Mini-Graph */}
-                            <div className="flex gap-1 mt-1.5 overflow-x-auto no-scrollbar scrollbar-hide pb-0.5">
-                              {currentWeekDates.map((d, i) => (
-                                <div
-                                  key={i}
-                                  className={`w-3.5 md:w-4.5 h-3 md:h-4 rounded-[3px] border transition-all flex items-center justify-center overflow-hidden shrink-0 ${
-                                    habit.history[d.dateStr] 
-                                    ? '' 
-                                    : 'bg-white/[0.04] border-white/5'
-                                  }`}
-                                  style={habit.history[d.dateStr] ? { backgroundColor: `${phase.color}25`, borderColor: `${phase.color}50` } : {}}
-                                  title={d.dateStr}
-                                >
-                                  {habit.history[d.dateStr] && (
-                                    <div className="w-full h-full opacity-80" style={{ backgroundColor: phase.color }} />
-                                  )}
-                                  {!habit.history[d.dateStr] && (
-                                    <span className="text-[6px] md:text-[7px] font-bold text-[#71767b] select-none">{d.label}</span>
-                                  )}
+                            <div className="min-w-0">
+                              <h4 className={`text-[15px] md:text-[17px] font-black text-[#eff3f4] uppercase tracking-tight group-hover:text-white transition-all ${
+                                isExpanded ? 'whitespace-normal break-words' : 'truncate'
+                              }`}>
+                                {habit.name}
+                              </h4>
+                              <div className="flex items-center gap-3 mt-2">
+                                <div className="flex items-center gap-1 bg-[#ff6b00]/10 px-2 py-0.5 rounded-full">
+                                  <Flame className="w-3.5 h-3.5 text-[#ff6b00]" />
+                                  <span className="text-[11px] font-black text-[#ff6b00]">{habit.streak}</span>
                                 </div>
-                              ))}
+                                <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{target} Days</span>
+                              </div>
                             </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 relative z-10">
+                             <AlignLeft className={`w-6 h-6 transition-all duration-300 ${isExpanded ? 'text-white' : 'text-[#71767b]'}`} />
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-3 md:gap-6 relative z-10 shrink-0">
-                          <div className="flex flex-col items-end">
-                            <span className="text-[15px] md:text-[18px] font-black text-[#eff3f4] leading-none">
-                              {totalMonthly}<span className="text-[11px] text-[#71767b]">/{target}</span>
-                            </span>
-                            <p className="text-[8px] md:text-[9px] font-black text-[#71767b] uppercase tracking-widest mt-1">Consistency</p>
-                          </div>
+                        {/* Expanded Content */}
+                        {isExpanded && (
+                          <div className="px-4 md:px-6 pb-6 pt-1 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10 w-full max-w-full overflow-hidden">
+                            <div className="h-px bg-white/5 mb-6" />
+                            
+                            <div className="space-y-4">
+                              {/* Action Row - Slim Line Style */}
+                              <div className="flex items-center justify-center gap-6 py-2 border-y border-white/5" onClick={e => e.stopPropagation()}>
+                                <button
+                                  onClick={() => onEditHabit(habit.id)}
+                                  className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#71767b] hover:text-[#eff3f4] transition-all"
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                  Edit Rules
+                                </button>
+                                <div className="w-[1px] h-3 bg-white/10" />
+                                <button
+                                  onClick={() => onDeleteHabit(habit.id)}
+                                  className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#71767b] hover:text-red-400 transition-all"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                  Delete
+                                </button>
+                              </div>
 
-                          {showActionsId === habit.id && (
-                            <div className="flex items-center gap-1 border-l border-[#2f3336] pl-3 animate-fade-in z-20">
-                              <button
-                                onClick={(e) => { e.stopPropagation(); onEditHabit(habit.id); }}
-                                className="p-2 md:p-2.5 text-[#71767b] hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10 rounded-xl transition-all"
-                              >
-                                <Edit2 className="w-4 h-4 md:w-[18px] md:h-[18px]" />
-                              </button>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); onDeleteHabit(habit.id); }}
-                                className="p-2 md:p-2.5 text-[#71767b] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
-                              >
-                                <Trash2 className="w-4 h-4 md:w-[18px] md:h-[18px]" />
-                              </button>
+                              {/* Description Section */}
+                              <div className="bg-white/[0.02] border border-white/5 rounded-[20px] p-4">
+                                <h5 className="text-[10px] font-black text-[#71767b] uppercase tracking-[0.25em] mb-2.5 flex items-center gap-2">
+                                  <Info className="w-3 h-3" />
+                                  Rules & Summary
+                                </h5>
+                                <div className="text-[13px] md:text-[14px] text-[#eff3f4]/90 leading-relaxed font-medium italic whitespace-pre-wrap px-1">
+                                  {habit.description || "No detailed rules or info provided."}
+                                </div>
+                              </div>
+
+                              {/* Recent Activity Bar */}
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.01] p-4 rounded-xl border border-white/5">
+                                <span className="text-[11px] font-black text-[#71767b] uppercase tracking-widest">Recent Activity</span>
+                                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                                  {currentWeekDates.map((d, i) => (
+                                    <div
+                                      key={i}
+                                      className={`w-6 h-6 rounded-full border transition-all flex items-center justify-center shrink-0 ${
+                                        habit.history[d.dateStr] 
+                                        ? '' 
+                                        : 'bg-white/[0.04] border-white/5'
+                                      }`}
+                                      style={habit.history[d.dateStr] ? { backgroundColor: `${phase.color}20`, borderColor: `${phase.color}40` } : {}}
+                                      title={d.dateStr}
+                                    >
+                                      {habit.history[d.dateStr] && (
+                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: phase.color }} />
+                                      )}
+                                      {!habit.history[d.dateStr] && (
+                                        <span className="text-[8px] font-black text-[#71767b] select-none uppercase">{d.label}</span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

@@ -11,6 +11,7 @@ export default defineSchema({
     category: v.optional(v.string()),
     history: v.any(), // Record<string, boolean>
     streak: v.number(),
+    description: v.optional(v.string()), // Detailed rules or task notes
     time: v.optional(v.union(v.string(), v.null())),
     monthlyTarget: v.optional(v.union(v.number(), v.null())),
   }).index("by_user", ["userId"]),

@@ -19,6 +19,7 @@ export const create = mutation({
     name: v.string(),
     time: v.optional(v.union(v.string(), v.null())),
     monthlyTarget: v.optional(v.union(v.number(), v.null())),
+    description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -30,6 +31,7 @@ export const create = mutation({
       streak: 0,
       time: args.time,
       monthlyTarget: args.monthlyTarget,
+      description: args.description,
     });
   },
 });
@@ -40,6 +42,7 @@ export const update = mutation({
     name: v.optional(v.string()),
     time: v.optional(v.union(v.string(), v.null())),
     monthlyTarget: v.optional(v.union(v.number(), v.null())),
+    description: v.optional(v.string()),
     history: v.optional(v.any()),
     streak: v.optional(v.number()),
     todayStr: v.optional(v.string()), // For proper streak context - updated
