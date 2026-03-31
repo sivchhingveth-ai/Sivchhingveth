@@ -23,9 +23,9 @@ interface DailyHabitsProps {
 // Time phase definitions
 const TIME_PHASES = [
   { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759', emoji: '🌱' },
+  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Circle, color: '#1d9bf0', emoji: '🎯' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0', emoji: '🚀' },
   { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30', emoji: '🚫' },
-  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Circle, color: '#1d9bf0', emoji: '🎯' },
   { key: 'spending', label: 'Spending', time: 'spending', icon: CircleDollarSign, color: '#ff9500', emoji: '💰' },
 ] as const;
 

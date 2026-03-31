@@ -31,7 +31,7 @@ export default function App() {
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const tabs = ['Rules', 'Reset & Distraction', 'Growth', 'Spending', 'Add Workspace', 'History'];
+  const tabs = ['Rules & Growth', 'Reset & Distraction', 'Spending', 'Add Workspace', 'History'];
   const [historyDate, setHistoryDate] = useState(todayStr);
 
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -495,7 +495,7 @@ export default function App() {
 
       <main className="flex-1 overflow-y-auto relative z-10 overscroll-contain bg-black/50 overflow-x-hidden">
         <div className="max-w-[1000px] mx-auto border-x border-[#2f3336] min-h-full bg-black shadow-2xl relative flex flex-col w-full">
-          {activeTab === 'Rules' && (
+          {activeTab === 'Rules & Growth' && (
             <div key={activeTab}>
               <DailyHabits
                 habits={habits}
@@ -505,7 +505,7 @@ export default function App() {
                 onTabChange={setActiveTab}
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
-                filterPhase="daily_rule"
+                filterPhase={['growth', 'daily_rule']}
               />
             </div>
           )}
@@ -520,20 +520,6 @@ export default function App() {
                 onLogout={handleLogout}
                 isLoggingOut={isLoggingOut}
                 filterPhase={['reset', 'distraction']}
-              />
-            </div>
-          )}
-          {activeTab === 'Growth' && (
-            <div key={activeTab}>
-              <DailyHabits
-                habits={habits}
-                onToggleHabit={toggleHabit}
-                tabs={tabs}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                onLogout={handleLogout}
-                isLoggingOut={isLoggingOut}
-                filterPhase="growth"
               />
             </div>
           )}
