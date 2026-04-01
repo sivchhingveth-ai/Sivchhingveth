@@ -258,21 +258,21 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
              </div>
              
              {/* Mobile Category Count Labels - shown below on small screens */}
-            <div className="flex md:hidden flex-wrap items-center gap-y-1 gap-x-1.5 mt-1 max-w-full">
-              {TIME_PHASES.map((phase, idx) => (
-                <React.Fragment key={phase.key}>
-                  <span 
-                    className="text-[8px] font-black uppercase tracking-wider leading-none whitespace-nowrap"
-                    style={{ color: phase.color }}
-                  >
-                    {habits.filter(h => getPhaseForHabit(h).key === phase.key && shouldShowHabitOnDay(h.monthlyTarget, todayStr)).length} {phase.label}
-                  </span>
-                  {idx < TIME_PHASES.length - 1 && (
-                    <span className="w-1 h-1 rounded-full bg-[#71767b] shrink-0" />
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
+             <div className="flex md:hidden flex-wrap items-center gap-y-1 gap-x-1.5 mt-1 max-w-full">
+               {TIME_PHASES.map((phase, idx) => (
+                 <React.Fragment key={phase.key}>
+                   <span 
+                     className="text-[8px] font-black uppercase tracking-wider leading-none whitespace-nowrap"
+                     style={{ color: isHistory ? '#eff3f4' : phase.color }}
+                   >
+                     {habits.filter(h => getPhaseForHabit(h).key === phase.key && shouldShowHabitOnDay(h.monthlyTarget, todayStr)).length} {phase.label}
+                   </span>
+                   {idx < TIME_PHASES.length - 1 && (
+                     <span className="w-1 h-1 rounded-full bg-[#71767b] shrink-0" />
+                   )}
+                 </React.Fragment>
+               ))}
+             </div>
             
             {!isHistory && (
               <div className="hidden md:flex items-center gap-2 ml-4">
@@ -283,16 +283,16 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               </div>
             )}
 
-            {/* Category Count Labels */}
-            <div className="hidden md:flex flex-wrap items-center gap-y-1 gap-x-2 ml-4">
-              {TIME_PHASES.map((phase, idx) => (
-                <React.Fragment key={phase.key}>
-                  <span 
-                    className="text-[10px] font-black uppercase tracking-wider leading-none"
-                    style={{ color: phase.color }}
-                  >
-                    {habits.filter(h => getPhaseForHabit(h).key === phase.key && shouldShowHabitOnDay(h.monthlyTarget, todayStr)).length} {phase.label}
-                  </span>
+             {/* Category Count Labels */}
+             <div className="hidden md:flex flex-wrap items-center gap-y-1 gap-x-2 ml-4">
+               {TIME_PHASES.map((phase, idx) => (
+                 <React.Fragment key={phase.key}>
+                   <span 
+                     className="text-[10px] font-black uppercase tracking-wider leading-none"
+                     style={{ color: isHistory ? '#eff3f4' : phase.color }}
+                   >
+                     {habits.filter(h => getPhaseForHabit(h).key === phase.key && shouldShowHabitOnDay(h.monthlyTarget, todayStr)).length} {phase.label}
+                   </span>
                   {idx < TIME_PHASES.length - 1 && (
                     <span className="w-1 h-1 rounded-full bg-[#71767b]" />
                   )}
