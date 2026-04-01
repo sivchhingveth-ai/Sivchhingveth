@@ -50,11 +50,13 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const isLoggingOut = useAppStore((state) => state.isLoggingOut);
   const historyDate = useAppStore((state) => state.historyDate);
   const now = useAppStore((state) => state.now);
+  const storeTodayStr = useAppStore((state) => state.todayStr);
+  const storeTodayDate = useAppStore((state) => state.todayDate);
   const tabs = ['To Do List', 'Add Workspace', 'History'];
   
   const isHistory = activeTab === 'History';
-  const todayStr = isHistory ? historyDate : useAppStore((state) => state.todayStr);
-  const todayDate = isHistory ? new Date(historyDate) : useAppStore((state) => state.todayDate);
+  const todayStr = isHistory ? historyDate : storeTodayStr;
+  const todayDate = isHistory ? new Date(historyDate) : storeTodayDate;
   const currentPhaseKey = getCurrentPhaseKey();
 
   // Memoized grouped habits
