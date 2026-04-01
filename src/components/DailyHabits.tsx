@@ -358,54 +358,51 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         {/* Main Card - Clickable to expand */}
                         <div 
                           onClick={() => setExpandedHistoryHabit(isExpanded ? null : habit.id)}
-                          className={`w-full flex items-center justify-between gap-3 md:gap-4 p-3 md:p-4 rounded-2xl cursor-pointer transition-all ${
+                          className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl cursor-pointer transition-all ${
                             isExpanded 
                               ? 'bg-[#0a0a0a] border border-white/10' 
                               : 'bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126]'
                           }`}
                         >
-                          <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                            <div 
-                              className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 border-2 ${
-                                isDone ? 'border-transparent' : 'border-[#2f3336]'
-                              }`}
-                              style={isDone ? { backgroundColor: '#71767b' } : {}}
-                            >
-                              {isDone ? (
-                                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                              ) : (
-                                <Circle className="w-4 h-4 text-[#2f3336]" />
-                              )}
-                            </div>
+                          <div 
+                            className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 border-2 ${
+                              isDone ? 'border-transparent' : 'border-[#2f3336]'
+                            }`}
+                            style={isDone ? { backgroundColor: '#71767b' } : {}}
+                          >
+                            {isDone ? (
+                              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            ) : (
+                              <Circle className="w-4 h-4 text-[#2f3336]" />
+                            )}
+                          </div>
 
-                            <div className="flex-1 text-left min-w-0">
+                          <div className="flex-1 text-left min-w-0">
+                            <div className="flex items-center gap-2">
                               <p className={`text-[14px] md:text-[15px] font-bold ${isExpanded ? 'whitespace-normal break-words' : 'truncate'} ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'}`}>
                                 {habit.name.toUpperCase()}
                               </p>
+                              {habit.streak > 0 && (
+                                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#2f3336] shrink-0">
+                                  <Flame className="w-2.5 h-2.5 text-[#71767b]" />
+                                  <span className="text-[9px] font-black text-[#71767b]">{habit.streak}</span>
+                                </div>
+                              )}
+                              {/* Monthly Target Badge */}
+                              {habit.monthlyTarget && habit.monthlyTarget > 0 && (
+                                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#2f3336] shrink-0">
+                                  <span className="text-[9px] font-black text-[#71767b]">
+                                    {habit.monthlyTarget}x
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
-                          {/* Badges - Right Aligned */}
-                          <div className="flex items-center gap-2 shrink-0">
-                            {habit.streak > 0 && (
-                              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#2f3336]">
-                                <Flame className="w-2.5 h-2.5 text-[#71767b]" />
-                                <span className="text-[9px] font-black text-[#71767b]">{habit.streak}</span>
-                              </div>
-                            )}
-                            {/* Monthly Target Badge */}
-                            {habit.monthlyTarget && habit.monthlyTarget > 0 && (
-                              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#2f3336]">
-                                <span className="text-[9px] font-black text-[#71767b]">
-                                  {habit.monthlyTarget}x
-                                </span>
-                              </div>
-                            )}
-                            <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                              <AlignLeft className={`w-5 h-5 transition-colors ${isExpanded ? 'text-white' : 'text-[#71767b]'}`} />
-                            </div>
+                          <div className={`shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                            <AlignLeft className={`w-5 h-5 transition-colors ${isExpanded ? 'text-white' : 'text-[#71767b]'}`} />
                           </div>
                         </div>
 
