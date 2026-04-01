@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Habit } from '../types';
-import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon } from 'lucide-react';
+import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon, AlignLeft } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate, formatDateStr, shouldShowHabitOnDay } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -60,6 +60,20 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const todayDate = isHistory ? new Date(historyDate) : getEffectiveDate();
   const currentPhaseKey = getCurrentPhaseKey();
   const [now, setNow] = React.useState(new Date());
+  
+  // History view mode toggle (Daily/Monthly)
+  const [historyViewMode, setHistoryViewMode] = useState<'daily' | 'monthly'>('daily');
+  
+  // Calculate days in current month for monthly history view
+  const daysInMonth = useMemo(() => {
+    const year = todayDate.getFullYear();
+    const month = todayDate.getMonth();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    return Array.from({ length: totalDays }, (_, i) => {
+      const date = new Date(year, month, i + 1);
+      return formatDateStr(date);
+    });
+  }, [todayDate]);
   
   // Category dropdown state and priority ordering
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -207,6 +221,34 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
           </div>
         </div>
       )}
+      
+      {/* History View Mode Toggle */}
+      {isHistory && (
+        <div className="bg-[#0a0a0a] border-b border-[#2f3336] px-4 py-2 flex items-center justify-center">
+          <div className="flex items-center bg-[#16181c] rounded-full p-1">
+            <button
+              onClick={() => setHistoryViewMode('daily')}
+              className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all ${
+                historyViewMode === 'daily'
+                  ? 'bg-[#71767b] text-white'
+                  : 'text-[#71767b] hover:text-[#eff3f4]'
+              }`}
+            >
+              Daily
+            </button>
+            <button
+              onClick={() => setHistoryViewMode('monthly')}
+              className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all ${
+                historyViewMode === 'monthly'
+                  ? 'bg-[#71767b] text-white'
+                  : 'text-[#71767b] hover:text-[#eff3f4]'
+              }`}
+            >
+              Monthly
+            </button>
+          </div>
+        </div>
+      )}
 
       <div>
         <div className="px-5 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 border-b border-[#2f3336]">
@@ -348,6 +390,56 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   
                   // History mode: Static display without interactions
                   if (isHistory) {
+                    // Monthly View: Show circular progress and stats
+                    if (historyViewMode === 'monthly') {
+                      const totalMonthly = daysInMonth.filter(d => habit.history[d]).length;
+                      const target = habit.monthlyTarget || daysInMonth.length;
+                      const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
+                      
+                      return (
+                        <div key={habit.id}>
+                          <div className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-[#16181c] border border-[#2f3336]">
+                            {/* Circular Progress - Grayscale */}
+                            <div className="relative w-12 h-12 md:w-14 md:h-14 shrink-0">
+                              <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+                                <circle cx="24" cy="24" r="20" fill="transparent" stroke="#2f3336" strokeWidth="3" />
+                                <circle 
+                                  cx="24" cy="24" r="20" 
+                                  fill="transparent" 
+                                  stroke="#71767b" 
+                                  strokeWidth="3" 
+                                  strokeDasharray={2 * Math.PI * 20}
+                                  strokeDashoffset={2 * Math.PI * 20 * (1 - completionRate / 100)}
+                                  strokeLinecap="round"
+                                />
+                              </svg>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-[10px] font-black text-[#71767b]">{completionRate}%</span>
+                              </div>
+                            </div>
+
+                            <div className="flex-1 text-left min-w-0">
+                              <h4 className="text-[14px] md:text-[16px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
+                                {habit.name.toUpperCase()}
+                              </h4>
+                              <div className="flex items-center gap-3 mt-1.5">
+                                <div className="flex items-center gap-1 bg-[#2f3336] px-2 py-0.5 rounded-full">
+                                  <Flame className="w-3 h-3 text-[#71767b]" />
+                                  <span className="text-[10px] font-black text-[#71767b]">{habit.streak}</span>
+                                </div>
+                                <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{target} Days</span>
+                              </div>
+                            </div>
+
+                            <div className="shrink-0">
+                              <AlignLeft className="w-5 h-5 text-[#71767b]" />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    // Daily View: Show simple checkbox
                     return (
                       <div key={habit.id}>
                         <div
