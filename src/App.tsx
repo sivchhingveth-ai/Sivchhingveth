@@ -640,17 +640,17 @@ export default function App() {
               </div>
             </div>
             <div className="animate-in fade-in slide-in-from-bottom-5 duration-600">
-              <label className={labelClass}>Monthly Target (Times per Month)</label>
+              <label className={labelClass}>Monthly Frequency</label>
               <select 
                 className={inputClass}
                 value={newHabitMonthlyTarget}
                 onChange={e => setNewHabitMonthlyTarget(e.target.value)}
               >
-                <option value="">Full Month ({new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} days)</option>
-                <option value="1">1 time - Day 1 only</option>
-                <option value="2">2 times - 2 weeks each</option>
-                <option value="3">3 times - Every ~10 days</option>
-                <option value="4">4 times - Weekly</option>
+                <option value="">Daily - Every day of the month</option>
+                <option value="1">Once - Only on the 1st of each month</option>
+                <option value="2">Twice - On the 1st and 15th of each month</option>
+                <option value="3">3 times - On the 1st, 11th, and 21st of each month</option>
+                <option value="4">Weekly - On the 1st, 8th, 15th, and 22nd of each month</option>
               </select>
             </div>
           </div>
