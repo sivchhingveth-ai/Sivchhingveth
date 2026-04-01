@@ -29,7 +29,8 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
                 key={tab}
                 ref={activeTab === tab ? activeTabRef : null}
                 onClick={() => onTabChange(tab)}
-                className="w-[170px] md:w-auto md:min-w-[220px] md:px-14 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
+                className="w-[170px] md:w-auto md:min-w-[220px] md:px-14 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0 touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
               >
                 <div className="flex flex-col items-center justify-center h-full relative w-full">
                   <span className={`text-[13px] md:text-[15px] transition-all font-black whitespace-nowrap ${activeTab === tab ? 'text-[#e7e9ea]' : 'text-[#71767b]'
@@ -52,8 +53,9 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
             <button
               onClick={onLogout}
               disabled={isLoggingOut}
-              className="px-5 h-full flex items-center justify-center text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5 transition-all disabled:opacity-50"
+              className="px-5 h-full flex items-center justify-center text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5 transition-all disabled:opacity-50 touch-manipulation"
               title="Sign Out"
+              style={{ touchAction: 'manipulation' }}
             >
               {isLoggingOut ? (
                 <Loader2 className="w-4 h-4 md:w-5 h-5 animate-spin" />

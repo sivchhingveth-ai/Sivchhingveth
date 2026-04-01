@@ -138,7 +138,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   d.setDate(d.getDate() - 1);
                   useAppStore.getState().setHistoryDate(formatDateStr(d));
                 }}
-                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4]"
+                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4] touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -160,7 +161,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   d.setDate(d.getDate() + 1);
                   useAppStore.getState().setHistoryDate(formatDateStr(d));
                 }}
-                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4]"
+                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4] touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -253,24 +255,26 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
                 {phaseHabits.map((habit) => {
                   const isDone = !!habit.history[todayStr];
-                  const animationDelay = `${globalIdx++ * 60}ms`;
+                  // Cap animation delay at 10 items to prevent mobile performance issues
+                  const animationDelay = `${Math.min(globalIdx++, 10) * 50}ms`;
                   return (
                     <div
                       key={habit.id}
                       className="animate-pop-in fill-mode-backwards"
-                      style={{ animationDelay }}
+                      style={{ animationDelay, willChange: 'transform, opacity' }}
                     >
                       <button
                         id={`habit-${habit.id}`}
                         onClick={() => {
                           if (!isHistory) onToggleHabit(habit.id, todayStr);
                         }}
-                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border bit-click-spring ${isDone
+                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border bit-click-spring touch-manipulation ${isDone
                           ? 'border-transparent'
                           : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
                           } ${isHistory ? 'cursor-default' : ''}`}
                         style={{
                           backgroundColor: isDone ? (isHistory ? '#71767b20' : `${phase.color}15`) : 'transparent',
+                          touchAction: 'manipulation'
                         } as React.CSSProperties}
                         disabled={isHistory}
                       >
@@ -280,7 +284,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           }`}
                           style={isDone ? { 
                             backgroundColor: isHistory ? '#71767b' : phase.color, 
-                            boxShadow: isHistory ? 'none' : `0 0 16px ${phase.color}44` 
+                            boxShadow: isHistory ? 'none' : `0 0 16px ${phase.color}44`,
+                            willChange: 'transform'
                           } : {}}
                         >
                           {isDone ? (

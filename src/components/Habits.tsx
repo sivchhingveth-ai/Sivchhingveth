@@ -56,7 +56,8 @@ export const Habits: React.FC<HabitsProps> = ({
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 50);
-    const clockTimer = setInterval(() => setCurrentTime(new Date()), 1000);
+    // Reduced from 1000ms to 60000ms (1 minute) for better mobile performance
+    const clockTimer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => {
       clearTimeout(timer);
       clearInterval(clockTimer);
@@ -200,7 +201,8 @@ export const Habits: React.FC<HabitsProps> = ({
                 {!isStartMonth ? (
                   <button
                     onClick={() => changeMonth(-1)}
-                    className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-[#71767b] hover:text-[#eff3f4]"
+                    className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-[#71767b] hover:text-[#eff3f4] touch-manipulation"
+                    style={{ touchAction: 'manipulation' }}
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -217,7 +219,8 @@ export const Habits: React.FC<HabitsProps> = ({
                 {!isCurrentOrFutureMonth ? (
                   <button
                     onClick={() => changeMonth(1)}
-                    className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-[#71767b] hover:text-[#eff3f4]"
+                    className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-[#71767b] hover:text-[#eff3f4] touch-manipulation"
+                    style={{ touchAction: 'manipulation' }}
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -228,7 +231,8 @@ export const Habits: React.FC<HabitsProps> = ({
             {/* Add Workspace Button */}
             <button
               onClick={onAddHabit}
-              className="w-full bg-[#eff3f4] text-[#0f1419] py-2.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:opacity-90 active:scale-[0.98] font-black tracking-tight text-[13px] md:text-[14px]"
+              className="w-full bg-[#eff3f4] text-[#0f1419] py-2.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:opacity-90 active:scale-[0.98] font-black tracking-tight text-[13px] md:text-[14px] touch-manipulation"
+              style={{ touchAction: 'manipulation' }}
             >
               <Plus className="w-5 h-5" strokeWidth={3} />
               Add Workspace
@@ -249,8 +253,9 @@ export const Habits: React.FC<HabitsProps> = ({
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#71767b]/30 hover:bg-[#71767b]/50 transition-colors"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#71767b]/30 hover:bg-[#71767b]/50 transition-colors touch-manipulation"
                     aria-label="Clear search"
+                    style={{ touchAction: 'manipulation' }}
                   >
                     <span className="text-[#eff3f4] text-[10px] font-bold leading-none">✕</span>
                   </button>
@@ -261,15 +266,17 @@ export const Habits: React.FC<HabitsProps> = ({
               <div className="relative shrink-0">
                 <button
                   onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold border justify-center whitespace-nowrap select-none"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold border justify-center whitespace-nowrap select-none touch-manipulation"
                   style={selectedCategory ? {
                     backgroundColor: `${TIME_PHASES.find(p => p.key === selectedCategory)?.color}15`,
                     borderColor: `${TIME_PHASES.find(p => p.key === selectedCategory)?.color}40`,
-                    color: TIME_PHASES.find(p => p.key === selectedCategory)?.color
+                    color: TIME_PHASES.find(p => p.key === selectedCategory)?.color,
+                    touchAction: 'manipulation'
                   } : {
                     backgroundColor: '#16181c',
                     borderColor: '#2f3336',
-                    color: '#71767b'
+                    color: '#71767b',
+                    touchAction: 'manipulation'
                   }}
                 >
                   <Target className="w-4 h-4" style={{ color: selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.color : 'currentColor' }} />
@@ -278,14 +285,15 @@ export const Habits: React.FC<HabitsProps> = ({
                   <ChevronRight className={`w-4 h-4 ${showCategoryFilter ? 'rotate-90' : ''}`} style={{ transition: 'none' }} />
                 </button>
                 
-                {/* Category Dropdown */}
+                {/* Category Dropdown - Positioned right for mobile safety */}
                 {showCategoryFilter && (
-                  <div className="absolute top-full right-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="absolute top-full right-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-[100] overflow-hidden max-w-[calc(100vw-1rem)]" style={{ touchAction: 'manipulation' }}>
                     <button
                       onClick={() => { setSelectedCategory(null); setShowCategoryFilter(false); }}
-                      className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 ${
+                      className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 touch-manipulation ${
                         !selectedCategory ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b]'
                       }`}
+                      style={{ touchAction: 'manipulation' }}
                     >
                       <Target className="w-4 h-4 text-[#71767b]" />
                       ALL CATEGORIES
@@ -296,9 +304,10 @@ export const Habits: React.FC<HabitsProps> = ({
                         <button
                           key={phase.key}
                           onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
-                          className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 ${
+                          className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 touch-manipulation ${
                             selectedCategory === phase.key ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b]'
                           }`}
+                          style={{ touchAction: 'manipulation' }}
                         >
                           <PhaseIcon className="w-4 h-4" style={{ color: phase.color }} />
                           {phase.label.toUpperCase()}
@@ -351,11 +360,12 @@ export const Habits: React.FC<HabitsProps> = ({
                       <div
                         key={habit.id}
                         onClick={() => setShowActionsId(isExpanded ? null : habit.id)}
-                        className={`w-full flex flex-col rounded-[24px] transition-all duration-500 group relative overflow-hidden cursor-pointer border ${
+                        className={`w-full flex flex-col rounded-[24px] transition-all duration-500 group relative overflow-hidden cursor-pointer border touch-manipulation ${
                           isExpanded 
                           ? 'bg-[#0a0a0a] border-white/10 shadow-2xl z-[1]' 
                           : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'
                         }`}
+                        style={{ touchAction: 'manipulation' }}
                       >
                         {/* Background Accent Progress */}
                         <div
@@ -378,6 +388,7 @@ export const Habits: React.FC<HabitsProps> = ({
                                   strokeDashoffset={2 * Math.PI * 21 * (1 - (isLoaded ? completionRate : 0) / 100)}
                                   strokeLinecap="round"
                                   className="transition-all duration-1000"
+                                  style={{ willChange: 'stroke-dashoffset' }}
                                 />
                               </svg>
                               <div className="absolute inset-0 flex items-center justify-center">
@@ -416,7 +427,8 @@ export const Habits: React.FC<HabitsProps> = ({
                               <div className="flex items-center justify-center gap-6 py-2 border-y border-white/5" onClick={e => e.stopPropagation()}>
                                 <button
                                   onClick={() => onEditHabit(habit.id)}
-                                  className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#71767b] hover:text-[#eff3f4] transition-all"
+                                  className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#71767b] hover:text-[#eff3f4] transition-all touch-manipulation"
+                                  style={{ touchAction: 'manipulation' }}
                                 >
                                   <Pencil className="w-3 h-3" />
                                   Edit Rules
@@ -424,7 +436,8 @@ export const Habits: React.FC<HabitsProps> = ({
                                 <div className="w-[1px] h-3 bg-white/10" />
                                 <button
                                   onClick={() => onDeleteHabit(habit.id)}
-                                  className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#71767b] hover:text-red-400 transition-all"
+                                  className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#71767b] hover:text-red-400 transition-all touch-manipulation"
+                                  style={{ touchAction: 'manipulation' }}
                                 >
                                   <Trash2 className="w-3 h-3" />
                                   Delete
@@ -445,7 +458,7 @@ export const Habits: React.FC<HabitsProps> = ({
                               {/* Recent Activity Bar */}
                               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.01] p-4 rounded-xl border border-white/5">
                                 <span className="text-[11px] font-black text-[#71767b] uppercase tracking-widest">Recent Activity</span>
-                                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                                   {currentWeekDates.map((d, i) => (
                                     <div
                                       key={i}

@@ -72,7 +72,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const scrollPositionRef = React.useRef(0);
 
   React.useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
+    // Reduced from 1000ms to 30000ms (30 seconds) for better mobile performance
+    const timer = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(timer);
   }, []);
   
@@ -178,7 +179,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   d.setDate(d.getDate() - 1);
                   onDateChange?.(formatDateStr(d));
                 }}
-                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4]"
+                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4] touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -200,7 +202,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   d.setDate(d.getDate() + 1);
                   onDateChange?.(formatDateStr(d));
                 }}
-                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4]"
+                className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4] touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -218,7 +221,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
             <div className="relative">
               <button
                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126] select-none"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126] select-none touch-manipulation"
+                style={{ touchAction: 'manipulation' }}
               >
                 <Filter className="w-3.5 h-3.5 text-[#71767b]" />
                 <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-wider">
@@ -226,9 +230,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 </span>
               </button>
               
-              {/* Category Dropdown */}
+              {/* Category Dropdown - Positioned for mobile safety */}
               {showCategoryDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
+                <div className="absolute top-full left-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-[100] overflow-hidden max-w-[calc(100vw-2rem)]" style={{ touchAction: 'manipulation' }}>
                   <div className="py-1">
                     {TIME_PHASES.map((phase, index) => {
                       const PhaseIcon = phase.icon;
@@ -241,8 +245,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                             scrollPositionRef.current = window.scrollY;
                             setPriorityCategory(phase.key);
                           }}
-                          className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 ${!isLast ? 'border-b border-[#2f3336]' : ''}`}
-                          style={{ color: isHistory ? '#71767b' : phase.color }}
+                          className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 touch-manipulation ${!isLast ? 'border-b border-[#2f3336]' : ''}`}
+                          style={{ color: isHistory ? '#71767b' : phase.color, touchAction: 'manipulation' }}
                         >
                           <PhaseIcon 
                             className="w-4 h-4"
@@ -374,7 +378,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 ) : (
                   phaseHabits.map((habit) => {
                   const isDone = !!habit.history[todayStr];
-                  const animationDelay = `${globalIdx++ * 60}ms`;
+                  // Cap animation delay at 10 items to prevent mobile performance issues
+                  const animationDelay = `${Math.min(globalIdx++, 10) * 50}ms`;
                   
                   // History mode: Static display with expandable details - Daily View Only
                   if (isHistory) {
@@ -390,6 +395,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                               ? 'bg-[#0a0a0a] border border-white/10' 
                               : 'bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126]'
                           }`}
+                          style={{ touchAction: 'manipulation' }}
                         >
                           <div 
                             className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 border-2 ${
@@ -480,28 +486,31 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                     <div
                       key={habit.id}
                       className="animate-pop-in fill-mode-backwards"
-                      style={{ animationDelay }}
+                      style={{ animationDelay, willChange: 'transform, opacity' }}
                     >
                       <button
                         id={`habit-${habit.id}`}
                         onClick={() => {
                           if (!isHistory) onToggleHabit(habit.id, todayStr);
                         }}
-                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border bit-click-spring ${isDone
+                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border bit-click-spring touch-manipulation ${isDone
                           ? 'border-transparent'
                           : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
                           }`}
                         style={{
                           backgroundColor: isDone ? `${phase.color}15` : 'transparent',
+                          touchAction: 'manipulation'
                         } as React.CSSProperties}
                       >
-                        <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
-                          ? 'border-transparent scale-100 animate-check-pop'
-                          : 'border-[#2f3336] group-hover:border-[#71767b]'
-                          }`}
+                        <div 
+                          className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
+                            ? 'border-transparent scale-100 animate-check-pop'
+                            : 'border-[#2f3336] group-hover:border-[#71767b]'
+                            }`}
                           style={isDone ? { 
                             backgroundColor: phase.color, 
-                            boxShadow: `0 0 16px ${phase.color}44` 
+                            boxShadow: `0 0 16px ${phase.color}44`,
+                            willChange: 'transform'
                           } : {}}
                         >
                           {isDone ? (
