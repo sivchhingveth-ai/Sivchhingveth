@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Habit } from '../types';
 import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon } from 'lucide-react';
-import { getEffectiveDateStr, getEffectiveDate, formatDateStr } from '../utils/dateUtils';
+import { getEffectiveDateStr, getEffectiveDate, formatDateStr, shouldShowHabitOnDay } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
 interface DailyHabitsProps {
@@ -81,7 +81,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     }
   }, [priorityCategory]);
 
-  // Group habits by time phase with priority ordering
+  // Group habits by time phase with priority ordering and monthly target filtering
   const groupedByPhase = useMemo(() => {
     const groups: { phase: typeof TIME_PHASES[number]; habits: Habit[] }[] = TIME_PHASES.map(p => ({
       phase: p,
@@ -89,6 +89,11 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     }));
 
     habits.forEach(h => {
+      // Check if habit should be shown on current day based on monthly target
+      if (!shouldShowHabitOnDay(h.monthlyTarget, todayStr)) {
+        return; // Skip this habit for today
+      }
+      
       const phase = getPhaseForHabit(h);
       const group = groups.find(g => g.phase.key === phase.key);
       if (group) group.habits.push(h);
@@ -107,7 +112,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     }
     
     return nonEmptyGroups;
-  }, [habits, priorityCategory]);
+  }, [habits, priorityCategory, todayStr]);
 
   // Derived habits to show based on filter
   const visibleHabits = useMemo(() => {
