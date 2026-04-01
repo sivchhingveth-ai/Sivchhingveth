@@ -183,10 +183,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       <div>
         <div className="px-5 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 border-b border-[#2f3336]">
           <div className="min-w-0 flex items-center gap-3">
-            <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] leading-tight tracking-tight">
-              {activeTab}
-            </h2>
-            
             {/* Category Filter Button */}
             <div className="relative">
               <button
@@ -235,7 +231,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
             </div>
             
             {!isHistory && (
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-2">
                 <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
                 <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
                   {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
