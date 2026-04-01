@@ -61,23 +61,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const currentPhaseKey = getCurrentPhaseKey();
   const [now, setNow] = React.useState(new Date());
   
-  // History view mode toggle (Daily/Monthly)
-  const [historyViewMode, setHistoryViewMode] = useState<'daily' | 'monthly'>('daily');
-  
-  // Track expanded habit in monthly history view
-  const [expandedHistoryHabit, setExpandedHistoryHabit] = useState<string | null>(null);
-  
-  // Calculate days in current month for monthly history view
-  const daysInMonth = useMemo(() => {
-    const year = todayDate.getFullYear();
-    const month = todayDate.getMonth();
-    const totalDays = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: totalDays }, (_, i) => {
-      const date = new Date(year, month, i + 1);
-      return formatDateStr(date);
-    });
-  }, [todayDate]);
-  
   // Category dropdown state and priority ordering
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [priorityCategory, setPriorityCategory] = useState<string | null>(null);
@@ -181,8 +164,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
 
-      {/* History Date Picker - Only show in Daily mode */}
-      {isHistory && historyViewMode === 'daily' && (
+      {/* History Date Picker */}
+      {isHistory && (
         <div className="bg-[#16181c] border-b border-[#2f3336] p-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {startDate !== todayStr ? (
@@ -221,43 +204,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
             ) : (
               <div className="w-10 h-10" />
             )}
-          </div>
-        </div>
-      )}
-      
-      {/* Month/Year Header for Monthly View - Same style as Daily header */}
-      {isHistory && historyViewMode === 'monthly' && (
-        <div className="bg-[#16181c] border-b border-[#2f3336] p-3 flex items-center justify-center">
-          <span className="text-[#eff3f4] font-black text-sm">
-            {todayDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()}
-          </span>
-        </div>
-      )}
-      
-      {/* History View Mode Toggle */}
-      {isHistory && (
-        <div className="bg-[#0a0a0a] border-b border-[#2f3336] px-4 py-2 flex items-center justify-center">
-          <div className="flex items-center bg-[#16181c] rounded-full p-1">
-            <button
-              onClick={() => setHistoryViewMode('daily')}
-              className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all ${
-                historyViewMode === 'daily'
-                  ? 'bg-[#71767b] text-white'
-                  : 'text-[#71767b] hover:text-[#eff3f4]'
-              }`}
-            >
-              Daily
-            </button>
-            <button
-              onClick={() => setHistoryViewMode('monthly')}
-              className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all ${
-                historyViewMode === 'monthly'
-                  ? 'bg-[#71767b] text-white'
-                  : 'text-[#71767b] hover:text-[#eff3f4]'
-              }`}
-            >
-              Monthly
-            </button>
           </div>
         </div>
       )}
@@ -400,108 +346,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   const isDone = !!habit.history[todayStr];
                   const animationDelay = `${globalIdx++ * 60}ms`;
                   
-                  // History mode: Static display without interactions
+                  // History mode: Static display without interactions - Daily View Only
                   if (isHistory) {
-                    // Monthly View: Show circular progress and stats with expandable details
-                    if (historyViewMode === 'monthly') {
-                      const totalMonthly = daysInMonth.filter(d => habit.history[d]).length;
-                      const target = habit.monthlyTarget || daysInMonth.length;
-                      const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
-                      const isExpanded = expandedHistoryHabit === habit.id;
-                      
-                      return (
-                        <div key={habit.id} className="space-y-2">
-                          {/* Main Card - Clickable to expand */}
-                          <div 
-                            onClick={() => setExpandedHistoryHabit(isExpanded ? null : habit.id)}
-                            className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl cursor-pointer transition-all ${
-                              isExpanded 
-                                ? 'bg-[#0a0a0a] border border-white/10 shadow-2xl' 
-                                : 'bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126]'
-                            }`}
-                          >
-                            {/* Circular Progress - Grayscale */}
-                            <div className="relative w-12 h-12 md:w-14 md:h-14 shrink-0">
-                              <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-                                <circle cx="24" cy="24" r="20" fill="transparent" stroke="#2f3336" strokeWidth="3" />
-                                <circle 
-                                  cx="24" cy="24" r="20" 
-                                  fill="transparent" 
-                                  stroke="#71767b" 
-                                  strokeWidth="3" 
-                                  strokeDasharray={2 * Math.PI * 20}
-                                  strokeDashoffset={2 * Math.PI * 20 * (1 - completionRate / 100)}
-                                  strokeLinecap="round"
-                                />
-                              </svg>
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-[10px] font-black text-[#71767b]">{completionRate}%</span>
-                              </div>
-                            </div>
-
-                            <div className="flex-1 text-left min-w-0">
-                              <h4 className={`text-[14px] md:text-[16px] font-black text-[#eff3f4] uppercase tracking-tight transition-all ${
-                                isExpanded ? 'whitespace-normal break-words' : 'truncate'
-                              }`}>
-                                {habit.name.toUpperCase()}
-                              </h4>
-                              <div className="flex items-center gap-3 mt-1.5">
-                                <div className="flex items-center gap-1 bg-[#2f3336] px-2 py-0.5 rounded-full">
-                                  <Flame className="w-3 h-3 text-[#71767b]" />
-                                  <span className="text-[10px] font-black text-[#71767b]">{habit.streak}</span>
-                                </div>
-                                <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{target} Days</span>
-                              </div>
-                            </div>
-
-                            <div className={`shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                              <AlignLeft className={`w-5 h-5 transition-colors ${isExpanded ? 'text-white' : 'text-[#71767b]'}`} />
-                            </div>
-                          </div>
-
-                          {/* Expanded Details - Read Only */}
-                          {isExpanded && (
-                            <div className="px-4 md:px-6 pb-4 pt-1 animate-in fade-in slide-in-from-top-2 duration-300">
-                              <div className="h-px bg-white/5 mb-4" />
-                              
-                              {/* Description Section */}
-                              {habit.description && (
-                                <div className="mb-4">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Info className="w-3.5 h-3.5 text-[#71767b]" />
-                                    <span className="text-[9px] font-black text-[#71767b] uppercase tracking-widest">Rules & Description</span>
-                                  </div>
-                                  <p className="text-[13px] text-[#eff3f4] leading-relaxed bg-[#16181c] rounded-xl p-3 border border-[#2f3336]">
-                                    {habit.description}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Monthly Progress Bar */}
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[9px] font-black text-[#71767b] uppercase tracking-widest">Monthly Progress</span>
-                                  <span className="text-[11px] font-black text-[#eff3f4]">{totalMonthly}/{target}</span>
-                                </div>
-                                <div className="h-2 bg-[#2f3336] rounded-full overflow-hidden">
-                                  <div 
-                                    className="h-full bg-[#71767b] rounded-full transition-all duration-500"
-                                    style={{ width: `${completionRate}%` }}
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Read Only Notice */}
-                              <div className="mt-4 flex items-center justify-center gap-2 text-[#71767b]/60">
-                                <span className="text-[10px] font-bold uppercase tracking-widest">View Only - History</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    }
-                    
-                    // Daily View: Show simple checkbox
                     return (
                       <div key={habit.id}>
                         <div
