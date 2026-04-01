@@ -64,11 +64,22 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   // Category dropdown state and priority ordering
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [priorityCategory, setPriorityCategory] = useState<string | null>(null);
+  
+  // Track scroll position to maintain it during reordering
+  const scrollPositionRef = React.useRef(0);
 
   React.useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+  
+  // Restore scroll position after reordering
+  React.useEffect(() => {
+    if (scrollPositionRef.current > 0) {
+      window.scrollTo(0, scrollPositionRef.current);
+      scrollPositionRef.current = 0;
+    }
+  }, [priorityCategory]);
 
   // Group habits by time phase with priority ordering
   const groupedByPhase = useMemo(() => {
@@ -223,14 +234,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         key={phase.key}
                         onClick={() => {
                           setShowCategoryDropdown(false);
+                          // Save current scroll position before reordering
+                          scrollPositionRef.current = window.scrollY;
                           setPriorityCategory(phase.key);
-                          // Small delay to let React re-render with new order, then scroll
-                          setTimeout(() => {
-                            const element = document.getElementById(`phase-${phase.key}`);
-                            if (element) {
-                              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                          }, 100);
                         }}
                         className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 transition-all duration-200 hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98] group ${!isLast ? 'border-b border-[#2f3336]' : ''}`}
                         style={{ 
