@@ -66,7 +66,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
 
         {/* Slide Navigation Boundary */}
         <div 
-          className="h-full w-14 border-l-2 border-[#71767b] bg-black flex items-center justify-center cursor-pointer hover:bg-white/5 transition-all group"
+          className="h-full w-12 border-l border-[#2f3336] bg-black flex items-center justify-center cursor-pointer hover:bg-white/5 transition-all group"
           onClick={() => {
             const currentIndex = tabs.indexOf(activeTab);
             const nextIndex = (currentIndex + 1) % tabs.length;
@@ -74,10 +74,8 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
           }}
           title="Next Tab"
         >
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-[3px] h-10 bg-[#71767b] group-hover:bg-[#eff3f4] transition-colors rounded-full" />
-            <ChevronRight className="w-5 h-5 text-[#71767b] group-hover:text-[#eff3f4] transition-colors" />
-          </div>
+          <div className="w-[2px] h-8 bg-[#2f3336] group-hover:bg-[#71767b] transition-colors rounded-full" />
+          <ChevronRight className="w-4 h-4 text-[#71767b] group-hover:text-[#eff3f4] -ml-1 transition-colors" />
         </div>
       </div>
     </div>
