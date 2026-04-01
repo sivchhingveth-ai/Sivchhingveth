@@ -29,7 +29,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
                 key={tab}
                 ref={activeTab === tab ? activeTabRef : null}
                 onClick={() => onTabChange(tab)}
-                className="w-[140px] md:w-auto md:min-w-[140px] md:px-8 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
+                className="w-[170px] md:w-auto md:min-w-[220px] md:px-14 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
               >
                 <div className="flex flex-col items-center justify-center h-full relative w-full">
                   <span className={`text-[13px] md:text-[15px] transition-all font-black whitespace-nowrap ${activeTab === tab ? 'text-[#e7e9ea]' : 'text-[#71767b]'
@@ -37,7 +37,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
                     {tab}
                   </span>
                   {activeTab === tab && (
-                    <div className="absolute bottom-[2px] left-1/2 -translate-x-1/2 h-[3.5px] w-[36px] md:w-[52px] bg-[#eff3f4] rounded-full shadow-[0_0_15px_rgba(255,255,255,0.6)] animate-in fade-in zoom-in-[0.8] duration-300 ease-out" />
+                    <div className="absolute bottom-[2px] left-1/2 -translate-x-1/2 h-[3.5px] w-[48px] md:w-[80px] bg-[#eff3f4] rounded-full shadow-[0_0_15px_rgba(255,255,255,0.6)] animate-in fade-in zoom-in-[0.8] duration-300 ease-out" />
                   )}
                 </div>
               </button>
