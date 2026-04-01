@@ -340,6 +340,58 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   phaseHabits.map((habit) => {
                   const isDone = !!habit.history[todayStr];
                   const animationDelay = `${globalIdx++ * 60}ms`;
+                  
+                  // History mode: Static display without interactions
+                  if (isHistory) {
+                    return (
+                      <div key={habit.id}>
+                        <div
+                          className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl border ${
+                            isDone
+                              ? 'bg-[#71767b]/10 border-[#71767b]/30'
+                              : 'bg-transparent border-[#2f3336]'
+                          }`}
+                        >
+                          <div 
+                            className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 border-2 ${
+                              isDone ? 'border-transparent' : 'border-[#2f3336]'
+                            }`}
+                            style={isDone ? { backgroundColor: '#71767b' } : {}}
+                          >
+                            {isDone ? (
+                              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            ) : (
+                              <Circle className="w-4 h-4 text-[#2f3336]" />
+                            )}
+                          </div>
+
+                          <div className="flex-1 text-left min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className={`text-[14px] md:text-[15px] font-bold truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'}`}>
+                                {habit.name.toUpperCase()}
+                              </p>
+                              {habit.streak > 0 && (
+                                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20 shrink-0">
+                                  <Flame className="w-2.5 h-2.5 text-[#ff6b00]" />
+                                  <span className="text-[9px] font-black text-[#ff6b00]">{habit.streak}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {isDone && (
+                            <div className="shrink-0 flex items-center justify-center">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#71767b]" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  // Normal mode: Interactive with animations
                   return (
                     <div
                       key={habit.id}
@@ -354,19 +406,18 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border bit-click-spring ${isDone
                           ? 'border-transparent'
                           : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
-                          } ${isHistory ? 'cursor-default' : ''}`}
+                          }`}
                         style={{
-                          backgroundColor: isDone ? (isHistory ? '#71767b20' : `${phase.color}15`) : 'transparent',
+                          backgroundColor: isDone ? `${phase.color}15` : 'transparent',
                         } as React.CSSProperties}
-                        disabled={isHistory}
                       >
                         <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
                           ? 'border-transparent scale-100 animate-check-pop'
                           : 'border-[#2f3336] group-hover:border-[#71767b]'
                           }`}
                           style={isDone ? { 
-                            backgroundColor: isHistory ? '#71767b' : phase.color, 
-                            boxShadow: isHistory ? 'none' : `0 0 16px ${phase.color}44` 
+                            backgroundColor: phase.color, 
+                            boxShadow: `0 0 16px ${phase.color}44` 
                           } : {}}
                         >
                           {isDone ? (
@@ -382,7 +433,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           <div className="flex items-center gap-2">
                             <p className={`text-[14px] md:text-[15px] font-bold transition-all duration-300 ease-in-out truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'
                               }`}>
-                               {habit.name.toUpperCase()}
+                              {habit.name.toUpperCase()}
                             </p>
                             {habit.streak > 0 && (
                               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20 shrink-0">
@@ -395,7 +446,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
                         {isDone && (
                           <div className="shrink-0 animate-fade-in flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: isHistory ? '#71767b' : phase.color }} />
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phase.color }} />
                           </div>
                         )}
                       </button>
