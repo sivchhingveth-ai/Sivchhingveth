@@ -240,13 +240,13 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         }}
                         className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 transition-all duration-200 hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98] group ${!isLast ? 'border-b border-[#2f3336]' : ''}`}
                         style={{ 
-                          color: phase.color,
+                          color: isHistory ? '#71767b' : phase.color,
                           animationDelay: `${index * 50}ms`
                         }}
                       >
                         <PhaseIcon 
                           className="w-4 h-4 transition-transform duration-200 group-hover:scale-110"
-                          style={{ color: phase.color }}
+                          style={{ color: isHistory ? '#71767b' : phase.color }}
                         />
                         <span className="group-hover:translate-x-1 transition-transform duration-200">{phase.label}</span>
                       </button>
@@ -285,8 +285,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
             {/* Streak Chip */}
             <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
-              <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
-                <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#ff6b00]" />
+              <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center ${isHistory ? 'bg-[#71767b]/10 border border-[#71767b]/20' : 'bg-[#ff6b00]/10 border border-[#ff6b00]/20'}`}>
+                <Flame className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isHistory ? 'text-[#71767b]' : 'text-[#ff6b00]'}`} />
               </div>
               <div className="text-right pr-1">
                 <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">{currentStreak}</p>
