@@ -26,7 +26,7 @@ import { getEffectiveDateStr, getEffectiveDate, formatDateStr, calculateStreak }
 
 export default function App() {
   const todayStr = getEffectiveDateStr();
-  const [activeTab, setActiveTab] = useState('Rules & Growth');
+  const [activeTab, setActiveTab] = useState('Tasks');
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { signOut } = useAuthActions();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
