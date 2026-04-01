@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Habit } from '../types';
-import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -60,6 +60,10 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const todayDate = isHistory ? new Date(historyDate) : getEffectiveDate();
   const currentPhaseKey = getCurrentPhaseKey();
   const [now, setNow] = React.useState(new Date());
+  
+  // Category filter state - default all selected
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(TIME_PHASES.map(p => p.key));
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   React.useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -79,18 +83,12 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       if (group) group.habits.push(h);
     });
 
-    // Filter phases based on selection
+    // Filter phases based on user selection
     return groups.filter(g => {
       if (g.habits.length === 0) return false;
-      if (filterPhase) {
-        if (Array.isArray(filterPhase)) {
-          return filterPhase.includes(g.phase.key);
-        }
-        return g.phase.key === filterPhase;
-      }
-      return true;
+      return selectedCategories.includes(g.phase.key);
     });
-  }, [habits, filterPhase]);
+  }, [habits, selectedCategories]);
 
   // Derived habits to show based on filter
   const visibleHabits = useMemo(() => {
@@ -188,11 +186,75 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
       <div>
         <div className="px-5 py-3 md:px-6 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 border-b border-[#2f3336]">
-          <div className="min-w-0">
+          <div className="min-w-0 flex items-center gap-3">
             <h2 className="text-[18px] md:text-[22px] font-black text-[#eff3f4] leading-tight tracking-tight">
               {activeTab}
             </h2>
-            {!isHistory && (
+            
+            {/* Category Filter Button */}
+            <div className="relative">
+              <button
+                onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126] transition-all"
+              >
+                <Filter className="w-3.5 h-3.5 text-[#71767b]" />
+                <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-wider">
+                  {selectedCategories.length === TIME_PHASES.length ? 'All' : `${selectedCategories.length}`}
+                </span>
+                <ChevronRightIcon className={`w-3 h-3 text-[#71767b] transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
+              </button>
+              
+              {/* Category Dropdown */}
+              {showCategoryDropdown && (
+                <div className="absolute top-full left-0 mt-2 w-[200px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="p-2">
+                    <button
+                      onClick={() => setSelectedCategories(TIME_PHASES.map(p => p.key))}
+                      className="w-full px-3 py-2 text-left text-[12px] font-bold text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-[#71767b]" />
+                      Select All
+                    </button>
+                    <button
+                      onClick={() => setSelectedCategories([])}
+                      className="w-full px-3 py-2 text-left text-[12px] font-bold text-[#71767b] hover:text-[#eff3f4] hover:bg-white/5 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      <div className="w-2 h-2 rounded-full border border-[#71767b]" />
+                      Deselect All
+                    </button>
+                    <div className="h-px bg-[#2f3336] my-2" />
+                    {TIME_PHASES.map((phase) => (
+                      <button
+                        key={phase.key}
+                        onClick={() => {
+                          if (selectedCategories.includes(phase.key)) {
+                            setSelectedCategories(selectedCategories.filter(k => k !== phase.key));
+                          } else {
+                            setSelectedCategories([...selectedCategories, phase.key]);
+                          }
+                        }}
+                        className="w-full px-3 py-2 text-left text-[12px] font-bold transition-colors rounded-lg flex items-center gap-2 hover:bg-white/5"
+                        style={{ 
+                          color: selectedCategories.includes(phase.key) ? phase.color : '#71767b'
+                        }}
+                      >
+                        <div 
+                          className="w-2 h-2 rounded-full transition-all"
+                          style={{ 
+                            backgroundColor: selectedCategories.includes(phase.key) ? phase.color : 'transparent',
+                            border: `2px solid ${phase.color}`
+                          }}
+                        />
+                        {phase.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {!isHistory && (
               <div className="flex items-center gap-2 mt-0.5">
                 <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
                 <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
