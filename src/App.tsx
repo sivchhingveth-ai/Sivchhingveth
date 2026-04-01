@@ -642,9 +642,9 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-5 duration-600">
               <label className={labelClass}>Monthly Target (Auto: Days in Month)</label>
               <input 
-                className={`${inputClass} bg-[#0a0a0a] cursor-not-allowed`}
+                className={`${inputClass} bg-[#0a0a0a] cursor-not-allowed opacity-80`}
                 type="text"
-                value={`${new Date().getDate() === 1 ? new Date(new Date().getFullYear(), new Date().getMonth(), 0).getDate() : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} days`}
+                value={`${new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} days`}
                 readOnly
                 disabled
               />
