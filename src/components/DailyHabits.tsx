@@ -252,9 +252,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 </div>
               )}
             </div>
-          </div>
-          
-          {!isHistory && (
+            
+            {!isHistory && (
               <div className="flex items-center gap-2 mt-0.5">
                 <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
                 <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
