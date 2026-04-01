@@ -178,8 +178,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
 
-      {/* History Date Picker (if in history mode) */}
-      {isHistory && (
+      {/* History Date Picker - Only show in Daily mode */}
+      {isHistory && historyViewMode === 'daily' && (
         <div className="bg-[#16181c] border-b border-[#2f3336] p-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {startDate !== todayStr ? (
@@ -219,6 +219,15 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               <div className="w-10 h-10" />
             )}
           </div>
+        </div>
+      )}
+      
+      {/* Month/Year Header for Monthly View */}
+      {isHistory && historyViewMode === 'monthly' && (
+        <div className="bg-[#16181c] border-b border-[#2f3336] p-3 flex items-center justify-center">
+          <span className="text-[#eff3f4] font-black text-sm">
+            {todayDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()}
+          </span>
         </div>
       )}
       
