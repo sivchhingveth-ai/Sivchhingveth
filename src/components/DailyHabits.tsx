@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Habit } from '../types';
-import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon, AlignLeft } from 'lucide-react';
+import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon, AlignLeft, Info } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate, formatDateStr, shouldShowHabitOnDay } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -63,6 +63,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   
   // History view mode toggle (Daily/Monthly)
   const [historyViewMode, setHistoryViewMode] = useState<'daily' | 'monthly'>('daily');
+  
+  // Track expanded habit in monthly history view
+  const [expandedHistoryHabit, setExpandedHistoryHabit] = useState<string | null>(null);
   
   // Calculate days in current month for monthly history view
   const daysInMonth = useMemo(() => {
@@ -399,15 +402,24 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   
                   // History mode: Static display without interactions
                   if (isHistory) {
-                    // Monthly View: Show circular progress and stats
+                    // Monthly View: Show circular progress and stats with expandable details
                     if (historyViewMode === 'monthly') {
                       const totalMonthly = daysInMonth.filter(d => habit.history[d]).length;
                       const target = habit.monthlyTarget || daysInMonth.length;
                       const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
+                      const isExpanded = expandedHistoryHabit === habit.id;
                       
                       return (
-                        <div key={habit.id}>
-                          <div className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-[#16181c] border border-[#2f3336]">
+                        <div key={habit.id} className="space-y-2">
+                          {/* Main Card - Clickable to expand */}
+                          <div 
+                            onClick={() => setExpandedHistoryHabit(isExpanded ? null : habit.id)}
+                            className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl cursor-pointer transition-all ${
+                              isExpanded 
+                                ? 'bg-[#0a0a0a] border border-white/10 shadow-2xl' 
+                                : 'bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126]'
+                            }`}
+                          >
                             {/* Circular Progress - Grayscale */}
                             <div className="relative w-12 h-12 md:w-14 md:h-14 shrink-0">
                               <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
@@ -428,7 +440,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                             </div>
 
                             <div className="flex-1 text-left min-w-0">
-                              <h4 className="text-[14px] md:text-[16px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
+                              <h4 className={`text-[14px] md:text-[16px] font-black text-[#eff3f4] uppercase tracking-tight transition-all ${
+                                isExpanded ? 'whitespace-normal break-words' : 'truncate'
+                              }`}>
                                 {habit.name.toUpperCase()}
                               </h4>
                               <div className="flex items-center gap-3 mt-1.5">
@@ -440,10 +454,49 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                               </div>
                             </div>
 
-                            <div className="shrink-0">
-                              <AlignLeft className="w-5 h-5 text-[#71767b]" />
+                            <div className={`shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                              <AlignLeft className={`w-5 h-5 transition-colors ${isExpanded ? 'text-white' : 'text-[#71767b]'}`} />
                             </div>
                           </div>
+
+                          {/* Expanded Details - Read Only */}
+                          {isExpanded && (
+                            <div className="px-4 md:px-6 pb-4 pt-1 animate-in fade-in slide-in-from-top-2 duration-300">
+                              <div className="h-px bg-white/5 mb-4" />
+                              
+                              {/* Description Section */}
+                              {habit.description && (
+                                <div className="mb-4">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Info className="w-3.5 h-3.5 text-[#71767b]" />
+                                    <span className="text-[9px] font-black text-[#71767b] uppercase tracking-widest">Rules & Description</span>
+                                  </div>
+                                  <p className="text-[13px] text-[#eff3f4] leading-relaxed bg-[#16181c] rounded-xl p-3 border border-[#2f3336]">
+                                    {habit.description}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Monthly Progress Bar */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[9px] font-black text-[#71767b] uppercase tracking-widest">Monthly Progress</span>
+                                  <span className="text-[11px] font-black text-[#eff3f4]">{totalMonthly}/{target}</span>
+                                </div>
+                                <div className="h-2 bg-[#2f3336] rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-[#71767b] rounded-full transition-all duration-500"
+                                    style={{ width: `${completionRate}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Read Only Notice */}
+                              <div className="mt-4 flex items-center justify-center gap-2 text-[#71767b]/60">
+                                <span className="text-[10px] font-bold uppercase tracking-widest">View Only - History</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     }
