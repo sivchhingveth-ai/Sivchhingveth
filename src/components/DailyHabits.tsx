@@ -222,14 +222,12 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         </div>
       )}
       
-      {/* Month/Year Header for Monthly View */}
+      {/* Month/Year Header for Monthly View - Same style as Daily header */}
       {isHistory && historyViewMode === 'monthly' && (
-        <div className="bg-[#0a0a0a] border-b border-[#2f3336] px-4 py-2 flex items-center justify-center">
-          <div className="flex items-center bg-[#16181c] rounded-full px-4 py-1.5">
-            <span className="text-[11px] font-black uppercase tracking-wider text-[#eff3f4]">
-              {todayDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()}
-            </span>
-          </div>
+        <div className="bg-[#16181c] border-b border-[#2f3336] p-3 flex items-center justify-center">
+          <span className="text-[#eff3f4] font-black text-sm">
+            {todayDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase()}
+          </span>
         </div>
       )}
       
