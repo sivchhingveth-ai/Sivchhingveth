@@ -639,35 +639,16 @@ export default function App() {
                 ))}
               </div>
             </div>
-            <div>
-              <label className={labelClass}>Monthly Target</label>
-              <input 
-                className={inputClass} 
-                type="number" 
-                inputMode="numeric" 
-                pattern="[0-9]*" 
-                min="1" 
-                max="31"
-                placeholder="e.g. 10" 
-                value={newHabitMonthlyTarget} 
-                onChange={e => {
-                  const val = e.target.value;
-                  if (val === "" || (parseInt(val) <= 31 && parseInt(val) >= 0)) {
-                    setNewHabitMonthlyTarget(val);
-                  }
-                }} 
+            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <label className={labelClass}>Detail Description (Rules / Info)</label>
+              <textarea 
+                className={`${inputClass} min-h-[100px] resize-none py-2`} 
+                placeholder="Explain the rules or details of this task..." 
+                value={newHabitDescription} 
+                onChange={e => setNewHabitDescription(e.target.value)}
+                autoComplete="off" autoCorrect="off" spellCheck={false}
               />
             </div>
-          </div>
-
-          <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <label className={labelClass}>Detail Description (Rules / Info)</label>
-            <textarea 
-              className={`${inputClass} min-h-[100px] resize-none py-2`} 
-              placeholder="Explain the rules or details of this task..." 
-              value={newHabitDescription} 
-              onChange={e => setNewHabitDescription(e.target.value)}
-            />
           </div>
 
           {habitError && (
