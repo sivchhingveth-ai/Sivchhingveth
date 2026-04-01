@@ -48,6 +48,8 @@ export const Habits: React.FC<HabitsProps> = ({
   tabs, activeTab, onTabChange, onLogout, isLoggingOut, startDate
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
   const [showActionsId, setShowActionsId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -71,9 +73,17 @@ export const Habits: React.FC<HabitsProps> = ({
     });
 
     const searchLower = searchTerm.trim().toLowerCase();
-    const filteredHabits = habits.filter(h =>
+    let filteredHabits = habits.filter(h =>
       h.name.toLowerCase().includes(searchLower)
     );
+
+    // Filter by selected category if one is selected
+    if (selectedCategory) {
+      filteredHabits = filteredHabits.filter(h => {
+        const phase = getPhaseForHabit(h);
+        return phase.key === selectedCategory;
+      });
+    }
 
     filteredHabits.forEach(h => {
       const phase = getPhaseForHabit(h);
@@ -88,7 +98,7 @@ export const Habits: React.FC<HabitsProps> = ({
       }
     });
     return result;
-  }, [habits, searchTerm]);
+  }, [habits, searchTerm, selectedCategory]);
 
   // Get days in current month
   const daysInMonth = useMemo(() => {
@@ -182,18 +192,10 @@ export const Habits: React.FC<HabitsProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 w-full md:w-auto">
-          <button
-            onClick={onAddHabit}
-            className="w-full md:w-auto bg-[#eff3f4] text-[#0f1419] py-2.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:opacity-90 active:scale-[0.98]"
-          >
-            <Plus className="w-5 h-5" strokeWidth={3} />
-            <span className="font-black tracking-tight text-[13px] md:text-[14px]">Add Workspace</span>
-          </button>
+          <div className="flex flex-col gap-3 w-full md:w-auto">
 
-          <div className="flex flex-col md:flex-row gap-3 items-center">
-            {/* Month Picker */}
-            <div className="flex items-center gap-1 bg-[#16181c] border border-[#2f3336] p-1 rounded-xl w-full md:w-auto h-10">
+            {/* Month Picker - Full width on its own row */}
+            <div className="flex items-center gap-1 bg-[#16181c] border border-[#2f3336] p-1 rounded-xl w-full h-10">
               <div className="flex items-center justify-center w-8">
                 {!isStartMonth ? (
                   <button
@@ -222,24 +224,75 @@ export const Habits: React.FC<HabitsProps> = ({
                 ) : null}
               </div>
             </div>
-            
-            <div className="relative w-full md:w-[280px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-[#16181c] border border-[#2f3336] pl-9 pr-8 py-2.5 rounded-xl text-[13px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
-              />
-              {searchTerm && (
+
+            {/* Search and Category Row - Side by side */}
+            <div className="flex flex-row gap-3 items-center w-full">
+              {/* Search Input - Takes most space on the LEFT */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#71767b]" />
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-[#16181c] border border-[#2f3336] pl-9 pr-8 py-2.5 rounded-xl text-[13px] text-[#eff3f4] placeholder-[#71767b] outline-none focus:border-[#1d9bf0] transition-all"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#71767b]/30 hover:bg-[#71767b]/50 transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <span className="text-[#eff3f4] text-[10px] font-bold leading-none">✕</span>
+                  </button>
+                )}
+              </div>
+              
+              {/* Category Filter Button - Auto width on the RIGHT with dynamic color */}
+              <div className="relative shrink-0">
                 <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-[#71767b]/30 hover:bg-[#71767b]/50 transition-colors"
-                  aria-label="Clear search"
+                  onClick={() => setShowCategoryFilter(!showCategoryFilter)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold transition-all border justify-center whitespace-nowrap"
+                  style={selectedCategory ? {
+                    backgroundColor: `${TIME_PHASES.find(p => p.key === selectedCategory)?.color}15`,
+                    borderColor: `${TIME_PHASES.find(p => p.key === selectedCategory)?.color}40`,
+                    color: TIME_PHASES.find(p => p.key === selectedCategory)?.color
+                  } : {
+                    backgroundColor: '#16181c',
+                    borderColor: '#2f3336',
+                    color: '#71767b'
+                  }}
                 >
-                  <span className="text-[#eff3f4] text-[10px] font-bold leading-none">✕</span>
+                  <Target className="w-4 h-4" style={{ color: selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.color : 'currentColor' }} />
+                  <span className="hidden sm:inline">{selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.label.toUpperCase() : 'ALL CATEGORIES'}</span>
+                  <span className="sm:hidden">{selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.label.toUpperCase() : 'ALL'}</span>
+                  <ChevronRight className={`w-4 h-4 transition-transform ${showCategoryFilter ? 'rotate-90' : ''}`} />
                 </button>
+                
+                {/* Category Dropdown */}
+              {showCategoryFilter && (
+                <div className="absolute top-full left-0 right-0 md:right-auto mt-2 w-full md:w-48 bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <button
+                    onClick={() => { setSelectedCategory(null); setShowCategoryFilter(false); }}
+                    className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors ${
+                      !selectedCategory ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b] hover:bg-white/5 hover:text-[#eff3f4]'
+                    }`}
+                  >
+                    ALL CATEGORIES
+                  </button>
+                  {TIME_PHASES.map((phase) => (
+                    <button
+                      key={phase.key}
+                      onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
+                      className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors flex items-center gap-2 ${
+                        selectedCategory === phase.key ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b] hover:bg-white/5 hover:text-[#eff3f4]'
+                      }`}
+                    >
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: phase.color }} />
+                      {phase.label.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -322,7 +375,7 @@ export const Habits: React.FC<HabitsProps> = ({
                               <h4 className={`text-[15px] md:text-[17px] font-black text-[#eff3f4] uppercase tracking-tight group-hover:text-white transition-all ${
                                 isExpanded ? 'whitespace-normal break-words' : 'truncate'
                               }`}>
-                                {habit.name}
+                                 {habit.name.toUpperCase()}
                               </h4>
                               <div className="flex items-center gap-3 mt-2">
                                 <div className="flex items-center gap-1 bg-[#ff6b00]/10 px-2 py-0.5 rounded-full">

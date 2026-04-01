@@ -23,15 +23,15 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
       <div className="flex h-[53px] items-center">
         {/* Scrollable Tabs Wrapper */}
         <div className="flex-1 min-w-0 flex h-full overflow-x-auto scrollbar-hide no-scrollbar relative">
-          <div className="flex h-full min-w-max px-[calc(50%-57.5px)] md:px-0">
+          <div className="flex h-full min-w-max px-4 md:px-0 md:justify-around w-full">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 ref={activeTab === tab ? activeTabRef : null}
                 onClick={() => onTabChange(tab)}
-                className="w-[115px] md:w-[170px] relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
+                className="w-[140px] md:w-auto md:min-w-[140px] md:px-8 relative flex items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors shrink-0"
               >
-                <div className="flex flex-col items-center justify-center h-full relative">
+                <div className="flex flex-col items-center justify-center h-full relative w-full">
                   <span className={`text-[13px] md:text-[15px] transition-all font-black whitespace-nowrap ${activeTab === tab ? 'text-[#e7e9ea]' : 'text-[#71767b]'
                     }`}>
                     {tab}

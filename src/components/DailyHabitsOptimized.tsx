@@ -1,21 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
+import useAppStore from '../store/appStore';
 import { Habit } from '../types';
 import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getEffectiveDateStr, getEffectiveDate, formatDateStr } from '../utils/dateUtils';
+import { formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
 interface DailyHabitsProps {
   habits: Habit[];
   onToggleHabit: (id: any, dateStr: string) => void;
-  // Navigation props
-  tabs: string[];
-  activeTab: string;
-  onTabChange: (tab: string) => void;
   onLogout: () => void;
-  isLoggingOut: boolean;
   filterPhase?: string | string[];
-  historyDate?: string;
-  onDateChange?: (dateStr: string) => void;
   startDate?: string;
   maxDate?: string;
 }
@@ -32,7 +26,6 @@ const TIME_PHASES = [
 const getPhaseForHabit = (habit: Habit) => {
   if (!habit.time) return TIME_PHASES[0];
   const time = habit.time;
-  // Support both old time strings and new phase keys
   if (time === 'reset' || time === '08:00') return TIME_PHASES[0];
   if (time === 'growth' || time === '14:00') return TIME_PHASES[1];
   if (time === 'distraction' || time === '20:00' || time === '02:00') return TIME_PHASES[2];
@@ -42,7 +35,6 @@ const getPhaseForHabit = (habit: Habit) => {
   return phase || TIME_PHASES[0];
 };
 
-// Phase selection is no longer strictly time-based as requested
 const getCurrentPhaseKey = (): string | null => {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 12) return 'reset';
@@ -51,22 +43,21 @@ const getCurrentPhaseKey = (): string | null => {
 };
 
 export const DailyHabits: React.FC<DailyHabitsProps> = ({
-  habits, onToggleHabit,
-  tabs, activeTab, onTabChange, onLogout, isLoggingOut, filterPhase,
-  historyDate, onDateChange, startDate, maxDate
+  habits, onToggleHabit, onLogout, filterPhase, startDate, maxDate
 }) => {
-  const isHistory = !!historyDate;
-  const todayStr = isHistory ? historyDate : getEffectiveDateStr();
-  const todayDate = isHistory ? new Date(historyDate) : getEffectiveDate();
+  // Get state from Zustand store instead of props
+  const activeTab = useAppStore((state) => state.activeTab);
+  const isLoggingOut = useAppStore((state) => state.isLoggingOut);
+  const historyDate = useAppStore((state) => state.historyDate);
+  const now = useAppStore((state) => state.now);
+  const tabs = ['Rules & Growth', 'Reset & Distraction', 'Spending', 'Add Workspace', 'History'];
+  
+  const isHistory = activeTab === 'History';
+  const todayStr = isHistory ? historyDate : useAppStore((state) => state.todayStr);
+  const todayDate = isHistory ? new Date(historyDate) : useAppStore((state) => state.todayDate);
   const currentPhaseKey = getCurrentPhaseKey();
-  const [now, setNow] = React.useState(new Date());
 
-  React.useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Group habits by time phase
+  // Memoized grouped habits
   const groupedByPhase = useMemo(() => {
     const groups: { phase: typeof TIME_PHASES[number]; habits: Habit[] }[] = TIME_PHASES.map(p => ({
       phase: p,
@@ -79,7 +70,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       if (group) group.habits.push(h);
     });
 
-    // Filter phases based on selection
     return groups.filter(g => {
       if (g.habits.length === 0) return false;
       if (filterPhase) {
@@ -92,28 +82,24 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     });
   }, [habits, filterPhase]);
 
-  // Derived habits to show based on filter
   const visibleHabits = useMemo(() => {
     return groupedByPhase.flatMap(g => g.habits);
   }, [groupedByPhase]);
 
-  // Stats for today
   const completedCount = visibleHabits.filter(h => h.history[todayStr]).length;
   const totalCount = visibleHabits.length;
   const completionPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  // Streak: consecutive days up to today
+  // Optimized streak calculation with early exit
   const currentStreak = useMemo(() => {
     if (totalCount === 0) return 0;
     let streak = 0;
     const d = new Date(todayDate);
     
-    // If today is completed, it counts toward the streak
     const todayStr = formatDateStr(d);
     const todayCompleted = visibleHabits.every(h => h.history[todayStr]);
     if (todayCompleted) streak++;
     
-    // Check previous days consecutively
     d.setDate(d.getDate() - 1);
     for (let i = 0; i < 365; i++) {
       const dStr = formatDateStr(d);
@@ -136,13 +122,10 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
   return (
     <div className="flex flex-col relative w-full h-full">
-
-      {/* Header with inline navigation + stats */}
       <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-xl border-b border-[#2f3336]">
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
+        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={(tab) => useAppStore.getState().setActiveTab(tab)} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
 
-      {/* History Date Picker (if in history mode) */}
       {isHistory && (
         <div className="bg-[#16181c] border-b border-[#2f3336] p-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -151,7 +134,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 onClick={() => {
                   const d = new Date(todayStr);
                   d.setDate(d.getDate() - 1);
-                  onDateChange?.(formatDateStr(d));
+                  useAppStore.getState().setHistoryDate(formatDateStr(d));
                 }}
                 className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4]"
               >
@@ -173,7 +156,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                  onClick={() => {
                   const d = new Date(todayStr);
                   d.setDate(d.getDate() + 1);
-                  onDateChange?.(formatDateStr(d));
+                  useAppStore.getState().setHistoryDate(formatDateStr(d));
                 }}
                 className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors text-[#71767b] hover:text-[#eff3f4]"
               >
@@ -196,14 +179,13 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               <div className="flex items-center gap-2 mt-0.5">
                 <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
                 <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
-                  {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+                  {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
                 </span>
               </div>
             )}
           </div>
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
-            {/* Done Chip */}
             <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
                 <div 
                   className="w-6 h-6 md:w-8 md:h-8 rounded-lg border flex items-center justify-center transition-colors"
@@ -219,7 +201,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               </div>
             </div>
 
-            {/* Streak Chip */}
             <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
               <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
                 <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#ff6b00]" />
@@ -252,7 +233,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               <div className={`flex items-center gap-3 px-1 mb-1.5 py-1 rounded-xl ${isCurrentPhase ? 'bg-white/[0.02]' : ''}`}>
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.2em] leading-none" style={{ color: isHistory ? '#71767b' : phase.color }}>
-                    {phase.label}
+                    {phase.label.toUpperCase()}
                   </span>
                   {isCurrentPhase && (
                     <span className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full animate-pulse"
