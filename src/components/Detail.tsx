@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Habit } from '../types';
-import { Sun, Target, Sparkles, Circle, CircleDollarSign, ChevronLeft, ChevronRight, Search, Flame, AlignLeft, Info, Loader2 } from 'lucide-react';
+import { Circle, Target, ChevronLeft, ChevronRight, Search, Flame, AlignLeft, Info, Loader2 } from 'lucide-react';
 import { formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -19,11 +19,11 @@ interface DetailProps {
 }
 
 const TIME_PHASES = [
-  { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759' },
+  { key: 'reset', label: 'Reset', time: 'reset', icon: Target, color: '#34c759' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
-  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30' },
-  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Circle, color: '#1d9bf0' },
-  { key: 'spending', label: 'Spending', time: 'spending', icon: CircleDollarSign, color: '#ff9500' },
+  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Target, color: '#ff3b30' },
+  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Target, color: '#1d9bf0' },
+  { key: 'spending', label: 'Spending', time: 'spending', icon: Target, color: '#ff9500' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -116,7 +116,7 @@ export const Detail: React.FC<DetailProps> = ({
         </div>
       </div>
 
-      <div className="p-5 md:p-6 space-y-8 pb-32 overflow-y-auto">
+      <div className="p-5 md:p-6 space-y-8 overflow-y-auto" style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
         {Object.entries(groupedByPhase).map(([phaseKey, phaseGroup]) => {
           const { phase, habits: phaseHabits } = phaseGroup as { phase: typeof TIME_PHASES[number]; habits: Habit[] };
           return (

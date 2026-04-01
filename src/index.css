@@ -384,6 +384,18 @@ button:active {
   border-radius: 20px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+/* Safe area support for mobile devices with notches/home indicators */
+@supports (padding: max(0px)) {
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+/* Ensure main content doesn't get hidden behind mobile home indicators */
+main > div > div:last-child {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
 }

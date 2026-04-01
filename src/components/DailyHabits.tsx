@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Habit } from '../types';
-import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon, AlignLeft, Info } from 'lucide-react';
+import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, ChevronLeft, ChevronRight, Filter, AlignLeft, Info } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate, formatDateStr, shouldShowHabitOnDay } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -22,11 +22,11 @@ interface DailyHabitsProps {
 
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759', emoji: '🌱' },
-  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Circle, color: '#1d9bf0', emoji: '🎯' },
+  { key: 'reset', label: 'Reset', time: 'reset', icon: Target, color: '#34c759', emoji: '🌱' },
+  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Target, color: '#1d9bf0', emoji: '🎯' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0', emoji: '🚀' },
-  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30', emoji: '🚫' },
-  { key: 'spending', label: 'Spending', time: 'spending', icon: CircleDollarSign, color: '#ff9500', emoji: '💰' },
+  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Target, color: '#ff3b30', emoji: '🚫' },
+  { key: 'spending', label: 'Spending', time: 'spending', icon: Target, color: '#ff9500', emoji: '💰' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -218,60 +218,87 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
             <div className="relative">
               <button
                 onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126] transition-all"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126] select-none"
               >
                 <Filter className="w-3.5 h-3.5 text-[#71767b]" />
                 <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-wider">
                   Categories
                 </span>
-                <ChevronRightIcon className={`w-3 h-3 text-[#71767b] transition-transform ${showCategoryDropdown ? 'rotate-90' : ''}`} />
               </button>
               
               {/* Category Dropdown */}
-              <div 
-                className={`absolute top-full left-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden transition-all duration-300 ease-out origin-top-left ${
-                  showCategoryDropdown ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-                }`}
-              >
-                <div className="py-1">
-                  {TIME_PHASES.map((phase, index) => {
-                    const PhaseIcon = phase.icon;
-                    const isLast = index === TIME_PHASES.length - 1;
-                    return (
-                      <button
-                        key={phase.key}
-                        onClick={() => {
-                          setShowCategoryDropdown(false);
-                          // Save current scroll position before reordering
-                          scrollPositionRef.current = window.scrollY;
-                          setPriorityCategory(phase.key);
-                        }}
-                        className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 transition-all duration-200 hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98] group ${!isLast ? 'border-b border-[#2f3336]' : ''}`}
-                        style={{ 
-                          color: isHistory ? '#71767b' : phase.color,
-                          animationDelay: `${index * 50}ms`
-                        }}
-                      >
-                        <PhaseIcon 
-                          className="w-4 h-4 transition-transform duration-200 group-hover:scale-110"
+              {showCategoryDropdown && (
+                <div className="absolute top-full left-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="py-1">
+                    {TIME_PHASES.map((phase, index) => {
+                      const PhaseIcon = phase.icon;
+                      const isLast = index === TIME_PHASES.length - 1;
+                      return (
+                        <button
+                          key={phase.key}
+                          onClick={() => {
+                            setShowCategoryDropdown(false);
+                            scrollPositionRef.current = window.scrollY;
+                            setPriorityCategory(phase.key);
+                          }}
+                          className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 ${!isLast ? 'border-b border-[#2f3336]' : ''}`}
                           style={{ color: isHistory ? '#71767b' : phase.color }}
-                        />
-                        <span className="group-hover:translate-x-1 transition-transform duration-200">{phase.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                        >
+                          <PhaseIcon 
+                            className="w-4 h-4"
+                            style={{ color: isHistory ? '#71767b' : phase.color }}
+                          />
+                          <span>{phase.label}</span>
+                       </button>
+                      );
+                    })}
+                   </div>
+                 </div>
+               )}
+             </div>
+             
+             {/* Mobile Category Count Labels - shown below on small screens */}
+            <div className="flex md:hidden flex-wrap items-center gap-y-1 gap-x-1.5 mt-1 max-w-full">
+              {TIME_PHASES.map((phase, idx) => (
+                <React.Fragment key={phase.key}>
+                  <span 
+                    className="text-[8px] font-black uppercase tracking-wider leading-none whitespace-nowrap"
+                    style={{ color: phase.color }}
+                  >
+                    {habits.filter(h => getPhaseForHabit(h).key === phase.key && shouldShowHabitOnDay(h.monthlyTarget, todayStr)).length} {phase.label}
+                  </span>
+                  {idx < TIME_PHASES.length - 1 && (
+                    <span className="w-1 h-1 rounded-full bg-[#71767b] shrink-0" />
+                  )}
+                </React.Fragment>
+              ))}
             </div>
             
             {!isHistory && (
-              <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2 ml-4">
                 <Clock className="w-3 h-3 text-[#71767b] shrink-0" />
                 <span className="text-[#8b98a5] text-[9px] md:text-[11px] font-black uppercase tracking-[0.15em]">
                   {now.toLocaleDateString('en-US', { weekday: 'short' })}, {now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} &middot; {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
                 </span>
               </div>
             )}
+
+            {/* Category Count Labels */}
+            <div className="hidden md:flex flex-wrap items-center gap-y-1 gap-x-2 ml-4">
+              {TIME_PHASES.map((phase, idx) => (
+                <React.Fragment key={phase.key}>
+                  <span 
+                    className="text-[10px] font-black uppercase tracking-wider leading-none"
+                    style={{ color: phase.color }}
+                  >
+                    {habits.filter(h => getPhaseForHabit(h).key === phase.key && shouldShowHabitOnDay(h.monthlyTarget, todayStr)).length} {phase.label}
+                  </span>
+                  {idx < TIME_PHASES.length - 1 && (
+                    <span className="w-1 h-1 rounded-full bg-[#71767b]" />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -305,7 +332,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         </div>
       </div>
 
-      <div className="p-5 md:p-6 space-y-7 pb-32">
+      <div className="p-5 md:p-6 space-y-7" style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
         {totalCount === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />

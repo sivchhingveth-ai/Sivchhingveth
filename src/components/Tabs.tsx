@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { LogOut, Loader2, ChevronRight } from 'lucide-react';
+import { LogOut, Loader2 } from 'lucide-react';
 
 interface TabsProps {
   tabs: string[];
@@ -62,20 +62,6 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, onLogo
               )}
             </button>
           )}
-        </div>
-
-        {/* Slide Navigation Boundary */}
-        <div 
-          className="h-full w-12 border-l border-[#2f3336] bg-black flex items-center justify-center cursor-pointer hover:bg-white/5 transition-all group"
-          onClick={() => {
-            const currentIndex = tabs.indexOf(activeTab);
-            const nextIndex = (currentIndex + 1) % tabs.length;
-            onTabChange(tabs[nextIndex]);
-          }}
-          title="Next Tab"
-        >
-          <div className="w-[2px] h-8 bg-[#2f3336] group-hover:bg-[#71767b] transition-colors rounded-full" />
-          <ChevronRight className="w-4 h-4 text-[#71767b] group-hover:text-[#eff3f4] -ml-1 transition-colors" />
         </div>
       </div>
     </div>

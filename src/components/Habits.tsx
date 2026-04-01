@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Habit } from '../types';
-import { Edit2, Trash2, Plus, Activity, TrendingUp, Sun, CloudSun, Moon, Stars, Search, Target, Clock, ChevronLeft, ChevronRight, Check, Sparkles, Circle, CircleDollarSign, AlignLeft, Info, Flame, Pencil } from 'lucide-react';
+import { Edit2, Trash2, Plus, Activity, TrendingUp, Search, Target, Clock, ChevronLeft, ChevronRight, Check, Circle, AlignLeft, Info, Flame, Pencil } from 'lucide-react';
 import { getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -23,11 +23,11 @@ interface HabitsProps {
 
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759' },
+  { key: 'reset', label: 'Reset', time: 'reset', icon: Target, color: '#34c759' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
-  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30' },
-  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Circle, color: '#1d9bf0' },
-  { key: 'spending', label: 'Spending', time: 'spending', icon: CircleDollarSign, color: '#ff9500' },
+  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Target, color: '#ff3b30' },
+  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Target, color: '#1d9bf0' },
+  { key: 'spending', label: 'Spending', time: 'spending', icon: Target, color: '#ff9500' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -261,7 +261,7 @@ export const Habits: React.FC<HabitsProps> = ({
               <div className="relative shrink-0">
                 <button
                   onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold transition-all border justify-center whitespace-nowrap"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold border justify-center whitespace-nowrap select-none"
                   style={selectedCategory ? {
                     backgroundColor: `${TIME_PHASES.find(p => p.key === selectedCategory)?.color}15`,
                     borderColor: `${TIME_PHASES.find(p => p.key === selectedCategory)?.color}40`,
@@ -275,22 +275,16 @@ export const Habits: React.FC<HabitsProps> = ({
                   <Target className="w-4 h-4" style={{ color: selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.color : 'currentColor' }} />
                   <span className="hidden sm:inline">{selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.label.toUpperCase() : 'ALL CATEGORIES'}</span>
                   <span className="sm:hidden">{selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.label.toUpperCase() : 'ALL'}</span>
-                  <ChevronRight className={`w-4 h-4 transition-transform ${showCategoryFilter ? 'rotate-90' : ''}`} />
+                  <ChevronRight className={`w-4 h-4 ${showCategoryFilter ? 'rotate-90' : ''}`} style={{ transition: 'none' }} />
                 </button>
                 
                 {/* Category Dropdown */}
-              {showCategoryFilter && (
-                <>
-                  {/* Backdrop overlay to close dropdown when clicking outside */}
-                  <div 
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowCategoryFilter(false)}
-                  />
+                {showCategoryFilter && (
                   <div className="absolute top-full right-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
                     <button
                       onClick={() => { setSelectedCategory(null); setShowCategoryFilter(false); }}
-                      className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors flex items-center gap-3 ${
-                        !selectedCategory ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b] hover:bg-white/5 hover:text-[#eff3f4]'
+                      className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 ${
+                        !selectedCategory ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b]'
                       }`}
                     >
                       <Target className="w-4 h-4 text-[#71767b]" />
@@ -302,8 +296,8 @@ export const Habits: React.FC<HabitsProps> = ({
                         <button
                           key={phase.key}
                           onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
-                          className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors flex items-center gap-3 ${
-                            selectedCategory === phase.key ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b] hover:bg-white/5 hover:text-[#eff3f4]'
+                          className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 ${
+                            selectedCategory === phase.key ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b]'
                           }`}
                         >
                           <PhaseIcon className="w-4 h-4" style={{ color: phase.color }} />
@@ -312,15 +306,14 @@ export const Habits: React.FC<HabitsProps> = ({
                       );
                     })}
                   </div>
-                </>
-              )}
+                )}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-5 md:px-6 py-4 space-y-6 pb-20 text-[#eff3f4] animate-slide-up duration-[400ms]">
-        <div className="flex flex-col gap-8 pb-32 mt-4 text-[#eff3f4]">
+      <div className="px-5 md:px-6 py-4 space-y-6 pb-8 md:pb-20 text-[#eff3f4] animate-slide-up duration-[400ms]">
+        <div className="flex flex-col gap-8 pb-20 md:pb-32 mt-4 text-[#eff3f4]" style={{ paddingBottom: 'max(5rem, env(safe-area-inset-bottom))' }}>
           {Object.entries(groupedByPhase).length === 0 && (
             <div className="text-center py-16 bg-white/[0.01] border border-dashed border-[#2f3336] rounded-3xl">
               <TrendingUp className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />

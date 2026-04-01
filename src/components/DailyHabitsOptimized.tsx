@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import useAppStore from '../store/appStore';
 import { Habit } from '../types';
-import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Circle, Flame, Target, ChevronDown, ChevronUp, Minus, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -16,11 +16,11 @@ interface DailyHabitsProps {
 
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'reset', label: 'Reset', time: 'reset', icon: Sun, color: '#34c759', emoji: '🌱' },
-  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Circle, color: '#1d9bf0', emoji: '🎯' },
+  { key: 'reset', label: 'Reset', time: 'reset', icon: Target, color: '#34c759', emoji: '🌱' },
+  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Target, color: '#1d9bf0', emoji: '🎯' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0', emoji: '🚀' },
-  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Sparkles, color: '#ff3b30', emoji: '🚫' },
-  { key: 'spending', label: 'Spending', time: 'spending', icon: CircleDollarSign, color: '#ff9500', emoji: '💰' },
+  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Target, color: '#ff3b30', emoji: '🚫' },
+  { key: 'spending', label: 'Spending', time: 'spending', icon: Target, color: '#ff9500', emoji: '💰' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -50,7 +50,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const isLoggingOut = useAppStore((state) => state.isLoggingOut);
   const historyDate = useAppStore((state) => state.historyDate);
   const now = useAppStore((state) => state.now);
-  const tabs = ['Tasks', 'Add Workspace', 'History'];
+  const tabs = ['To Do List', 'Add Workspace', 'History'];
   
   const isHistory = activeTab === 'History';
   const todayStr = isHistory ? historyDate : useAppStore((state) => state.todayStr);
@@ -116,7 +116,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
   const activePhase = filterPhase ? TIME_PHASES.find(p => p.key === filterPhase) : null;
   const chipColor = activePhase ? (isHistory ? '#71767b' : activePhase.color) : '#eff3f4';
-  const ChipIcon = activePhase ? activePhase.icon : Target;
+  const ChipIcon = activePhase ? activePhase.icon : Circle;
 
   let globalIdx = 0;
 
@@ -191,7 +191,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   className="w-6 h-6 md:w-8 md:h-8 rounded-lg border flex items-center justify-center transition-colors"
                   style={{ backgroundColor: `${chipColor}10`, borderColor: `${chipColor}20` }}
                 >
-                  <Target className="w-3.5 h-3.5 md:w-4 md:h-4 transition-colors" style={{ color: chipColor }} />
+                  <ChipIcon className="w-3.5 h-3.5 md:w-4 md:h-4" style={{ color: chipColor }} />
                 </div>
               <div className="text-right pr-1">
                 <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">
@@ -214,10 +214,10 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         </div>
       </div>
 
-      <div className="p-5 md:p-6 space-y-7 pb-32">
+      <div className="p-5 md:p-6 space-y-7" style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
         {totalCount === 0 && (
           <div className="text-center py-16">
-            <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
+            <Circle className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
             <p className="text-[#71767b] text-base font-bold">No {activeTab} tracked yet</p>
             <p className="text-[#71767b]/60 text-sm mt-1">Go to Add Workspace to add your first {activeTab.toLowerCase()}!</p>
           </div>
