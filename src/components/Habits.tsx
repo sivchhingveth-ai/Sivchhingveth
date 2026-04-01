@@ -349,7 +349,8 @@ export const Habits: React.FC<HabitsProps> = ({
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
                   {phaseHabits.map(habit => {
                     const totalMonthly = days.filter(d => habit.history[d.dateStr]).length;
-                    const target = habit.monthlyTarget || days.length;
+                    const daysInCurrentMonth = days.length;
+                    const target = habit.monthlyTarget || daysInCurrentMonth;
                     const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
                     const isExpanded = showActionsId === habit.id;
 
@@ -402,7 +403,7 @@ export const Habits: React.FC<HabitsProps> = ({
                                   <Flame className="w-3.5 h-3.5 text-[#ff6b00]" />
                                   <span className="text-[11px] font-black text-[#ff6b00]">{habit.streak}</span>
                                 </div>
-                                <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{target} Days</span>
+                                <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{daysInCurrentMonth} Days</span>
                               </div>
                             </div>
                           </div>
