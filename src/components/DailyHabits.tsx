@@ -61,6 +61,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const currentPhaseKey = getCurrentPhaseKey();
   const [now, setNow] = React.useState(new Date());
   
+  // Track expanded habit in history view
+  const [expandedHistoryHabit, setExpandedHistoryHabit] = useState<string | null>(null);
+  
   // Category dropdown state and priority ordering
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [priorityCategory, setPriorityCategory] = useState<string | null>(null);
@@ -346,15 +349,19 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   const isDone = !!habit.history[todayStr];
                   const animationDelay = `${globalIdx++ * 60}ms`;
                   
-                  // History mode: Static display without interactions - Daily View Only
+                  // History mode: Static display with expandable details - Daily View Only
                   if (isHistory) {
+                    const isExpanded = expandedHistoryHabit === habit.id;
+                    
                     return (
-                      <div key={habit.id}>
-                        <div
-                          className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl border ${
-                            isDone
-                              ? 'bg-[#71767b]/10 border-[#71767b]/30'
-                              : 'bg-transparent border-[#2f3336]'
+                      <div key={habit.id} className="space-y-2">
+                        {/* Main Card - Clickable to expand */}
+                        <div 
+                          onClick={() => setExpandedHistoryHabit(isExpanded ? null : habit.id)}
+                          className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl cursor-pointer transition-all ${
+                            isExpanded 
+                              ? 'bg-[#0a0a0a] border border-white/10' 
+                              : 'bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126]'
                           }`}
                         >
                           <div 
@@ -374,24 +381,61 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
                           <div className="flex-1 text-left min-w-0">
                             <div className="flex items-center gap-2">
-                              <p className={`text-[14px] md:text-[15px] font-bold truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'}`}>
+                              <p className={`text-[14px] md:text-[15px] font-bold ${isExpanded ? 'whitespace-normal break-words' : 'truncate'} ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'}`}>
                                 {habit.name.toUpperCase()}
                               </p>
                               {habit.streak > 0 && (
-                                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20 shrink-0">
-                                  <Flame className="w-2.5 h-2.5 text-[#ff6b00]" />
-                                  <span className="text-[9px] font-black text-[#ff6b00]">{habit.streak}</span>
+                                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#2f3336] shrink-0">
+                                  <Flame className="w-2.5 h-2.5 text-[#71767b]" />
+                                  <span className="text-[9px] font-black text-[#71767b]">{habit.streak}</span>
                                 </div>
                               )}
                             </div>
                           </div>
 
-                          {isDone && (
-                            <div className="shrink-0 flex items-center justify-center">
-                              <div className="w-1.5 h-1.5 rounded-full bg-[#71767b]" />
-                            </div>
-                          )}
+                          <div className={`shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                            <AlignLeft className={`w-5 h-5 transition-colors ${isExpanded ? 'text-white' : 'text-[#71767b]'}`} />
+                          </div>
                         </div>
+
+                        {/* Expanded Details - Read Only */}
+                        {isExpanded && (
+                          <div className="px-4 md:px-6 pb-4 pt-1 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="h-px bg-white/5 mb-4" />
+                            
+                            {/* Description Section */}
+                            {habit.description && (
+                              <div className="mb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Info className="w-3.5 h-3.5 text-[#71767b]" />
+                                  <span className="text-[9px] font-black text-[#71767b] uppercase tracking-widest">Rules & Description</span>
+                                </div>
+                                <p className="text-[13px] text-[#eff3f4] leading-relaxed bg-[#16181c] rounded-xl p-3 border border-[#2f3336]">
+                                  {habit.description}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Monthly Target Info */}
+                            <div className="space-y-2 mb-4">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[9px] font-black text-[#71767b] uppercase tracking-widest">Monthly Frequency</span>
+                                <span className="text-[11px] font-black text-[#eff3f4]">
+                                  {habit.monthlyTarget === 1 ? 'Once (Day 1)' : 
+                                   habit.monthlyTarget === 2 ? 'Twice (Days 1 & 15)' : 
+                                   habit.monthlyTarget === 3 ? '3 times (Days 1, 11, 21)' : 
+                                   habit.monthlyTarget === 4 ? 'Weekly (Days 1, 8, 15, 22)' : 
+                                   'Daily (Every day)'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Read Only Notice */}
+                            <div className="flex items-center justify-center gap-2 text-[#71767b]/60 pt-2 border-t border-white/5">
+                              <span className="text-[10px] font-bold uppercase tracking-widest">History View - Read Only</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   }
