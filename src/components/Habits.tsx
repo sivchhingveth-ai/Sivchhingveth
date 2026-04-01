@@ -274,24 +274,28 @@ export const Habits: React.FC<HabitsProps> = ({
                 <div className="absolute top-full right-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
                   <button
                     onClick={() => { setSelectedCategory(null); setShowCategoryFilter(false); }}
-                    className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors ${
+                    className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors flex items-center gap-3 ${
                       !selectedCategory ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b] hover:bg-white/5 hover:text-[#eff3f4]'
                     }`}
                   >
+                    <Target className="w-4 h-4 text-[#71767b]" />
                     ALL CATEGORIES
                   </button>
-                  {TIME_PHASES.map((phase) => (
-                    <button
-                      key={phase.key}
-                      onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
-                      className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors flex items-center gap-2 ${
-                        selectedCategory === phase.key ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b] hover:bg-white/5 hover:text-[#eff3f4]'
-                      }`}
-                    >
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: phase.color }} />
-                      {phase.label.toUpperCase()}
-                    </button>
-                  ))}
+                  {TIME_PHASES.map((phase) => {
+                    const PhaseIcon = phase.icon;
+                    return (
+                      <button
+                        key={phase.key}
+                        onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
+                        className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors flex items-center gap-3 ${
+                          selectedCategory === phase.key ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b] hover:bg-white/5 hover:text-[#eff3f4]'
+                        }`}
+                      >
+                        <PhaseIcon className="w-4 h-4" style={{ color: phase.color }} />
+                        {phase.label.toUpperCase()}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
