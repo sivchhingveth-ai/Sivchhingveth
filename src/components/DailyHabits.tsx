@@ -34,8 +34,8 @@ const getPhaseForHabit = (habit: Habit) => {
   const time = habit.time;
   // Support both old time strings and new phase keys
   if (time === 'reset' || time === '08:00') return TIME_PHASES[0];
-  if (time === 'growth' || time === '14:00') return TIME_PHASES[1];
-  if (time === 'distraction' || time === '20:00' || time === '02:00') return TIME_PHASES[2];
+  if (time === 'growth' || time === '14:00') return TIME_PHASES[2];
+  if (time === 'distraction' || time === '20:00' || time === '02:00') return TIME_PHASES[3];
   if (time === 'spending') return TIME_PHASES[4];
   
   const phase = TIME_PHASES.find(p => p.time === time);
