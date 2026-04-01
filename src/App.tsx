@@ -135,9 +135,10 @@ export default function App() {
             name: args.name,
             history: {},
             streak: 0,
-            time: args.time ?? undefined,
-            monthlyTarget: args.monthlyTarget ?? undefined,
-            description: args.description ?? undefined,
+            category: args.category,
+            time: args.time,
+            monthlyTarget: args.monthlyTarget,
+            description: args.description,
           }
         ]);
       }
@@ -151,11 +152,12 @@ export default function App() {
         localStore.setQuery(api.habits.list, {}, existing.map(h => 
           h._id === args.id ? { 
             ...h, 
-            history: args.history ?? h.history, 
             name: args.name ?? h.name, 
-            time: args.time ?? h.time, 
+            category: args.category ?? h.category,
+            time: args.time ?? h.time,
             monthlyTarget: args.monthlyTarget ?? h.monthlyTarget,
             description: args.description ?? h.description,
+            history: args.history ?? h.history,
             // Optimistically update streak if history is changed
             streak: args.history ? calculateStreak(args.history, args.todayStr || todayStr) : h.streak
           } : h
@@ -163,6 +165,49 @@ export default function App() {
       }
     }
   );
+
+  // Auto-save daily snapshot at midnight - runs every minute to check
+  useEffect(() => {
+    if (!isAuthenticated || !rawHabits) return;
+    
+    const checkAndSaveDailySnapshot = () => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      
+      // Check if it's midnight (00:00)
+      if (currentHour === 0 && currentMinute === 0) {
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = formatDateStr(yesterday);
+        
+        // Save snapshot for all habits from yesterday
+        rawHabits.forEach(habit => {
+          // Only save if not already saved for yesterday
+          if (!habit.history || !habit.history.hasOwnProperty(yesterdayStr)) {
+            const updatedHistory = { ...habit.history };
+            // Mark as false (incomplete) if not already marked
+            updatedHistory[yesterdayStr] = false;
+            
+            // Save to database
+            updateHabit({
+              id: habit._id,
+              history: updatedHistory,
+              todayStr: yesterdayStr,
+            });
+          }
+        });
+      }
+    };
+    
+    // Check every minute
+    const interval = setInterval(checkAndSaveDailySnapshot, 60000);
+    
+    // Also check immediately when component mounts
+    checkAndSaveDailySnapshot();
+    
+    return () => clearInterval(interval);
+  }, [isAuthenticated, rawHabits, updateHabit, todayStr]);
 
   const removeHabit = useMutation(api.habits.remove).withOptimisticUpdate(
     (localStore, args) => {
