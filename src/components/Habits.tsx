@@ -225,6 +225,15 @@ export const Habits: React.FC<HabitsProps> = ({
               </div>
             </div>
 
+            {/* Add Workspace Button */}
+            <button
+              onClick={onAddHabit}
+              className="w-full bg-[#eff3f4] text-[#0f1419] py-2.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(255,255,255,0.1)] transition-all hover:opacity-90 active:scale-[0.98] font-black tracking-tight text-[13px] md:text-[14px]"
+            >
+              <Plus className="w-5 h-5" strokeWidth={3} />
+              Add Workspace
+            </button>
+
             {/* Search and Category Row - Side by side */}
             <div className="flex flex-row gap-3 items-center w-full">
               {/* Search Input - Takes most space on the LEFT */}
