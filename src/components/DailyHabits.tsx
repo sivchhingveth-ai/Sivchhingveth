@@ -201,32 +201,37 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               </button>
               
               {/* Category Dropdown */}
-              {showCategoryDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-[200px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
-                  <div className="p-2">
-                    {TIME_PHASES.map((phase) => (
-                      <button
-                        key={phase.key}
-                        onClick={() => {
-                          setShowCategoryDropdown(false);
-                          const element = document.getElementById(`phase-${phase.key}`);
-                          if (element) {
-                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }
-                        }}
-                        className="w-full px-3 py-2 text-left text-[12px] font-bold transition-colors rounded-lg flex items-center gap-2 hover:bg-white/5"
-                        style={{ color: phase.color }}
-                      >
-                        <div 
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: phase.color }}
-                        />
-                        {phase.label}
-                      </button>
-                    ))}
-                  </div>
+              <div 
+                className={`absolute top-full left-0 mt-2 w-[200px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden transition-all duration-300 ease-out origin-top-left ${
+                  showCategoryDropdown ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                }`}
+              >
+                <div className="p-2 space-y-1">
+                  {TIME_PHASES.map((phase, index) => (
+                    <button
+                      key={phase.key}
+                      onClick={() => {
+                        setShowCategoryDropdown(false);
+                        const element = document.getElementById(`phase-${phase.key}`);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
+                      className="w-full px-3 py-2.5 text-left text-[13px] font-bold rounded-xl flex items-center gap-3 transition-all duration-200 hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98] group"
+                      style={{ 
+                        color: phase.color,
+                        animationDelay: `${index * 50}ms`
+                      }}
+                    >
+                      <div 
+                        className="w-3 h-3 rounded-full transition-transform duration-200 group-hover:scale-125"
+                        style={{ backgroundColor: phase.color }}
+                      />
+                      <span className="group-hover:translate-x-1 transition-transform duration-200">{phase.label}</span>
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
             
             {!isHistory && (
