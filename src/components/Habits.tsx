@@ -271,7 +271,7 @@ export const Habits: React.FC<HabitsProps> = ({
                 
                 {/* Category Dropdown */}
               {showCategoryFilter && (
-                <div className="absolute top-full right-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
+                <div className="absolute top-full left-0 right-0 md:right-auto mt-2 w-full md:w-48 bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-50 overflow-hidden">
                   <button
                     onClick={() => { setSelectedCategory(null); setShowCategoryFilter(false); }}
                     className={`w-full px-4 py-3 text-left text-[13px] font-bold transition-colors ${
