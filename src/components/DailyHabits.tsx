@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Habit } from '../types';
-import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon, AlignLeft } from 'lucide-react';
+import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, CircleDollarSign, ChevronLeft, ChevronRight, Filter, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate, formatDateStr, shouldShowHabitOnDay } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -60,17 +60,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const todayDate = isHistory ? new Date(historyDate) : getEffectiveDate();
   const currentPhaseKey = getCurrentPhaseKey();
   const [now, setNow] = React.useState(new Date());
-  
-  // Calculate days in current month for history view
-  const daysInMonth = useMemo(() => {
-    const year = todayDate.getFullYear();
-    const month = todayDate.getMonth();
-    const totalDays = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: totalDays }, (_, i) => {
-      const date = new Date(year, month, i + 1);
-      return formatDateStr(date);
-    });
-  }, [todayDate]);
   
   // Category dropdown state and priority ordering
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -357,50 +346,51 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   const isDone = !!habit.history[todayStr];
                   const animationDelay = `${globalIdx++ * 60}ms`;
                   
-                  // History mode: Static display with circular progress and info
+                  // History mode: Static display without interactions
                   if (isHistory) {
-                    const totalMonthly = daysInMonth.filter(d => habit.history[d]).length;
-                    const target = habit.monthlyTarget || daysInMonth.length;
-                    const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
-                    
                     return (
                       <div key={habit.id}>
-                        <div className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl bg-[#16181c] border border-[#2f3336]">
-                          {/* Circular Progress */}
-                          <div className="relative w-12 h-12 md:w-14 md:h-14 shrink-0">
-                            <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-                              <circle cx="24" cy="24" r="20" fill="transparent" stroke="#2f3336" strokeWidth="3" />
-                              <circle 
-                                cx="24" cy="24" r="20" 
-                                fill="transparent" 
-                                stroke="#71767b" 
-                                strokeWidth="3" 
-                                strokeDasharray={2 * Math.PI * 20}
-                                strokeDashoffset={2 * Math.PI * 20 * (1 - completionRate / 100)}
-                                strokeLinecap="round"
-                              />
-                            </svg>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-[10px] font-black text-[#71767b]">{completionRate}%</span>
-                            </div>
+                        <div
+                          className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl border ${
+                            isDone
+                              ? 'bg-[#71767b]/10 border-[#71767b]/30'
+                              : 'bg-transparent border-[#2f3336]'
+                          }`}
+                        >
+                          <div 
+                            className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 border-2 ${
+                              isDone ? 'border-transparent' : 'border-[#2f3336]'
+                            }`}
+                            style={isDone ? { backgroundColor: '#71767b' } : {}}
+                          >
+                            {isDone ? (
+                              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            ) : (
+                              <Circle className="w-4 h-4 text-[#2f3336]" />
+                            )}
                           </div>
 
                           <div className="flex-1 text-left min-w-0">
-                            <h4 className="text-[14px] md:text-[16px] font-black text-[#eff3f4] uppercase tracking-tight truncate">
-                              {habit.name.toUpperCase()}
-                            </h4>
-                            <div className="flex items-center gap-3 mt-1.5">
-                              <div className="flex items-center gap-1 bg-[#2f3336] px-2 py-0.5 rounded-full">
-                                <Flame className="w-3 h-3 text-[#71767b]" />
-                                <span className="text-[10px] font-black text-[#71767b]">{habit.streak}</span>
-                              </div>
-                              <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{target} Days</span>
+                            <div className="flex items-center gap-2">
+                              <p className={`text-[14px] md:text-[15px] font-bold truncate ${isDone ? 'text-[#71767b] opacity-60 line-through' : 'text-[#eff3f4]'}`}>
+                                {habit.name.toUpperCase()}
+                              </p>
+                              {habit.streak > 0 && (
+                                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20 shrink-0">
+                                  <Flame className="w-2.5 h-2.5 text-[#ff6b00]" />
+                                  <span className="text-[9px] font-black text-[#ff6b00]">{habit.streak}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
-                          <div className="shrink-0">
-                            <AlignLeft className="w-5 h-5 text-[#71767b]" />
-                          </div>
+                          {isDone && (
+                            <div className="shrink-0 flex items-center justify-center">
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#71767b]" />
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
