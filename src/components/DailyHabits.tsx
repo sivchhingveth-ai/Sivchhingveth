@@ -61,16 +61,15 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const currentPhaseKey = getCurrentPhaseKey();
   const [now, setNow] = React.useState(new Date());
   
-  // Category dropdown state and priority ordering
+  // Category dropdown state
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [priorityCategory, setPriorityCategory] = useState<string | null>(null);
 
   React.useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Group habits by time phase with priority ordering
+  // Group habits by time phase
   const groupedByPhase = useMemo(() => {
     const groups: { phase: typeof TIME_PHASES[number]; habits: Habit[] }[] = TIME_PHASES.map(p => ({
       phase: p,
@@ -83,20 +82,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       if (group) group.habits.push(h);
     });
 
-    // Filter out empty groups
-    const nonEmptyGroups = groups.filter(g => g.habits.length > 0);
-    
-    // If there's a priority category, move it to the front
-    if (priorityCategory) {
-      const priorityIndex = nonEmptyGroups.findIndex(g => g.phase.key === priorityCategory);
-      if (priorityIndex > 0) {
-        const priorityGroup = nonEmptyGroups.splice(priorityIndex, 1)[0];
-        nonEmptyGroups.unshift(priorityGroup);
-      }
-    }
-    
-    return nonEmptyGroups;
-  }, [habits, priorityCategory]);
+    // Only return phases that have habits
+    return groups.filter(g => g.habits.length > 0);
+  }, [habits]);
 
   // Derived habits to show based on filter
   const visibleHabits = useMemo(() => {
@@ -223,14 +211,10 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         key={phase.key}
                         onClick={() => {
                           setShowCategoryDropdown(false);
-                          setPriorityCategory(phase.key);
-                          // Small delay to let React re-render with new order, then scroll
-                          setTimeout(() => {
-                            const element = document.getElementById(`phase-${phase.key}`);
-                            if (element) {
-                              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                          }, 100);
+                          const element = document.getElementById(`phase-${phase.key}`);
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }
                         }}
                         className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 transition-all duration-200 hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98] group ${!isLast ? 'border-b border-[#2f3336]' : ''}`}
                         style={{ 
