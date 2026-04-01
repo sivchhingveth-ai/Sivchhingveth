@@ -50,7 +50,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const isLoggingOut = useAppStore((state) => state.isLoggingOut);
   const historyDate = useAppStore((state) => state.historyDate);
   const now = useAppStore((state) => state.now);
-  const tabs = ['Rules & Growth', 'Reset & Distraction', 'Spending', 'Add Workspace', 'History'];
+  const tabs = ['Tasks', 'Add Workspace', 'History'];
   
   const isHistory = activeTab === 'History';
   const todayStr = isHistory ? historyDate : useAppStore((state) => state.todayStr);
