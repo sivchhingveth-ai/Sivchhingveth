@@ -332,7 +332,12 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
-                {phaseHabits.map((habit) => {
+                {phaseHabits.length === 0 ? (
+                  <div className="col-span-1 md:col-span-2 py-4 px-4 rounded-xl bg-[#16181c]/50 border border-[#2f3336]/50">
+                    <span className="text-[11px] font-bold text-[#71767b]/60 uppercase tracking-wider">No tasks yet</span>
+                  </div>
+                ) : (
+                  phaseHabits.map((habit) => {
                   const isDone = !!habit.history[todayStr];
                   const animationDelay = `${globalIdx++ * 60}ms`;
                   return (
@@ -396,7 +401,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                       </button>
                     </div>
                   );
-                })}
+                })
+                )}
               </div>
             </div>
           );
