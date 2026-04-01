@@ -403,7 +403,7 @@ export const Habits: React.FC<HabitsProps> = ({
                                   <Flame className="w-3.5 h-3.5 text-[#ff6b00]" />
                                   <span className="text-[11px] font-black text-[#ff6b00]">{habit.streak}</span>
                                 </div>
-                                <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{daysInCurrentMonth} Days</span>
+                                <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{target} Days</span>
                               </div>
                             </div>
                           </div>
