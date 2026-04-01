@@ -390,6 +390,14 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                                   <span className="text-[9px] font-black text-[#71767b]">{habit.streak}</span>
                                 </div>
                               )}
+                              {/* Monthly Target Badge */}
+                              {habit.monthlyTarget && habit.monthlyTarget > 0 && (
+                                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#2f3336] shrink-0">
+                                  <span className="text-[9px] font-black text-[#71767b]">
+                                    {habit.monthlyTarget}x
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
