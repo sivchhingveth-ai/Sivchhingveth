@@ -639,16 +639,27 @@ export default function App() {
                 ))}
               </div>
             </div>
-            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-              <label className={labelClass}>Detail Description (Rules / Info)</label>
-              <textarea 
-                className={`${inputClass} min-h-[100px] resize-none py-2`} 
-                placeholder="Explain the rules or details of this task..." 
-                value={newHabitDescription} 
-                onChange={e => setNewHabitDescription(e.target.value)}
-                autoComplete="off" autoCorrect="off" spellCheck={false}
+            <div className="animate-in fade-in slide-in-from-bottom-5 duration-600">
+              <label className={labelClass}>Monthly Target (Auto: Days in Month)</label>
+              <input 
+                className={`${inputClass} bg-[#0a0a0a] cursor-not-allowed`}
+                type="text"
+                value={`${new Date().getDate() === 1 ? new Date(new Date().getFullYear(), new Date().getMonth(), 0).getDate() : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()} days`}
+                readOnly
+                disabled
               />
             </div>
+          </div>
+
+          <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <label className={labelClass}>Detail Description (Rules / Info)</label>
+            <textarea 
+              className={`${inputClass} min-h-[100px] resize-none py-2`} 
+              placeholder="Explain the rules or details of this task..." 
+              value={newHabitDescription} 
+              onChange={e => setNewHabitDescription(e.target.value)}
+              autoComplete="off" autoCorrect="off" spellCheck={false}
+            />
           </div>
 
           {habitError && (
