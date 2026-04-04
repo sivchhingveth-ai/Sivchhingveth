@@ -377,10 +377,10 @@ export const Habits: React.FC<HabitsProps> = ({
                         key={habit.id}
                         data-habit-id={String(habit.id)}
                         onClick={() => setShowActionsId(isExpanded ? null : habit.id)}
-                        className={`w-full flex flex-col rounded-[24px] transition-all duration-500 group relative overflow-hidden cursor-pointer border touch-manipulation ${
+                        className={`w-full flex flex-col rounded-[24px] transition-all duration-500 group relative overflow-hidden cursor-pointer border-2 touch-manipulation ${
                           isExpanded 
-                          ? 'bg-[#0a0a0a] border-white/10 shadow-2xl z-[1]' 
-                          : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'
+                          ? 'bg-[#0a0a0a] border-white/30 shadow-2xl z-[1]' 
+                          : 'bg-white/[0.02] border-[#4a4d54] hover:bg-white/[0.04] hover:border-[#5a5d64]'
                         }`}
                         style={{ touchAction: 'manipulation' }}
                       >
