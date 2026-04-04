@@ -412,7 +412,7 @@ export default function App() {
 
     setSpendingError('');
 
-    const colors = ['#34c759', '#007aff', '#FF6B4A', '#ff3b30', '#af52de', '#5ac8fa'];
+    const colors = ['#34c759', '#007aff', '#FFD700', '#ff3b30', '#af52de', '#5ac8fa'];
 
     createGoal({
       name: newGoalName.trim(),
