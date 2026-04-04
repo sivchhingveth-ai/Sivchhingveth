@@ -107,12 +107,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   React.useEffect(() => {
     if (isHistory && historyDate) {
       setIsDateChanging(true);
-      // Scroll to top of content area when date changes
-      const mainContainer = document.querySelector('main');
-      if (mainContainer) {
-        mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-      const timer = setTimeout(() => setIsDateChanging(false), 400);
+      const timer = setTimeout(() => setIsDateChanging(false), 300);
       return () => clearTimeout(timer);
     }
   }, [historyDate, isHistory]);
@@ -198,15 +193,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const chipColor = activePhase ? (isHistory ? '#71767b' : activePhase.color) : '#eff3f4';
   const ChipIcon = activePhase ? activePhase.icon : Target;
 
-  // Use ref for animation counter to persist across renders but reset on date change
-  const globalIdxRef = React.useRef(0);
-  
-  // Reset animation counter when date changes in History
-  React.useEffect(() => {
-    if (isHistory) {
-      globalIdxRef.current = 0;
-    }
-  }, [historyDate, isHistory]);
+  let globalIdx = 0;
 
   return (
     <div className="flex flex-col relative w-full h-full">
@@ -384,7 +371,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         </div>
       </div>
 
-      <div className={`p-5 md:p-6 space-y-7 transition-all duration-400 ease-out ${isDateChanging ? 'opacity-0 scale-[0.98] translate-y-4' : 'opacity-100 scale-100 translate-y-0'}`} style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
+      <div className={`p-5 md:p-6 space-y-7 transition-all duration-300 ${isDateChanging ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`} style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
         {totalCount === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
@@ -427,7 +414,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   phaseHabits.map((habit) => {
                   const isDone = !!habit.history[todayStr];
                   // Cap animation delay at 10 items to prevent mobile performance issues
-                  const animationDelay = `${Math.min(globalIdxRef.current++, 10) * 50}ms`;
+                  const animationDelay = `${Math.min(globalIdx++, 10) * 50}ms`;
                   
                   // History mode: Static display with expandable details - Daily View Only
                   if (isHistory) {
