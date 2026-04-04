@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Habit } from '../types';
-import { Circle, Flame, Target, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, ChevronLeft, ChevronRight, Filter, AlignLeft, Info } from 'lucide-react';
+import { Circle, Flame, Settings, Sparkles, Sun, CloudSun, Moon, Stars, ChevronDown, ChevronUp, Minus, Clock, ChevronLeft, ChevronRight, Filter, AlignLeft, Info } from 'lucide-react';
 import { getEffectiveDateStr, getEffectiveDate, formatDateStr, shouldShowHabitOnDay } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -20,56 +20,13 @@ interface DailyHabitsProps {
   maxDate?: string;
 }
 
-// Custom martial arts/boxing silhouette icon
-const CycleIcon: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className, style }) => (
-  <svg 
-    viewBox="0 0 100 100" 
-    fill="currentColor"
-    className={className}
-    style={style}
-  >
-    {/* Head */}
-    <ellipse cx="55" cy="18" rx="9" ry="11" />
-    {/* Hair tuft */}
-    <path d="M58 9 Q63 6, 65 12 Q62 8, 58 9" />
-    {/* Neck */}
-    <rect x="50" y="26" width="10" height="6" />
-    {/* Torso - t-shirt with stripes */}
-    <path d="M38 32 Q55 28, 72 32 L75 35 L73 38 L70 36 L70 52 L40 52 L40 36 L37 38 L35 35 L38 32" />
-    {/* T-shirt stripes */}
-    <path d="M45 36 L65 36" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
-    <path d="M43 42 L67 42" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
-    <path d="M42 48 L68 48" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
-    {/* Left arm (punching forward) */}
-    <path d="M70 36 L85 34 Q92 33, 95 35 L95 40 Q92 42, 85 41 L72 40" />
-    {/* Left fist */}
-    <ellipse cx="96" cy="37.5" rx="4" ry="3.5" />
-    {/* Right arm (at side) */}
-    <path d="M40 36 L32 42 Q28 46, 32 50 L36 48" />
-    {/* Right fist */}
-    <ellipse cx="34" cy="51" rx="3.5" ry="4" />
-    {/* Shorts */}
-    <path d="M40 52 L70 52 L68 70 L55 65 L42 70 L40 52" />
-    {/* Shorts stripe */}
-    <path d="M55 52 L55 65" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
-    {/* Left leg (forward stance) */}
-    <path d="M58 68 L70 75 L75 88 Q76 92, 72 93 L68 92 L65 82 L55 75" />
-    {/* Left foot */}
-    <ellipse cx="74" cy="92.5" rx="6" ry="3" />
-    {/* Right leg (back stance) */}
-    <path d="M52 68 L45 72 L35 82 L28 92 Q26 95, 22 94 L20 92 L28 80 L40 68" />
-    {/* Right foot */}
-    <ellipse cx="24" cy="93" rx="5" ry="3.5" />
-  </svg>
-);
-
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'reset', label: 'Health', time: 'reset', icon: CycleIcon, color: '#34c759', emoji: '🌱' },
-  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: CycleIcon, color: '#ff3b30', emoji: '🎯' },
-  { key: 'growth', label: 'Growth', time: 'growth', icon: CycleIcon, color: '#bf7af0', emoji: '🚀' },
-  { key: 'distraction', label: 'Discipline', time: 'distraction', icon: CycleIcon, color: '#1d9bf0', emoji: '🚫' },
-  { key: 'spending', label: 'Boundary', time: 'spending', icon: CycleIcon, color: '#FFD700', emoji: '💰' },
+  { key: 'reset', label: 'Health', time: 'reset', icon: Settings, color: '#34c759', emoji: '🌱' },
+  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Settings, color: '#ff3b30', emoji: '🎯' },
+  { key: 'growth', label: 'Growth', time: 'growth', icon: Settings, color: '#bf7af0', emoji: '🚀' },
+  { key: 'distraction', label: 'Discipline', time: 'distraction', icon: Settings, color: '#1d9bf0', emoji: '🚫' },
+  { key: 'spending', label: 'Boundary', time: 'spending', icon: Settings, color: '#FFD700', emoji: '💰' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -241,7 +198,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
   const activePhase = filterPhase ? TIME_PHASES.find(p => p.key === filterPhase) : null;
   const chipColor = activePhase ? (isHistory ? '#71767b' : activePhase.color) : '#eff3f4';
-  const ChipIcon = activePhase ? activePhase.icon : CycleIcon;
+  const ChipIcon = activePhase ? activePhase.icon : Settings;
 
   let globalIdx = 0;
 
@@ -377,7 +334,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                                     style={isPriority ? { backgroundColor: `${displayColor}20` } : {}}
                                   >
                                     <PhaseIcon 
-                                      className={`w-3 h-3 transition-all duration-200 animate-target-pulse ${
+                                      className={`w-3 h-3 transition-all duration-200 ${
                                         isPriority ? '' : 'text-white/50 group-hover:text-white/70'
                                       }`}
                                       style={isPriority ? { color: displayColor } : {}} 
@@ -432,7 +389,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   className="w-6 h-6 md:w-8 md:h-8 rounded-lg border flex items-center justify-center transition-colors"
                   style={{ backgroundColor: `${chipColor}10`, borderColor: `${chipColor}20` }}
                 >
-                  <Target className="w-3.5 h-3.5 md:w-4 md:h-4 transition-colors" style={{ color: chipColor }} />
+                  <Settings className="w-3.5 h-3.5 md:w-4 md:h-4 transition-colors" style={{ color: chipColor }} />
                 </div>
               <div className="text-right pr-1">
                 <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">
