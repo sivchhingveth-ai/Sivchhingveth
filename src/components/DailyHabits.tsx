@@ -306,6 +306,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                             const PhaseIcon = phase.icon;
                             const isLast = index === visiblePhases.length - 1;
                             const isPriority = priorityCategory === phase.key;
+                            // In history mode, use gray colors instead of category colors
+                            const displayColor = isHistory ? '#71767b' : phase.color;
                             return (
                               <button
                                 key={phase.key}
@@ -329,20 +331,20 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                                     className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 ${
                                       isPriority ? '' : 'bg-white/[0.05] group-hover:bg-white/[0.08]'
                                     }`}
-                                    style={isPriority ? { backgroundColor: `${phase.color}20` } : {}}
+                                    style={isPriority ? { backgroundColor: `${displayColor}20` } : {}}
                                   >
                                     <PhaseIcon 
                                       className={`w-3 h-3 transition-all duration-200 ${
                                         isPriority ? '' : 'text-white/50 group-hover:text-white/70'
                                       }`}
-                                      style={isPriority ? { color: phase.color } : {}} 
+                                      style={isPriority ? { color: displayColor } : {}} 
                                     />
                                   </div>
                                   <span 
                                     className={`text-[13px] font-medium tracking-wide uppercase transition-colors duration-200 ${
                                       isPriority ? '' : 'text-white/60 group-hover:text-white/80'
                                     }`}
-                                    style={isPriority ? { color: phase.color } : {}}
+                                    style={isPriority ? { color: displayColor } : {}}
                                   >
                                     {phase.label.toUpperCase()}
                                   </span>
@@ -352,8 +354,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                                     isPriority ? '' : 'text-white/40'
                                   }`}
                                   style={isPriority ? { 
-                                    backgroundColor: `${phase.color}20`,
-                                    color: phase.color 
+                                    backgroundColor: `${displayColor}20`,
+                                    color: displayColor 
                                   } : {}}
                                 >
                                   {phase.count}
