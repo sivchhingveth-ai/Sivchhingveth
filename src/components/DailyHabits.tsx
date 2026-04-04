@@ -93,6 +93,13 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     }
   }, [expandedHistoryHabit, isHistory]);
 
+  // Reset expanded habit when date changes in History view
+  React.useEffect(() => {
+    if (isHistory) {
+      setExpandedHistoryHabit(null);
+    }
+  }, [historyDate, isHistory]);
+
   // Restore scroll position after reordering
   React.useEffect(() => {
     if (scrollPositionRef.current > 0) {
