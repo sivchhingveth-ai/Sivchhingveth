@@ -601,7 +601,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   // Normal mode: Interactive with animations
                   return (
                     <div
-                      key={habit.id}
+                      key={`${phase.key}-${habit.id}-${priorityCategory || 'none'}-${globalIdx}`}
                       className="animate-pop-in fill-mode-backwards"
                       style={{ animationDelay, willChange: 'transform, opacity' }}
                     >
