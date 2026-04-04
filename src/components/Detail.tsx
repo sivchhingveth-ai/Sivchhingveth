@@ -159,9 +159,9 @@ export const Detail: React.FC<DetailProps> = ({
                           <div>
                              <h4 className="text-[15px] font-black text-[#eff3f4] uppercase tracking-tight">{habit.name.toUpperCase()}</h4>
                             <div className="flex items-center gap-2 mt-1">
-                              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#FF69B4]/10 border border-[#FF69B4]/20">
-                                <Flame className="w-2.5 h-2.5 text-[#FF69B4]" />
-                                <span className="text-[9px] font-black text-[#FF69B4]">{habit.streak}</span>
+                              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20">
+                                <Flame className="w-2.5 h-2.5 text-[#ff6b00] animate-fire" />
+                                <span className="text-[9px] font-black text-[#ff6b00]">{habit.streak}</span>
                               </div>
                               <span className="text-[9px] font-bold text-[#71767b] uppercase tracking-widest">{completionsThisMonth} / {target} Days</span>
                             </div>
