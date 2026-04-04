@@ -289,7 +289,7 @@ export default function App() {
     if (!isAuthenticated) return;
 
     // Trigger Convex update
-    const habit = (rawHabits || []).find(h => h._id === id);
+    const habit = (rawHabits || []).find(h => String(h._id) === String(id));
     if (!habit) return;
 
     const updatedHistory = { ...habit.history };
@@ -441,7 +441,7 @@ export default function App() {
     setModalOpen('habit');
   };
   const openEditHabit = (id: any) => {
-    const habit = habits.find(h => h.id === id);
+    const habit = habits.find(h => String(h.id) === String(id));
     if (habit) {
       setEditingHabitId(id);
       setNewHabitName(habit.name);
