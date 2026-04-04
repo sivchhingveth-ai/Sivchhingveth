@@ -214,39 +214,6 @@ export const Habits: React.FC<HabitsProps> = ({
 
           <div className="flex flex-col gap-2 w-full md:w-auto">
 
-            {/* Month Picker - Full width on its own row */}
-            <div className="flex items-center gap-1 bg-[#16181c] border border-[#2f3336] p-1 rounded-xl w-full h-10">
-              <div className="flex items-center justify-center w-8">
-                {!isStartMonth ? (
-                  <button
-                    onClick={() => changeMonth(-1)}
-                    className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-[#71767b] hover:text-[#eff3f4] touch-manipulation"
-                    style={{ touchAction: 'manipulation' }}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="flex-1 text-center px-2 min-w-[100px]">
-                <span className="text-[11px] font-black uppercase tracking-widest text-[#eff3f4]">
-                  {monthYearLabel}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-center w-8">
-                {!isCurrentOrFutureMonth ? (
-                  <button
-                    onClick={() => changeMonth(1)}
-                    className="p-1.5 hover:bg-white/5 rounded-lg transition-colors text-[#71767b] hover:text-[#eff3f4] touch-manipulation"
-                    style={{ touchAction: 'manipulation' }}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                ) : null}
-              </div>
-            </div>
-
             {/* Add Workspace Button */}
             <button
               onClick={onAddHabit}
