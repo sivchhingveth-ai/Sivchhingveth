@@ -364,7 +364,7 @@ export const Habits: React.FC<HabitsProps> = ({
                   <div className="flex-1 h-px bg-gradient-to-r from-[#2f3336] to-transparent" />
                 </div>
 
-                <div className={`grid gap-3 md:gap-4 ${showActionsId ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+                <div className="grid gap-3 md:gap-4 grid-cols-1">
                   {phaseHabits.map(habit => {
                     const totalMonthly = days.filter(d => habit.history[d.dateStr]).length;
                     const daysInCurrentMonth = days.length;
