@@ -618,11 +618,11 @@ export default function App() {
               <label className={labelClass}>Time Phase (Optional)</label>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {[
-                  { name: 'Reset', time: 'reset' },
+                  { name: 'Health', time: 'reset' },
                   { name: 'Growth', time: 'growth' },
-                  { name: 'Distraction', time: 'distraction' },
-                  { name: 'Rules', time: 'any' },
-                  { name: 'Spending', time: 'spending' }
+                  { name: 'Discipline', time: 'distraction' },
+                  { name: 'Eliminate', time: 'any' },
+                  { name: 'Boundary', time: 'spending' }
                 ].map(phase => (
                   <button
                     key={phase.name}
@@ -654,7 +654,7 @@ export default function App() {
           </div>
 
           <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <label className={labelClass}>Detail Description (Rules / Info)</label>
+            <label className={labelClass}>Detail Description (Info)</label>
             <textarea 
               className={`${inputClass} min-h-[100px] resize-none py-2`} 
               placeholder="Explain the rules or details of this task..." 
