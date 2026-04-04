@@ -351,10 +351,19 @@ export default function App() {
 
       setHabitError('');
       try {
-        if (editingHabitId) {
-          console.log('Updating habit:', editingHabitId, 'with time:', newHabitTime);
+        // Close modal and clear state immediately for better UX
+        setModalOpen(null);
+        setNewHabitName('');
+        setNewHabitTime('');
+        setNewHabitMonthlyTarget('');
+        setNewHabitDescription('');
+        const currentEditId = editingHabitId;
+        setEditingHabitId(null);
+        
+        if (currentEditId) {
+          console.log('Updating habit:', currentEditId, 'with time:', newHabitTime);
           const updateData: any = {
-            id: editingHabitId as Id<"habits">,
+            id: currentEditId as Id<"habits">,
             name: trimmedName,
             time: newHabitTime || null,
             monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
@@ -364,8 +373,12 @@ export default function App() {
           if (trimmedDesc) {
             updateData.description = trimmedDesc;
           }
-          await updateHabit(updateData);
-          console.log('Update successful');
+          // Don't await - let it happen in background
+          updateHabit(updateData).catch(err => {
+            console.error('Update failed:', err);
+            setHabitError('Failed to update. Please try again.');
+          });
+          console.log('Update sent to server');
         } else {
           const createData: any = {
             name: trimmedName,
@@ -376,14 +389,12 @@ export default function App() {
           if (trimmedDesc) {
             createData.description = trimmedDesc;
           }
-          await createHabit(createData);
+          // Don't await - let it happen in background
+          createHabit(createData).catch(err => {
+            console.error('Create failed:', err);
+            setHabitError('Failed to create. Please try again.');
+          });
         }
-        setNewHabitName('');
-        setNewHabitTime('');
-        setNewHabitMonthlyTarget('');
-        setNewHabitDescription('');
-        setEditingHabitId(null);
-        setModalOpen(null);
       } catch (error) {
         console.error("Failed to save habit:", error);
         setHabitError("Failed to save. Check connection and try again.");
