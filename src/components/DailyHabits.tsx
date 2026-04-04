@@ -62,7 +62,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   const [now, setNow] = React.useState(new Date());
   
   // Track expanded habit in history view
-  const [expandedHistoryHabit, setExpandedHistoryHabit] = useState<string | null>(null);
+  const [expandedHistoryHabit, setExpandedHistoryHabit] = useState<any>(null);
   
   // Category dropdown state and priority ordering
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -76,7 +76,23 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
     const timer = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(timer);
   }, []);
-  
+
+  // Auto-scroll to expanded card in History view
+  React.useEffect(() => {
+    if (expandedHistoryHabit && isHistory) {
+      setTimeout(() => {
+        const expandedCard = document.querySelector(`[data-history-habit="${String(expandedHistoryHabit)}"]`);
+        const mainContainer = document.querySelector('main');
+        if (expandedCard && mainContainer) {
+          const headerOffset = 200;
+          const cardRect = expandedCard.getBoundingClientRect();
+          const scrollPosition = mainContainer.scrollTop + cardRect.top - headerOffset;
+          mainContainer.scrollTo({ top: Math.max(0, scrollPosition), behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [expandedHistoryHabit, isHistory]);
+
   // Restore scroll position after reordering
   React.useEffect(() => {
     if (scrollPositionRef.current > 0) {
@@ -383,10 +399,10 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                   
                   // History mode: Static display with expandable details - Daily View Only
                   if (isHistory) {
-                    const isExpanded = expandedHistoryHabit === habit.id;
+                    const isExpanded = String(expandedHistoryHabit) === String(habit.id);
                     
                     return (
-                      <div key={habit.id} className="space-y-2">
+                      <div key={habit.id} className="space-y-2" data-history-habit={String(habit.id)}>
                         {/* Main Card - Clickable to expand */}
                         <div 
                           onClick={() => setExpandedHistoryHabit(isExpanded ? null : habit.id)}
