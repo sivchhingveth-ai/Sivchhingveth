@@ -352,25 +352,21 @@ export default function App() {
       setHabitError('');
       try {
         if (editingHabitId) {
-          updateHabit({
+          console.log('Updating habit:', editingHabitId, 'with time:', newHabitTime);
+          await updateHabit({
             id: editingHabitId as Id<"habits">,
             name: trimmedName,
             time: newHabitTime || null,
             monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null,
             description: newHabitDescription.trim() || null
-          }).catch(err => {
-            console.error(err);
-            setHabitError('Failed to update routine.');
           });
+          console.log('Update successful');
         } else {
-          createHabit({
+          await createHabit({
             name: trimmedName,
             time: newHabitTime || null,
             monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null,
             description: newHabitDescription.trim() || null
-          }).catch(err => {
-            console.error(err);
-            setHabitError('Failed to create routine.');
           });
         }
         setNewHabitName('');
@@ -381,6 +377,8 @@ export default function App() {
         setModalOpen(null);
       } catch (error) {
         console.error("Failed to save habit:", error);
+        setHabitError("Failed to save. Check connection and try again.");
+      }
         setHabitError("Failed to save. Check connection and try again.");
       }
     }
