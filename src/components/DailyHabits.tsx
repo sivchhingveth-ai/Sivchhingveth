@@ -386,7 +386,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 </span>
               </div>
 
-              <div className={`grid gap-2 md:gap-3 ${expandedHistoryHabit ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+              <div className="grid gap-2 md:gap-3 grid-cols-1">
                 {phaseHabits.length === 0 ? (
                   <div className={`py-4 px-4 rounded-xl bg-[#16181c]/50 border border-[#2f3336]/50 ${expandedHistoryHabit ? 'col-span-1' : 'col-span-1 md:col-span-2'}`}>
                     <span className="text-[11px] font-bold text-[#71767b]/60 uppercase tracking-wider">No tasks yet</span>
