@@ -459,7 +459,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
                           {/* Expanded Details - Read Only */}
                           {isExpanded && (
-                            <div className="px-4 md:px-6 pb-4 pt-0 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="px-4 md:px-6 pb-4 pt-0 animate-in fade-in slide-in-from-top-4 duration-400 ease-out">
                               <div className="h-px bg-white/10 mb-4" />
                               
                               {/* Description Section */}

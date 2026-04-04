@@ -445,7 +445,7 @@ export const Habits: React.FC<HabitsProps> = ({
 
                         {/* Expanded Content */}
                         {isExpanded && (
-                          <div className="px-4 md:px-6 pb-6 pt-1 animate-in fade-in slide-in-from-top-4 duration-500 relative z-10 w-full max-w-full overflow-hidden">
+                          <div className="px-4 md:px-6 pb-6 pt-1 animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-400 ease-out relative z-10 w-full max-w-full overflow-hidden">
                             <div className="h-px bg-white/5 mb-6" />
                             
                             <div className="space-y-4">
