@@ -71,7 +71,7 @@ export const Habits: React.FC<HabitsProps> = ({
         const expandedCard = document.querySelector(`[data-habit-id="${String(showActionsId)}"]`);
         const mainContainer = document.querySelector('main');
         if (expandedCard && mainContainer) {
-          const headerOffset = 200; // Space for sticky header
+          const headerOffset = 280; // More space for header + breathing room
           const cardRect = expandedCard.getBoundingClientRect();
           const scrollPosition = mainContainer.scrollTop + cardRect.top - headerOffset;
           mainContainer.scrollTo({ top: Math.max(0, scrollPosition), behavior: 'smooth' });

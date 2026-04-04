@@ -84,7 +84,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         const expandedCard = document.querySelector(`[data-history-habit="${String(expandedHistoryHabit)}"]`);
         const mainContainer = document.querySelector('main');
         if (expandedCard && mainContainer) {
-          const headerOffset = 200;
+          const headerOffset = 280; // More space for header + breathing room
           const cardRect = expandedCard.getBoundingClientRect();
           const scrollPosition = mainContainer.scrollTop + cardRect.top - headerOffset;
           mainContainer.scrollTo({ top: Math.max(0, scrollPosition), behavior: 'smooth' });
