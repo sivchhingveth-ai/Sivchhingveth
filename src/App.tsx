@@ -164,7 +164,7 @@ export default function App() {
     }
   );
 
-  // Auto-save daily snapshot at midnight - runs every minute to check
+  // Auto-save daily snapshot at midnight - runs every 5 minutes to check (optimized for mobile battery)
   useEffect(() => {
     if (!isAuthenticated || !rawHabits) return;
     
@@ -198,14 +198,14 @@ export default function App() {
       }
     };
     
-    // Check every minute
-    const interval = setInterval(checkAndSaveDailySnapshot, 60000);
-    
-    // Also check immediately when component mounts
+    // Check immediately on mount
     checkAndSaveDailySnapshot();
     
+    // Then check every 5 minutes instead of every minute (saves battery)
+    const interval = setInterval(checkAndSaveDailySnapshot, 5 * 60 * 1000);
+    
     return () => clearInterval(interval);
-  }, [isAuthenticated, rawHabits, updateHabit, todayStr]);
+  }, [isAuthenticated, rawHabits, updateHabit]);
 
   const removeHabit = useMutation(api.habits.remove).withOptimisticUpdate(
     (localStore, args) => {

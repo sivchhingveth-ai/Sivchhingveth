@@ -478,9 +478,9 @@ main > div > div:last-child {
 }
 
 .animate-shimmer-border {
-  animation: shimmer-border 3s ease-in-out infinite;
+  animation: shimmer-border 3s ease-in-out 3; /* Only run 3 times to save battery */
 }
 
 .animate-shimmer-full {
-  animation: shimmer-full 2.5s ease-in-out infinite;
+  animation: shimmer-full 3s ease-in-out 3; /* Only run 3 times to save battery */
 }
