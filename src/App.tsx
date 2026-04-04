@@ -341,7 +341,7 @@ export default function App() {
     if (trimmedName && isAuthenticated) {
       // Prevent duplicate habit names
       const isDuplicate = habits.some(
-        h => h.name.toLowerCase() === trimmedName.toLowerCase() && h.id !== editingHabitId
+        h => h.name.toLowerCase() === trimmedName.toLowerCase() && String(h.id) !== String(editingHabitId)
       );
 
       if (isDuplicate) {
@@ -414,7 +414,7 @@ export default function App() {
   };
 
   const addDailySpending = async (goalId: any, amount: number, date: string) => {
-    const goal = savings.find(s => s.id === goalId);
+    const goal = savings.find(s => String(s.id) === String(goalId));
     if (!goal) return;
 
     const newHistory = { ...goal.history, [date]: (goal.history[date] || 0) + amount };

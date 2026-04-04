@@ -132,7 +132,7 @@ export const Detail: React.FC<DetailProps> = ({
                   const daysInCurrentMonth = daysInMonth.length;
                   const target = habit.monthlyTarget || daysInCurrentMonth;
                   const completionRate = Math.min(Math.round((completionsThisMonth / target) * 100), 100);
-                  const isExpanded = expandedHabitId === habit.id;
+                  const isExpanded = String(expandedHabitId) === String(habit.id);
 
                   return (
                     <div key={habit.id} 
@@ -166,7 +166,7 @@ export const Detail: React.FC<DetailProps> = ({
                           </div>
                         </div>
                         <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                          {savingId === habit.id ? (
+                          {String(savingId) === String(habit.id) ? (
                             <Loader2 className="w-5 h-5 text-[#1d9bf0] animate-spin" />
                           ) : (
                             <AlignLeft className="w-5 h-5 text-[#71767b] group-hover:text-[#eff3f4]" />
