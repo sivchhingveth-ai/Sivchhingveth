@@ -196,19 +196,24 @@ export const Habits: React.FC<HabitsProps> = ({
             Add Workspace
           </h2>
           <div className="flex flex-wrap items-center gap-y-1 gap-x-2 mt-1">
-            {TIME_PHASES.map((phase, idx) => (
-              <React.Fragment key={phase.key}>
-                <span 
-                  className="text-[9px] font-black uppercase tracking-widest leading-none"
-                  style={{ color: phase.color }}
-                >
-                  {habits.filter(h => getPhaseForHabit(h).key === phase.key).length} {phase.label}
-                </span>
-                {idx < TIME_PHASES.length - 1 && (
-                  <span className="w-1 h-1 rounded-full bg-[#71767b]" />
-                )}
-              </React.Fragment>
-            ))}
+            {TIME_PHASES.map((phase, idx) => {
+              const count = habits.filter(h => getPhaseForHabit(h).key === phase.key).length;
+              if (count === 0) return null; // Don't show empty categories
+              return (
+                <React.Fragment key={phase.key}>
+                  <button 
+                    onClick={() => setSelectedCategory(phase.key)}
+                    className="text-[9px] font-black uppercase tracking-widest leading-none hover:opacity-80 transition-opacity cursor-pointer"
+                    style={{ color: phase.color }}
+                  >
+                    {count} {phase.label}
+                  </button>
+                  {idx < TIME_PHASES.length - 1 && (
+                    <span className="w-1 h-1 rounded-full bg-[#71767b]" />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
 
@@ -282,10 +287,16 @@ export const Habits: React.FC<HabitsProps> = ({
                       style={{ touchAction: 'manipulation' }}
                     >
                       <Target className="w-4 h-4 text-[#71767b]" />
-                      ALL CATEGORIES
+                      <div className="flex flex-col">
+                        <span>ALL CATEGORIES</span>
+                        <span className="text-[10px] font-medium text-[#71767b]">
+                          {habits.length} total tasks
+                        </span>
+                      </div>
                     </button>
                     {TIME_PHASES.map((phase) => {
                       const PhaseIcon = phase.icon;
+                      const count = habits.filter(h => getPhaseForHabit(h).key === phase.key).length;
                       return (
                         <button
                           key={phase.key}
@@ -296,7 +307,12 @@ export const Habits: React.FC<HabitsProps> = ({
                           style={{ touchAction: 'manipulation' }}
                         >
                           <PhaseIcon className="w-4 h-4" style={{ color: phase.color }} />
-                          {phase.label.toUpperCase()}
+                          <div className="flex flex-col">
+                            <span>{phase.label.toUpperCase()}</span>
+                            <span className="text-[10px] font-medium" style={{ color: phase.color }}>
+                              {count} tasks
+                            </span>
+                          </div>
                         </button>
                       );
                     })}
