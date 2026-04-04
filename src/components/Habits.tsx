@@ -50,7 +50,7 @@ export const Habits: React.FC<HabitsProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
-  const [showActionsId, setShowActionsId] = useState<string | null>(null);
+  const [showActionsId, setShowActionsId] = useState<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -63,6 +63,22 @@ export const Habits: React.FC<HabitsProps> = ({
       clearInterval(clockTimer);
     };
   }, []);
+
+  // Auto-scroll to expanded card with header offset
+  useEffect(() => {
+    if (showActionsId) {
+      setTimeout(() => {
+        const expandedCard = document.querySelector(`[data-habit-id="${String(showActionsId)}"]`);
+        const mainContainer = document.querySelector('main');
+        if (expandedCard && mainContainer) {
+          const headerOffset = 200; // Space for sticky header
+          const cardRect = expandedCard.getBoundingClientRect();
+          const scrollPosition = mainContainer.scrollTop + cardRect.top - headerOffset;
+          mainContainer.scrollTo({ top: Math.max(0, scrollPosition), behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [showActionsId]);
 
   // Group habits by time phase
   const groupedByPhase = useMemo(() => {
@@ -348,17 +364,18 @@ export const Habits: React.FC<HabitsProps> = ({
                   <div className="flex-1 h-px bg-gradient-to-r from-[#2f3336] to-transparent" />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
+                <div className={`grid gap-3 md:gap-4 ${showActionsId ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
                   {phaseHabits.map(habit => {
                     const totalMonthly = days.filter(d => habit.history[d.dateStr]).length;
                     const daysInCurrentMonth = days.length;
                     const target = habit.monthlyTarget || daysInCurrentMonth;
                     const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
-                    const isExpanded = showActionsId === habit.id;
+                    const isExpanded = String(showActionsId) === String(habit.id);
 
                     return (
                       <div
                         key={habit.id}
+                        data-habit-id={String(habit.id)}
                         onClick={() => setShowActionsId(isExpanded ? null : habit.id)}
                         className={`w-full flex flex-col rounded-[24px] transition-all duration-500 group relative overflow-hidden cursor-pointer border touch-manipulation ${
                           isExpanded 

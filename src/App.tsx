@@ -135,7 +135,6 @@ export default function App() {
             name: args.name,
             history: {},
             streak: 0,
-            category: args.category,
             time: args.time,
             monthlyTarget: args.monthlyTarget,
             description: args.description,
@@ -153,7 +152,6 @@ export default function App() {
           h._id === args.id ? { 
             ...h, 
             name: args.name ?? h.name, 
-            category: args.category ?? h.category,
             time: args.time ?? h.time,
             monthlyTarget: args.monthlyTarget ?? h.monthlyTarget,
             description: args.description ?? h.description,
