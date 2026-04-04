@@ -334,7 +334,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                                     style={isPriority ? { backgroundColor: `${displayColor}20` } : {}}
                                   >
                                     <PhaseIcon 
-                                      className={`w-3 h-3 transition-all duration-200 ${
+                                      className={`w-3 h-3 transition-all duration-200 animate-target-pulse ${
                                         isPriority ? '' : 'text-white/50 group-hover:text-white/70'
                                       }`}
                                       style={isPriority ? { color: displayColor } : {}} 

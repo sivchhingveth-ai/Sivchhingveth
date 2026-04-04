@@ -484,3 +484,19 @@ main > div > div:last-child {
 .animate-shimmer-full {
   animation: shimmer-full 2.5s ease-in-out infinite;
 }
+
+/* Target icon subtle pulse animation */
+@keyframes target-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+.animate-target-pulse {
+  animation: target-pulse 2s ease-in-out infinite;
+}

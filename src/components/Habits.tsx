@@ -287,7 +287,7 @@ export const Habits: React.FC<HabitsProps> = ({
                             <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 ${
                               !selectedCategory ? 'bg-white/10' : 'bg-white/[0.05]'
                             }`}>
-                              <Target className="w-3 h-3 text-white/50" />
+                              <Target className="w-3 h-3 text-white/50 animate-target-pulse" />
                             </div>
                             <span className={`text-[13px] font-medium tracking-wide uppercase ${
                               !selectedCategory ? 'text-white' : 'text-white/60'
@@ -339,7 +339,7 @@ export const Habits: React.FC<HabitsProps> = ({
                                       style={isSelected ? { backgroundColor: `${phase.color}20` } : {}}
                                     >
                                       <PhaseIcon 
-                                        className={`w-3 h-3 transition-all duration-200 ${
+                                        className={`w-3 h-3 transition-all duration-200 animate-target-pulse ${
                                           isSelected ? '' : 'text-white/50 group-hover:text-white/70'
                                         }`}
                                         style={isSelected ? { color: phase.color } : {}} 
