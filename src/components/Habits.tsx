@@ -310,63 +310,69 @@ export const Habits: React.FC<HabitsProps> = ({
                         
                         {/* Category Options */}
                         <div>
-                          {TIME_PHASES.map((phase, index) => {
-                            const PhaseIcon = phase.icon;
-                            const count = habits.filter(h => getPhaseForHabit(h).key === phase.key).length;
-                            if (count === 0) return null;
-                            const isSelected = selectedCategory === phase.key;
-                            const isLast = index === TIME_PHASES.length - 1;
-                            return (
-                              <button
-                                key={phase.key}
-                                onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
-                                className={`w-full px-4 py-2 text-left flex items-center justify-between group transition-all duration-200 touch-manipulation animate-dropdown-item ${
-                                  !isLast ? 'border-b border-white/[0.06]' : ''
-                                } ${
-                                  isSelected ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
-                                }`}
-                                style={{ 
-                                  touchAction: 'manipulation',
-                                  animationDelay: `${index * 40}ms`
-                                }}
-                              >
-                                <span className="flex items-center gap-3">
-                                  <div 
-                                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 ${
-                                      isSelected ? '' : 'bg-white/[0.05] group-hover:bg-white/[0.08]'
-                                    }`}
-                                    style={isSelected ? { backgroundColor: `${phase.color}20` } : {}}
-                                  >
-                                    <PhaseIcon 
-                                      className={`w-3 h-3 transition-all duration-200 ${
-                                        isSelected ? '' : 'text-white/50 group-hover:text-white/70'
-                                      }`}
-                                      style={isSelected ? { color: phase.color } : {}} 
-                                    />
-                                  </div>
-                                  <span 
-                                    className={`text-[13px] font-medium tracking-wide uppercase transition-colors duration-200 ${
-                                      isSelected ? '' : 'text-white/60 group-hover:text-white/80'
-                                    }`}
-                                    style={isSelected ? { color: phase.color } : {}}
-                                  >
-                                    {phase.label.toUpperCase()}
-                                  </span>
-                                </span>
-                                <span 
-                                  className={`text-[12px] font-semibold px-2 py-0.5 rounded-md transition-all duration-200 ${
-                                    isSelected ? '' : 'text-white/40'
+                          {(() => {
+                            // Filter to only visible categories first
+                            const visiblePhases = TIME_PHASES.map(phase => ({
+                              ...phase,
+                              count: habits.filter(h => getPhaseForHabit(h).key === phase.key).length
+                            })).filter(p => p.count > 0);
+                            
+                            return visiblePhases.map((phase, index) => {
+                              const PhaseIcon = phase.icon;
+                              const isSelected = selectedCategory === phase.key;
+                              const isLast = index === visiblePhases.length - 1;
+                              return (
+                                <button
+                                  key={phase.key}
+                                  onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
+                                  className={`w-full px-4 py-2 text-left flex items-center justify-between group transition-all duration-200 touch-manipulation animate-dropdown-item ${
+                                    !isLast ? 'border-b border-white/[0.06]' : ''
+                                  } ${
+                                    isSelected ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
                                   }`}
-                                  style={isSelected ? { 
-                                    backgroundColor: `${phase.color}20`,
-                                    color: phase.color 
-                                  } : {}}
+                                  style={{ 
+                                    touchAction: 'manipulation',
+                                    animationDelay: `${index * 40}ms`
+                                  }}
                                 >
-                                  {count}
-                                </span>
-                              </button>
-                            );
-                          })}
+                                  <span className="flex items-center gap-3">
+                                    <div 
+                                      className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 ${
+                                        isSelected ? '' : 'bg-white/[0.05] group-hover:bg-white/[0.08]'
+                                      }`}
+                                      style={isSelected ? { backgroundColor: `${phase.color}20` } : {}}
+                                    >
+                                      <PhaseIcon 
+                                        className={`w-3 h-3 transition-all duration-200 ${
+                                          isSelected ? '' : 'text-white/50 group-hover:text-white/70'
+                                        }`}
+                                        style={isSelected ? { color: phase.color } : {}} 
+                                      />
+                                    </div>
+                                    <span 
+                                      className={`text-[13px] font-medium tracking-wide uppercase transition-colors duration-200 ${
+                                        isSelected ? '' : 'text-white/60 group-hover:text-white/80'
+                                      }`}
+                                      style={isSelected ? { color: phase.color } : {}}
+                                    >
+                                      {phase.label.toUpperCase()}
+                                    </span>
+                                  </span>
+                                  <span 
+                                    className={`text-[12px] font-semibold px-2 py-0.5 rounded-md transition-all duration-200 ${
+                                      isSelected ? '' : 'text-white/40'
+                                    }`}
+                                    style={isSelected ? { 
+                                      backgroundColor: `${phase.color}20`,
+                                      color: phase.color 
+                                    } : {}}
+                                  >
+                                    {phase.count}
+                                  </span>
+                                </button>
+                              );
+                            });
+                          })()}
                         </div>
                       </div>
                     </div>
