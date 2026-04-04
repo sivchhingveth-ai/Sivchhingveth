@@ -64,6 +64,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   // Track expanded habit in history view
   const [expandedHistoryHabit, setExpandedHistoryHabit] = useState<any>(null);
   
+  // Animation state for date change
+  const [isDateChanging, setIsDateChanging] = useState(false);
+  
   // Category dropdown state and priority ordering
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [priorityCategory, setPriorityCategory] = useState<string | null>(null);
@@ -97,6 +100,15 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   React.useEffect(() => {
     if (isHistory) {
       setExpandedHistoryHabit(null);
+    }
+  }, [historyDate, isHistory]);
+
+  // Animate when date changes in History view
+  React.useEffect(() => {
+    if (isHistory && historyDate) {
+      setIsDateChanging(true);
+      const timer = setTimeout(() => setIsDateChanging(false), 300);
+      return () => clearTimeout(timer);
     }
   }, [historyDate, isHistory]);
 
@@ -359,7 +371,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         </div>
       </div>
 
-      <div className="p-5 md:p-6 space-y-7" style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
+      <div className={`p-5 md:p-6 space-y-7 transition-all duration-300 ${isDateChanging ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`} style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
         {totalCount === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
