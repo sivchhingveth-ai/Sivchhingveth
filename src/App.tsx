@@ -149,7 +149,7 @@ export default function App() {
       const existing = localStore.getQuery(api.habits.list, {});
       if (existing !== undefined) {
         localStore.setQuery(api.habits.list, {}, existing.map(h => 
-          h._id === args.id ? { 
+          String(h._id) === String(args.id) ? { 
             ...h, 
             name: args.name ?? h.name, 
             time: args.time ?? h.time,
@@ -211,7 +211,7 @@ export default function App() {
     (localStore, args) => {
       const existing = localStore.getQuery(api.habits.list, {});
       if (existing !== undefined) {
-        localStore.setQuery(api.habits.list, {}, existing.filter(h => h._id !== args.id));
+        localStore.setQuery(api.habits.list, {}, existing.filter(h => String(h._id) !== String(args.id)));
       }
     }
   );
@@ -244,7 +244,7 @@ export default function App() {
       const existing = localStore.getQuery(api.savingGoals.list, {});
       if (existing !== undefined) {
         localStore.setQuery(api.savingGoals.list, {}, existing.map(s => 
-          s._id === args.id ? { ...s, saved: args.saved ?? s.saved, history: args.history ?? s.history } : s
+          String(s._id) === String(args.id) ? { ...s, saved: args.saved ?? s.saved, history: args.history ?? s.history } : s
         ));
       }
     }
@@ -254,7 +254,7 @@ export default function App() {
     (localStore, args) => {
       const existing = localStore.getQuery(api.savingGoals.list, {});
       if (existing !== undefined) {
-        localStore.setQuery(api.savingGoals.list, {}, existing.filter(s => s._id !== args.id));
+        localStore.setQuery(api.savingGoals.list, {}, existing.filter(s => String(s._id) !== String(args.id)));
       }
     }
   );
@@ -615,7 +615,7 @@ export default function App() {
           </div>
           <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <label className={labelClass}>Time Phase (Optional)</label>
+              <label className={labelClass}>Core Categories</label>
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {[
                   { name: 'Health', time: 'reset' },
