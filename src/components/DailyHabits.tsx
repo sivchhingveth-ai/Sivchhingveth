@@ -507,12 +507,12 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                       className="animate-pop-in fill-mode-backwards"
                       style={{ animationDelay, willChange: 'transform, opacity' }}
                     >
-                      <button
+                      <div
                         id={`habit-${habit.id}`}
-                        onClick={() => {
+                        onPointerDown={() => {
                           if (!isHistory) onToggleHabit(habit.id, todayStr);
                         }}
-                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-150 group border-2 cursor-pointer select-none touch-manipulation active:scale-[0.98] ${isDone
+                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-transform duration-100 group border-2 cursor-pointer select-none touch-manipulation active:scale-[0.98] ${isDone
                           ? 'bg-[#16181c] border-[#71767b]/30'
                           : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-[#71767b]'
                           }`}
@@ -521,11 +521,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           touchAction: 'manipulation',
                           WebkitTapHighlightColor: 'transparent'
                         } as React.CSSProperties}
-                        onTouchStart={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-                        onTouchEnd={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                        onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-                        onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
                         <div 
                           className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 border-2 ${isDone
@@ -567,7 +562,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phase.color }} />
                           </div>
                         )}
-                      </button>
+                      </div>
                     </div>
                   );
                 })
