@@ -353,21 +353,30 @@ export default function App() {
       try {
         if (editingHabitId) {
           console.log('Updating habit:', editingHabitId, 'with time:', newHabitTime);
-          await updateHabit({
+          const updateData: any = {
             id: editingHabitId as Id<"habits">,
             name: trimmedName,
             time: newHabitTime || null,
-            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null,
-            description: newHabitDescription.trim() || null
-          });
+            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+          };
+          // Only add description if it has a value (undefined is not sent to server)
+          const trimmedDesc = newHabitDescription.trim();
+          if (trimmedDesc) {
+            updateData.description = trimmedDesc;
+          }
+          await updateHabit(updateData);
           console.log('Update successful');
         } else {
-          await createHabit({
+          const createData: any = {
             name: trimmedName,
             time: newHabitTime || null,
-            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null,
-            description: newHabitDescription.trim() || null
-          });
+            monthlyTarget: newHabitMonthlyTarget ? parseInt(newHabitMonthlyTarget) : null
+          };
+          const trimmedDesc = newHabitDescription.trim();
+          if (trimmedDesc) {
+            createData.description = trimmedDesc;
+          }
+          await createHabit(createData);
         }
         setNewHabitName('');
         setNewHabitTime('');
