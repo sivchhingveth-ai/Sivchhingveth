@@ -64,9 +64,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   // Track expanded habit in history view
   const [expandedHistoryHabit, setExpandedHistoryHabit] = useState<any>(null);
   
-  // Animation state for tab change
-  const [isTabChanging, setIsTabChanging] = useState(false);
-  
   // Category dropdown state and priority ordering
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [priorityCategory, setPriorityCategory] = useState<string | null>(null);
@@ -74,11 +71,30 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
   // Track scroll position to maintain it during reordering
   const scrollPositionRef = React.useRef(0);
 
+  // Animation state for tab change
+  const [isTabChanging, setIsTabChanging] = useState(false);
+  const [isDateChanging, setIsDateChanging] = useState(false);
+  const prevTabRef = React.useRef(activeTab);
+
+  // Animate only when switching TO History tab
   React.useEffect(() => {
-    // Reduced from 1000ms to 30000ms (30 seconds) for better mobile performance
-    const timer = setInterval(() => setNow(new Date()), 30000);
-    return () => clearInterval(timer);
-  }, []);
+    if (activeTab === 'History' && prevTabRef.current !== 'History') {
+      setIsTabChanging(true);
+      const timer = setTimeout(() => setIsTabChanging(false), 400);
+      prevTabRef.current = activeTab;
+      return () => clearTimeout(timer);
+    }
+    prevTabRef.current = activeTab;
+  }, [activeTab]);
+
+  // Animate when date changes in History view
+  React.useEffect(() => {
+    if (isHistory && historyDate) {
+      setIsDateChanging(true);
+      const timer = setTimeout(() => setIsDateChanging(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [historyDate, isHistory]);
 
   // Auto-scroll to expanded card in History view
   React.useEffect(() => {
@@ -87,7 +103,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         const expandedCard = document.querySelector(`[data-history-habit="${String(expandedHistoryHabit)}"]`);
         const mainContainer = document.querySelector('main');
         if (expandedCard && mainContainer) {
-          const headerOffset = 280; // More space for header + breathing room
+          const headerOffset = 280;
           const cardRect = expandedCard.getBoundingClientRect();
           const scrollPosition = mainContainer.scrollTop + cardRect.top - headerOffset;
           mainContainer.scrollTo({ top: Math.max(0, scrollPosition), behavior: 'smooth' });
@@ -102,20 +118,6 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
       setExpandedHistoryHabit(null);
     }
   }, [historyDate, isHistory]);
-
-  // Animation state for tab change
-  const prevTabRef = React.useRef(activeTab);
-
-  // Animate only when switching TO History tab
-  React.useEffect(() => {
-    if (activeTab === 'History' && prevTabRef.current !== 'History') {
-      setIsTabChanging(true);
-      const timer = setTimeout(() => setIsTabChanging(false), 400);
-      prevTabRef.current = activeTab;
-      return () => clearTimeout(timer);
-    }
-    prevTabRef.current = activeTab;
-  }, [activeTab]);
 
   // Restore scroll position after reordering
   React.useEffect(() => {
@@ -376,7 +378,13 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
         </div>
       </div>
 
-      <div className={`p-5 md:p-6 space-y-7 transition-all duration-300 ${isTabChanging ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`} style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
+      <div className={`p-5 md:p-6 space-y-7 transition-all duration-300 ${
+        isTabChanging 
+          ? 'opacity-0 translate-y-2' 
+          : isDateChanging 
+            ? 'opacity-90 scale-[0.99]' 
+            : 'opacity-100 translate-y-0 scale-100'
+      }`} style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom) + 4rem)' }}>
         {totalCount === 0 && (
           <div className="text-center py-16">
             <Sparkles className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
