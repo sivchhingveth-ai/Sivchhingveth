@@ -379,8 +379,6 @@ export default function App() {
         console.error("Failed to save habit:", error);
         setHabitError("Failed to save. Check connection and try again.");
       }
-        setHabitError("Failed to save. Check connection and try again.");
-      }
     }
   };
 
