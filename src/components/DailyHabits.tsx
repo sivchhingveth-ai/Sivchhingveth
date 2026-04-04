@@ -408,8 +408,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           onClick={() => setExpandedHistoryHabit(isExpanded ? null : habit.id)}
                           className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl cursor-pointer transition-all ${
                             isExpanded 
-                              ? 'bg-[#0a0a0a] border border-white/10' 
-                              : 'bg-[#16181c] border border-[#2f3336] hover:bg-[#1f2126]'
+                              ? 'bg-[#0a0a0a] border-2 border-white/30 shadow-lg shadow-white/5' 
+                              : 'bg-[#16181c] border border-[#4a4d54] hover:border-[#5a5d64] hover:bg-[#1f2126]'
                           }`}
                           style={{ touchAction: 'manipulation' }}
                         >
