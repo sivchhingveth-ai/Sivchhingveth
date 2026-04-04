@@ -23,9 +23,9 @@ interface DailyHabitsProps {
 // Time phase definitions
 const TIME_PHASES = [
   { key: 'reset', label: 'Health', time: 'reset', icon: Target, color: '#34c759', emoji: '🌱' },
-  { key: 'daily_rule', label: 'Discipline', time: 'any', icon: Target, color: '#1d9bf0', emoji: '🎯' },
+  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Target, color: '#1d9bf0', emoji: '🎯' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0', emoji: '🚀' },
-  { key: 'distraction', label: 'Eliminate', time: 'distraction', icon: Target, color: '#ff3b30', emoji: '🚫' },
+  { key: 'distraction', label: 'Discipline', time: 'distraction', icon: Target, color: '#ff3b30', emoji: '🚫' },
   { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#ff9500', emoji: '💰' },
 ] as const;
 
@@ -499,7 +499,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                                 <div className="mb-4">
                                   <div className="flex items-center gap-2 mb-2">
                                     <Info className="w-3.5 h-3.5 text-[#71767b]" />
-                                    <span className="text-[9px] font-black text-[#71767b] uppercase tracking-widest">Discipline & Description</span>
+                                    <span className="text-[9px] font-black text-[#71767b] uppercase tracking-widest">Info & Description</span>
                                   </div>
                                   <p className="text-[13px] text-[#eff3f4] leading-relaxed bg-[#16181c] rounded-xl p-3 border border-[#2f3336]">
                                     {habit.description}
