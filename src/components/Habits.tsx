@@ -452,7 +452,7 @@ export const Habits: React.FC<HabitsProps> = ({
                               {/* Action Row - Slim Line Style */}
                               <div className="flex items-center justify-center gap-6 py-2 border-y border-white/5" onClick={e => e.stopPropagation()}>
                                 <button
-                                  onClick={() => onEditHabit(habit.id)}
+                                  onClick={() => { setShowActionsId(null); onEditHabit(habit.id); }}
                                   className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#71767b] hover:text-[#eff3f4] transition-all touch-manipulation"
                                   style={{ touchAction: 'manipulation' }}
                                 >
@@ -461,7 +461,7 @@ export const Habits: React.FC<HabitsProps> = ({
                                 </button>
                                 <div className="w-[1px] h-3 bg-white/10" />
                                 <button
-                                  onClick={() => onDeleteHabit(habit.id)}
+                                  onClick={() => { setShowActionsId(null); onDeleteHabit(habit.id); }}
                                   className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#71767b] hover:text-red-400 transition-all touch-manipulation"
                                   style={{ touchAction: 'manipulation' }}
                                 >
