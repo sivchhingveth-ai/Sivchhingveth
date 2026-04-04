@@ -26,13 +26,14 @@ const TIME_PHASES = [
 const getPhaseForHabit = (habit: Habit) => {
   if (!habit.time) return TIME_PHASES[0];
   const time = habit.time;
-  if (time === 'reset' || time === '08:00') return TIME_PHASES[0];
-  if (time === 'growth' || time === '14:00') return TIME_PHASES[1];
-  if (time === 'distraction' || time === '20:00' || time === '02:00') return TIME_PHASES[2];
-  if (time === 'spending') return TIME_PHASES[4];
-  
+  // Find by time value - works for all category types
   const phase = TIME_PHASES.find(p => p.time === time);
-  return phase || TIME_PHASES[0];
+  if (phase) return phase;
+  // Fallback for legacy time strings
+  if (time === '08:00') return TIME_PHASES[0]; // Health
+  if (time === '14:00') return TIME_PHASES[2]; // Growth  
+  if (time === '20:00' || time === '02:00') return TIME_PHASES[3]; // Discipline
+  return TIME_PHASES[0];
 };
 
 const getCurrentPhaseKey = (): string | null => {
