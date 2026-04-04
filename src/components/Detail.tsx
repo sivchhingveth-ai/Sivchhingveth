@@ -23,7 +23,7 @@ const TIME_PHASES = [
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
   { key: 'distraction', label: 'Discipline', time: 'distraction', icon: Target, color: '#1d9bf0' },
   { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Target, color: '#ff3b30' },
-  { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#ff9500' },
+  { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#FF6B4A' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
