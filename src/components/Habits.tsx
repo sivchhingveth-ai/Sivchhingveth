@@ -195,23 +195,19 @@ export const Habits: React.FC<HabitsProps> = ({
           <h2 className="text-[18px] md:text-[20px] font-black text-[#eff3f4] leading-tight tracking-tight whitespace-nowrap">
             Add Workspace
           </h2>
-          <div className="flex flex-wrap items-center gap-y-1 gap-x-2 mt-1">
-            {TIME_PHASES.map((phase, idx) => {
+          <div className="flex flex-wrap items-center gap-x-3 mt-1">
+            {TIME_PHASES.map((phase) => {
               const count = habits.filter(h => getPhaseForHabit(h).key === phase.key).length;
               if (count === 0) return null; // Don't show empty categories
               return (
-                <React.Fragment key={phase.key}>
-                  <button 
-                    onClick={() => setSelectedCategory(phase.key)}
-                    className="text-[9px] font-black uppercase tracking-widest leading-none hover:opacity-80 transition-opacity cursor-pointer"
-                    style={{ color: phase.color }}
-                  >
-                    {count} {phase.label}
-                  </button>
-                  {idx < TIME_PHASES.length - 1 && (
-                    <span className="w-1 h-1 rounded-full bg-[#71767b]" />
-                  )}
-                </React.Fragment>
+                <button 
+                  key={phase.key}
+                  onClick={() => setSelectedCategory(phase.key)}
+                  className="text-[9px] font-black uppercase tracking-widest leading-none hover:opacity-80 transition-opacity cursor-pointer"
+                  style={{ color: phase.color }}
+                >
+                  {count} {phase.label}
+                </button>
               );
             })}
           </div>
@@ -281,41 +277,46 @@ export const Habits: React.FC<HabitsProps> = ({
                   <div className="absolute top-full right-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-[100] overflow-hidden max-w-[calc(100vw-1rem)]" style={{ touchAction: 'manipulation' }}>
                     <button
                       onClick={() => { setSelectedCategory(null); setShowCategoryFilter(false); }}
-                      className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 touch-manipulation ${
+                      className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center justify-between hover:bg-white/5 touch-manipulation ${
                         !selectedCategory ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b]'
                       }`}
                       style={{ touchAction: 'manipulation' }}
                     >
-                      <Target className="w-4 h-4 text-[#71767b]" />
-                      <div className="flex flex-col">
-                        <span>ALL CATEGORIES</span>
-                        <span className="text-[10px] font-medium text-[#71767b]">
-                          {habits.length} total tasks
-                        </span>
-                      </div>
+                      <span className="flex items-center gap-2">
+                        <Target className="w-4 h-4 text-[#71767b]" />
+                        ALL CATEGORIES
+                      </span>
+                      <span className="text-white font-black">
+                        {habits.length}
+                      </span>
                     </button>
                     {TIME_PHASES.map((phase) => {
                       const PhaseIcon = phase.icon;
                       const count = habits.filter(h => getPhaseForHabit(h).key === phase.key).length;
+                      if (count === 0) return null; // Skip empty categories
                       return (
                         <button
                           key={phase.key}
                           onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
-                          className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 touch-manipulation ${
-                            selectedCategory === phase.key ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b]'
+                          className={`w-full px-4 py-2.5 text-left text-[13px] font-bold flex items-center justify-between hover:bg-white/5 touch-manipulation ${
+                            selectedCategory === phase.key ? 'bg-white/5' : ''
                           }`}
                           style={{ touchAction: 'manipulation' }}
                         >
-                          <PhaseIcon className="w-4 h-4" style={{ color: phase.color }} />
-                          <div className="flex flex-col">
-                            <span>{phase.label.toUpperCase()}</span>
-                            <span className="text-[10px] font-medium" style={{ color: phase.color }}>
-                              {count} tasks
-                            </span>
-                          </div>
+                          <span style={{ color: phase.color }}>
+                            {phase.label.toUpperCase()}
+                          </span>
+                          <span className="text-white font-black">
+                            {count}
+                          </span>
                         </button>
                       );
                     })}
+                    <div className="px-4 py-2 border-t border-[#2f3336] bg-[#0a0a0a]">
+                      <span className="text-[10px] font-medium text-[#71767b] uppercase tracking-widest">
+                        Click to filter
+                      </span>
+                    </div>
                   </div>
                 )}
             </div>
