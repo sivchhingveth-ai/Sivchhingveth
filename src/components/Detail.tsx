@@ -21,9 +21,9 @@ interface DetailProps {
 const TIME_PHASES = [
   { key: 'reset', label: 'Health', time: 'reset', icon: Target, color: '#34c759' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
-  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Target, color: '#ff3b30' },
-  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Target, color: '#1d9bf0' },
-  { key: 'spending', label: 'Spending', time: 'spending', icon: Target, color: '#ff9500' },
+  { key: 'distraction', label: 'Eliminate', time: 'distraction', icon: Target, color: '#ff3b30' },
+  { key: 'daily_rule', label: 'Discipline', time: 'any', icon: Target, color: '#1d9bf0' },
+  { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#ff9500' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -183,11 +183,11 @@ export const Detail: React.FC<DetailProps> = ({
                             <div className="bg-white/[0.03] border border-white/5 rounded-[20px] p-5" onClick={(e) => e.stopPropagation()}>
                               <h5 className="text-[10px] font-black text-[#71767b] uppercase tracking-[0.25em] mb-3 flex items-center gap-2">
                                 <Info className="w-3 h-3" />
-                                Task Details & Rules
+                                Task Details & Description
                               </h5>
                               <div className="text-[14px] md:text-[16px] text-[#eff3f4] leading-relaxed font-medium whitespace-pre-wrap">
                                 {habit.description || (
-                                  <span className="text-[#71767b] italic opacity-50">No detailed rules or info provided for this category. You can add them in the "Add Workspace" tab.</span>
+                                  <span className="text-[#71767b] italic opacity-50">No detailed info provided for this category. You can add them in the "Add Workspace" tab.</span>
                                 )}
                               </div>
                             </div>

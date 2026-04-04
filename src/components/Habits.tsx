@@ -25,9 +25,9 @@ interface HabitsProps {
 const TIME_PHASES = [
   { key: 'reset', label: 'Health', time: 'reset', icon: Target, color: '#34c759' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
-  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Target, color: '#ff3b30' },
-  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Target, color: '#1d9bf0' },
-  { key: 'spending', label: 'Spending', time: 'spending', icon: Target, color: '#ff9500' },
+  { key: 'distraction', label: 'Eliminate', time: 'distraction', icon: Target, color: '#ff3b30' },
+  { key: 'daily_rule', label: 'Discipline', time: 'any', icon: Target, color: '#1d9bf0' },
+  { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#ff9500' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -457,7 +457,7 @@ export const Habits: React.FC<HabitsProps> = ({
                                   style={{ touchAction: 'manipulation' }}
                                 >
                                   <Pencil className="w-3 h-3" />
-                                  Edit Rules
+                                  Edit Category
                                 </button>
                                 <div className="w-[1px] h-3 bg-white/10" />
                                 <button
@@ -474,10 +474,10 @@ export const Habits: React.FC<HabitsProps> = ({
                               <div className="bg-white/[0.02] border border-white/5 rounded-[20px] p-4">
                                 <h5 className="text-[10px] font-black text-[#71767b] uppercase tracking-[0.25em] mb-2.5 flex items-center gap-2">
                                   <Info className="w-3 h-3" />
-                                  Rules & Summary
+                                  Description & Summary
                                 </h5>
                                 <div className="text-[13px] md:text-[14px] text-[#eff3f4]/90 leading-relaxed font-medium italic whitespace-pre-wrap px-1">
-                                  {habit.description || "No detailed rules or info provided."}
+                                  {habit.description || "No detailed info provided."}
                                 </div>
                               </div>
 

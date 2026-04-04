@@ -17,10 +17,10 @@ interface DailyHabitsProps {
 // Time phase definitions
 const TIME_PHASES = [
   { key: 'reset', label: 'Health', time: 'reset', icon: Target, color: '#34c759', emoji: '🌱' },
-  { key: 'daily_rule', label: 'Rules', time: 'any', icon: Target, color: '#1d9bf0', emoji: '🎯' },
+  { key: 'daily_rule', label: 'Discipline', time: 'any', icon: Target, color: '#1d9bf0', emoji: '🎯' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0', emoji: '🚀' },
-  { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Target, color: '#ff3b30', emoji: '🚫' },
-  { key: 'spending', label: 'Spending', time: 'spending', icon: Target, color: '#ff9500', emoji: '💰' },
+  { key: 'distraction', label: 'Eliminate', time: 'distraction', icon: Target, color: '#ff3b30', emoji: '🚫' },
+  { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#ff9500', emoji: '💰' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
