@@ -189,13 +189,13 @@ export const Habits: React.FC<HabitsProps> = ({
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
 
-      <div className="px-5 md:px-6 py-4 md:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2f3336]">
+      <div className="px-5 md:px-6 py-2 md:py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#2f3336]">
         {/* Row 1: Title & Month Picker */}
         <div className="min-w-0">
           <h2 className="text-[18px] md:text-[20px] font-black text-[#eff3f4] leading-tight tracking-tight whitespace-nowrap">
             Add Workspace
           </h2>
-          <div className="flex flex-wrap items-center gap-y-1.5 gap-x-2 mt-1.5">
+          <div className="flex flex-wrap items-center gap-y-1 gap-x-2 mt-1">
             {TIME_PHASES.map((phase, idx) => (
               <React.Fragment key={phase.key}>
                 <span 
@@ -212,7 +212,7 @@ export const Habits: React.FC<HabitsProps> = ({
           </div>
         </div>
 
-          <div className="flex flex-col gap-3 w-full md:w-auto">
+          <div className="flex flex-col gap-2 w-full md:w-auto">
 
             {/* Month Picker - Full width on its own row */}
             <div className="flex items-center gap-1 bg-[#16181c] border border-[#2f3336] p-1 rounded-xl w-full h-10">
@@ -340,8 +340,8 @@ export const Habits: React.FC<HabitsProps> = ({
         </div>
       </div>
 
-      <div className="px-5 md:px-6 py-4 space-y-6 pb-8 md:pb-20 text-[#eff3f4] animate-slide-up duration-[400ms]">
-        <div className="flex flex-col gap-8 pb-20 md:pb-32 mt-4 text-[#eff3f4]" style={{ paddingBottom: 'max(5rem, env(safe-area-inset-bottom))' }}>
+      <div className="px-5 md:px-6 py-2 space-y-4 pb-8 md:pb-20 text-[#eff3f4] animate-slide-up duration-[400ms]">
+        <div className="flex flex-col gap-8 pb-20 md:pb-32 mt-0 text-[#eff3f4]" style={{ paddingBottom: 'max(5rem, env(safe-area-inset-bottom))' }}>
           {Object.entries(groupedByPhase).length === 0 && (
             <div className="text-center py-16 bg-white/[0.01] border border-dashed border-[#2f3336] rounded-3xl">
               <TrendingUp className="w-10 h-10 text-[#71767b]/40 mx-auto mb-4" />
