@@ -272,35 +272,95 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                 </span>
               </button>
               
-              {/* Category Dropdown - Positioned for mobile safety */}
+              {/* Category Dropdown - ChatGPT-style with shine */}
               {showCategoryDropdown && (
-                <div className="absolute top-full left-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-[100] overflow-hidden max-w-[calc(100vw-2rem)]" style={{ touchAction: 'manipulation' }}>
-                  <div className="py-1">
-                    {TIME_PHASES.map((phase, index) => {
-                      const PhaseIcon = phase.icon;
-                      const isLast = index === TIME_PHASES.length - 1;
-                      return (
-                        <button
-                          key={phase.key}
-                          onClick={() => {
-                            setShowCategoryDropdown(false);
-                            scrollPositionRef.current = window.scrollY;
-                            setPriorityCategory(phase.key);
-                          }}
-                          className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center gap-3 hover:bg-white/5 touch-manipulation ${!isLast ? 'border-b border-[#2f3336]' : ''}`}
-                          style={{ color: isHistory ? '#71767b' : phase.color, touchAction: 'manipulation' }}
-                        >
-                          <PhaseIcon 
-                            className="w-4 h-4"
-                            style={{ color: isHistory ? '#71767b' : phase.color }}
-                          />
-                          <span>{phase.label}</span>
-                       </button>
-                      );
-                    })}
-                   </div>
-                 </div>
-               )}
+                <div 
+                  className="absolute top-full left-0 mt-2 w-[260px] z-[100] max-w-[calc(100vw-2rem)] animate-dropdown-in"
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  {/* Glow wrapper */}
+                  <div className="relative rounded-2xl p-[1px] bg-gradient-to-b from-white/25 via-white/10 to-white/20 shadow-[0_0_40px_rgba(255,255,255,0.06),0_0_80px_rgba(255,255,255,0.03),inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
+                    {/* Full shimmer overlay */}
+                    <div className="absolute inset-0 pointer-events-none z-10">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer-full" />
+                    </div>
+                    {/* Inner black background */}
+                    <div className="relative bg-black rounded-2xl overflow-hidden">
+                      {/* Clean minimal header */}
+                      <div className="px-4 py-2.5 border-b border-white/[0.08]">
+                        <span className="text-[10px] font-medium text-white/40 tracking-widest uppercase">
+                          Filter by category
+                        </span>
+                      </div>
+                      
+                      {/* Category Options */}
+                      <div>
+                        {TIME_PHASES.map((phase, index) => {
+                          const PhaseIcon = phase.icon;
+                          const count = habits.filter(h => getPhaseForHabit(h).key === phase.key && shouldShowHabitOnDay(h.monthlyTarget, todayStr)).length;
+                          if (count === 0) return null;
+                          const isLast = index === TIME_PHASES.length - 1;
+                          const isPriority = priorityCategory === phase.key;
+                          return (
+                            <button
+                              key={phase.key}
+                              onClick={() => {
+                                setShowCategoryDropdown(false);
+                                scrollPositionRef.current = window.scrollY;
+                                setPriorityCategory(phase.key);
+                              }}
+                              className={`w-full px-4 py-2 text-left flex items-center justify-between group transition-all duration-200 touch-manipulation animate-dropdown-item ${
+                                !isLast ? 'border-b border-white/[0.06]' : ''
+                              } ${
+                                isPriority ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
+                              }`}
+                              style={{ 
+                                touchAction: 'manipulation',
+                                animationDelay: `${index * 40}ms`
+                              }}
+                            >
+                              <span className="flex items-center gap-3">
+                                <div 
+                                  className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 ${
+                                    isPriority ? '' : 'bg-white/[0.05] group-hover:bg-white/[0.08]'
+                                  }`}
+                                  style={isPriority ? { backgroundColor: `${phase.color}20` } : {}}
+                                >
+                                  <PhaseIcon 
+                                    className={`w-3 h-3 transition-all duration-200 ${
+                                      isPriority ? '' : 'text-white/50 group-hover:text-white/70'
+                                    }`}
+                                    style={isPriority ? { color: phase.color } : {}} 
+                                  />
+                                </div>
+                                <span 
+                                  className={`text-[13px] font-medium tracking-wide uppercase transition-colors duration-200 ${
+                                    isPriority ? '' : 'text-white/60 group-hover:text-white/80'
+                                  }`}
+                                  style={isPriority ? { color: phase.color } : {}}
+                                >
+                                  {phase.label.toUpperCase()}
+                                </span>
+                              </span>
+                              <span 
+                                className={`text-[12px] font-semibold px-2 py-0.5 rounded-md transition-all duration-200 ${
+                                  isPriority ? '' : 'text-white/40'
+                                }`}
+                                style={isPriority ? { 
+                                  backgroundColor: `${phase.color}20`,
+                                  color: phase.color 
+                                } : {}}
+                              >
+                                {count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
              </div>
              
              {/* Mobile Category Count Labels - shown below on small screens */}

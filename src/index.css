@@ -424,3 +424,63 @@ main > div > div:last-child {
   animation: fire-flicker 0.5s ease-in-out infinite;
   transform-origin: center bottom;
 }
+
+/* Dropdown menu animations - ChatGPT style */
+@keyframes dropdown-in {
+  0% {
+    transform: translateY(-4px) scale(0.98);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes dropdown-item {
+  0% {
+    transform: translateX(-6px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-dropdown-in {
+  animation: dropdown-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
+}
+
+.animate-dropdown-item {
+  animation: dropdown-item 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+/* Shimmer border animation for dropdown shine effect - FULL FRAME */
+@keyframes shimmer-border {
+  0% {
+    transform: translateX(-100%);
+  }
+  50%, 100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes shimmer-full {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.animate-shimmer-border {
+  animation: shimmer-border 3s ease-in-out infinite;
+}
+
+.animate-shimmer-full {
+  animation: shimmer-full 2.5s ease-in-out infinite;
+}

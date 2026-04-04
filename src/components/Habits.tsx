@@ -195,22 +195,6 @@ export const Habits: React.FC<HabitsProps> = ({
           <h2 className="text-[18px] md:text-[20px] font-black text-[#eff3f4] leading-tight tracking-tight whitespace-nowrap">
             Add Workspace
           </h2>
-          <div className="flex flex-wrap items-center gap-x-3 mt-1">
-            {TIME_PHASES.map((phase) => {
-              const count = habits.filter(h => getPhaseForHabit(h).key === phase.key).length;
-              if (count === 0) return null; // Don't show empty categories
-              return (
-                <button 
-                  key={phase.key}
-                  onClick={() => setSelectedCategory(phase.key)}
-                  className="text-[9px] font-black uppercase tracking-widest leading-none hover:opacity-80 transition-opacity cursor-pointer"
-                  style={{ color: phase.color }}
-                >
-                  {count} {phase.label}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
           <div className="flex flex-col gap-2 w-full md:w-auto">
@@ -272,50 +256,119 @@ export const Habits: React.FC<HabitsProps> = ({
                   <ChevronRight className={`w-4 h-4 ${showCategoryFilter ? 'rotate-90' : ''}`} style={{ transition: 'none' }} />
                 </button>
                 
-                {/* Category Dropdown - Positioned right for mobile safety */}
+                {/* Category Dropdown - ChatGPT-style with separators */}
                 {showCategoryFilter && (
-                  <div className="absolute top-full right-0 mt-2 w-[220px] bg-[#16181c] border border-[#2f3336] rounded-xl shadow-2xl z-[100] overflow-hidden max-w-[calc(100vw-1rem)]" style={{ touchAction: 'manipulation' }}>
-                    <button
-                      onClick={() => { setSelectedCategory(null); setShowCategoryFilter(false); }}
-                      className={`w-full px-4 py-3 text-left text-[13px] font-bold flex items-center justify-between hover:bg-white/5 touch-manipulation ${
-                        !selectedCategory ? 'bg-white/5 text-[#eff3f4]' : 'text-[#71767b]'
-                      }`}
-                      style={{ touchAction: 'manipulation' }}
-                    >
-                      <span className="flex items-center gap-2">
-                        <Target className="w-4 h-4 text-[#71767b]" />
-                        ALL CATEGORIES
-                      </span>
-                      <span className="text-white font-black">
-                        {habits.length}
-                      </span>
-                    </button>
-                    {TIME_PHASES.map((phase) => {
-                      const PhaseIcon = phase.icon;
-                      const count = habits.filter(h => getPhaseForHabit(h).key === phase.key).length;
-                      if (count === 0) return null; // Skip empty categories
-                      return (
+                  <div 
+                    className="absolute top-full right-0 mt-2 w-[260px] z-[100] max-w-[calc(100vw-1rem)] animate-dropdown-in"
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    {/* Glow wrapper */}
+                    <div className="relative rounded-2xl p-[1px] bg-gradient-to-b from-white/25 via-white/10 to-white/20 shadow-[0_0_40px_rgba(255,255,255,0.06),0_0_80px_rgba(255,255,255,0.03),inset_0_1px_1px_rgba(255,255,255,0.15)] overflow-hidden">
+                      {/* Full shimmer overlay */}
+                      <div className="absolute inset-0 pointer-events-none z-10">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer-full" />
+                      </div>
+                      {/* Inner black background */}
+                      <div className="relative bg-black rounded-2xl overflow-hidden">
+                        {/* Clean minimal header */}
+                        <div className="px-4 py-2.5 border-b border-white/[0.08]">
+                          <span className="text-[10px] font-medium text-white/40 tracking-widest uppercase">
+                            Filter by category
+                          </span>
+                        </div>
+                        
+                        {/* All Categories Option */}
                         <button
-                          key={phase.key}
-                          onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
-                          className={`w-full px-4 py-2.5 text-left text-[13px] font-bold flex items-center justify-between hover:bg-white/5 touch-manipulation ${
-                            selectedCategory === phase.key ? 'bg-white/5' : ''
+                          onClick={() => { setSelectedCategory(null); setShowCategoryFilter(false); }}
+                          className={`w-full px-4 py-2 text-left flex items-center justify-between group transition-all duration-200 touch-manipulation border-b border-white/[0.06] ${
+                            !selectedCategory 
+                              ? 'bg-white/[0.06]' 
+                              : 'hover:bg-white/[0.03]'
                           }`}
                           style={{ touchAction: 'manipulation' }}
                         >
-                          <span style={{ color: phase.color }}>
-                            {phase.label.toUpperCase()}
+                          <span className="flex items-center gap-3">
+                            <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 ${
+                              !selectedCategory ? 'bg-white/10' : 'bg-white/[0.05]'
+                            }`}>
+                              <Target className="w-3 h-3 text-white/50" />
+                            </div>
+                            <span className={`text-[13px] font-medium tracking-wide uppercase ${
+                              !selectedCategory ? 'text-white' : 'text-white/60'
+                            }`}>
+                              All Categories
+                            </span>
                           </span>
-                          <span className="text-white font-black">
-                            {count}
+                          <span className={`text-[12px] font-semibold px-2 py-0.5 rounded-md transition-all duration-200 ${
+                            !selectedCategory 
+                              ? 'bg-white/10 text-white' 
+                              : 'text-white/40'
+                          }`}>
+                            {habits.length}
                           </span>
                         </button>
-                      );
-                    })}
-                    <div className="px-4 py-2 border-t border-[#2f3336] bg-[#0a0a0a]">
-                      <span className="text-[10px] font-medium text-[#71767b] uppercase tracking-widest">
-                        Click to filter
-                      </span>
+                        
+                        {/* Category Options */}
+                        <div>
+                          {TIME_PHASES.map((phase, index) => {
+                            const PhaseIcon = phase.icon;
+                            const count = habits.filter(h => getPhaseForHabit(h).key === phase.key).length;
+                            if (count === 0) return null;
+                            const isSelected = selectedCategory === phase.key;
+                            const isLast = index === TIME_PHASES.length - 1;
+                            return (
+                              <button
+                                key={phase.key}
+                                onClick={() => { setSelectedCategory(phase.key); setShowCategoryFilter(false); }}
+                                className={`w-full px-4 py-2 text-left flex items-center justify-between group transition-all duration-200 touch-manipulation animate-dropdown-item ${
+                                  !isLast ? 'border-b border-white/[0.06]' : ''
+                                } ${
+                                  isSelected ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
+                                }`}
+                                style={{ 
+                                  touchAction: 'manipulation',
+                                  animationDelay: `${index * 40}ms`
+                                }}
+                              >
+                                <span className="flex items-center gap-3">
+                                  <div 
+                                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 ${
+                                      isSelected ? '' : 'bg-white/[0.05] group-hover:bg-white/[0.08]'
+                                    }`}
+                                    style={isSelected ? { backgroundColor: `${phase.color}20` } : {}}
+                                  >
+                                    <PhaseIcon 
+                                      className={`w-3 h-3 transition-all duration-200 ${
+                                        isSelected ? '' : 'text-white/50 group-hover:text-white/70'
+                                      }`}
+                                      style={isSelected ? { color: phase.color } : {}} 
+                                    />
+                                  </div>
+                                  <span 
+                                    className={`text-[13px] font-medium tracking-wide uppercase transition-colors duration-200 ${
+                                      isSelected ? '' : 'text-white/60 group-hover:text-white/80'
+                                    }`}
+                                    style={isSelected ? { color: phase.color } : {}}
+                                  >
+                                    {phase.label.toUpperCase()}
+                                  </span>
+                                </span>
+                                <span 
+                                  className={`text-[12px] font-semibold px-2 py-0.5 rounded-md transition-all duration-200 ${
+                                    isSelected ? '' : 'text-white/40'
+                                  }`}
+                                  style={isSelected ? { 
+                                    backgroundColor: `${phase.color}20`,
+                                    color: phase.color 
+                                  } : {}}
+                                >
+                                  {count}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
