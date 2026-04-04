@@ -512,9 +512,9 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         onClick={() => {
                           if (!isHistory) onToggleHabit(habit.id, todayStr);
                         }}
-                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border bit-click-spring touch-manipulation ${isDone
-                          ? 'border-transparent'
-                          : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-white/10'
+                        className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border-2 bit-click-spring touch-manipulation ${isDone
+                          ? 'border-[#4a4d54] hover:border-[#5a5d64]'
+                          : 'bg-transparent border-[#4a4d54] hover:bg-white/[0.02] hover:border-[#5a5d64]'
                           }`}
                         style={{
                           backgroundColor: isDone ? `${phase.color}15` : 'transparent',
