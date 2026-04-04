@@ -207,8 +207,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
             </div>
 
             <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
-              <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#ff6b00]/10 border border-[#ff6b00]/20 flex items-center justify-center">
-                <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#ff6b00]" />
+              <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-[#ff3b30]/10 border border-[#ff3b30]/20 flex items-center justify-center">
+                <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#ff3b30]" />
               </div>
               <div className="text-right pr-1">
                 <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">{currentStreak}</p>
@@ -304,10 +304,10 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                               }`}>
                                {habit.name.toUpperCase()}
                             </p>
-                            {habit.streak > 0 && (
-                              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20 shrink-0">
-                                <Flame className="w-2.5 h-2.5 text-[#ff6b00]" />
-                                <span className="text-[9px] font-black text-[#ff6b00]">{habit.streak}</span>
+                              {habit.streak > 0 && (
+                              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#ff3b30]/10 border border-[#ff3b30]/20 shrink-0">
+                                <Flame className="w-2.5 h-2.5 text-[#ff3b30]" />
+                                <span className="text-[9px] font-black text-[#ff3b30]">{habit.streak}</span>
                               </div>
                             )}
                           </div>

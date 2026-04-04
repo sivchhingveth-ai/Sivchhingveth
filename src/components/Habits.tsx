@@ -429,9 +429,9 @@ export const Habits: React.FC<HabitsProps> = ({
                                  {habit.name.toUpperCase()}
                               </h4>
                               <div className="flex items-center gap-3 mt-2">
-                                <div className="flex items-center gap-1 bg-[#ff6b00]/10 px-2 py-0.5 rounded-full">
-                                  <Flame className="w-3.5 h-3.5 text-[#ff6b00]" />
-                                  <span className="text-[11px] font-black text-[#ff6b00]">{habit.streak}</span>
+                                <div className="flex items-center gap-1 bg-[#ff3b30]/10 px-2 py-0.5 rounded-full">
+                                  <Flame className="w-3.5 h-3.5 text-[#ff3b30]" />
+                                  <span className="text-[11px] font-black text-[#ff3b30]">{habit.streak}</span>
                                 </div>
                                 <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{target} Days</span>
                               </div>
