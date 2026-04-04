@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Habit } from '../types';
-import { Edit2, Trash2, Plus, Activity, TrendingUp, Search, Settings, Clock, ChevronLeft, ChevronRight, Check, Circle, AlignLeft, Info, Flame, Pencil } from 'lucide-react';
+import { Edit2, Trash2, Plus, Activity, TrendingUp, Search, Target, Clock, ChevronLeft, ChevronRight, Check, Circle, AlignLeft, Info, Flame, Pencil } from 'lucide-react';
 import { getEffectiveDate, formatDateStr } from '../utils/dateUtils';
 import { Tabs } from './Tabs';
 
@@ -23,11 +23,11 @@ interface HabitsProps {
 
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'reset', label: 'Health', time: 'reset', icon: Settings, color: '#34c759' },
-  { key: 'growth', label: 'Growth', time: 'growth', icon: Settings, color: '#bf7af0' },
-  { key: 'distraction', label: 'Discipline', time: 'distraction', icon: Settings, color: '#1d9bf0' },
-  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Settings, color: '#ff3b30' },
-  { key: 'spending', label: 'Boundary', time: 'spending', icon: Settings, color: '#FFD700' },
+  { key: 'reset', label: 'Health', time: 'reset', icon: Target, color: '#34c759' },
+  { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
+  { key: 'distraction', label: 'Discipline', time: 'distraction', icon: Target, color: '#1d9bf0' },
+  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Target, color: '#ff3b30' },
+  { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#FFD700' },
 ] as const;
 
 const getPhaseForHabit = (habit: Habit) => {
@@ -246,7 +246,7 @@ export const Habits: React.FC<HabitsProps> = ({
                     touchAction: 'manipulation'
                   }}
                 >
-                  <Settings className="w-4 h-4" style={{ color: selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.color : 'currentColor' }} />
+                  <Target className="w-4 h-4" style={{ color: selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.color : 'currentColor' }} />
                   <span className="hidden sm:inline">{selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.label.toUpperCase() : 'ALL CATEGORIES'}</span>
                   <span className="sm:hidden">{selectedCategory ? TIME_PHASES.find(p => p.key === selectedCategory)?.label.toUpperCase() : 'ALL'}</span>
                   <ChevronRight className={`w-4 h-4 ${showCategoryFilter ? 'rotate-90' : ''}`} style={{ transition: 'none' }} />
@@ -287,7 +287,7 @@ export const Habits: React.FC<HabitsProps> = ({
                             <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 ${
                               !selectedCategory ? 'bg-white/10' : 'bg-white/[0.05]'
                             }`}>
-                              <Settings className="w-3 h-3 text-white/50" />
+                              <Target className="w-3 h-3 text-white/50" />
                             </div>
                             <span className={`text-[13px] font-medium tracking-wide uppercase ${
                               !selectedCategory ? 'text-white' : 'text-white/60'
