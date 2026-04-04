@@ -23,7 +23,7 @@ interface HabitsProps {
 
 // Time phase definitions
 const TIME_PHASES = [
-  { key: 'reset', label: 'Reset', time: 'reset', icon: Target, color: '#34c759' },
+  { key: 'reset', label: 'Health', time: 'reset', icon: Target, color: '#34c759' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
   { key: 'distraction', label: 'Distraction', time: 'distraction', icon: Target, color: '#ff3b30' },
   { key: 'daily_rule', label: 'Rules', time: 'any', icon: Target, color: '#1d9bf0' },
