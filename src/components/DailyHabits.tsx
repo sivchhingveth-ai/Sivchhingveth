@@ -23,7 +23,7 @@ interface DailyHabitsProps {
 // Time phase definitions
 const TIME_PHASES = [
   { key: 'reset', label: 'Health', time: 'reset', icon: Target, color: '#34c759', emoji: '🌱' },
-  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Target, color: '#ff3b30', emoji: '🎯' },
+  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Target, color: '#FF69B4', emoji: '🎯' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0', emoji: '🚀' },
   { key: 'distraction', label: 'Discipline', time: 'distraction', icon: Target, color: '#1d9bf0', emoji: '🚫' },
   { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#FFD700', emoji: '💰' },
@@ -366,8 +366,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
 
             {/* Streak Chip */}
             <div className="bg-[#16181c] border border-[#2f3336] rounded-xl p-1.5 md:p-2 flex items-center gap-2 shadow-xl flex-1 md:flex-none justify-center md:justify-start">
-                              <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center ${isHistory ? 'bg-[#71767b]/10 border border-[#71767b]/20' : 'bg-[#ff3b30]/10 border border-[#ff3b30]/20'}`}>
-                <Flame className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isHistory ? 'text-[#71767b]' : 'text-[#ff3b30]'}`} />
+                              <div className={`w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center ${isHistory ? 'bg-[#71767b]/10 border border-[#71767b]/20' : 'bg-[#FF69B4]/10 border border-[#FF69B4]/20'}`}>
+                <Flame className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isHistory ? 'text-[#71767b]' : 'text-[#FF69B4]'}`} />
               </div>
               <div className="text-right pr-1">
                 <p className="text-[13px] md:text-[15px] font-black text-[#eff3f4] leading-none">{currentStreak}</p>
@@ -582,8 +582,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                             </p>
                             {habit.streak > 0 && (
                               <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#ff6b00]/10 border border-[#ff6b00]/20 shrink-0">
-                                <Flame className="w-2.5 h-2.5 text-[#ff3b30]" />
-                                    <span className="text-[9px] font-black text-[#ff3b30]">{habit.streak}</span>
+                                <Flame className="w-2.5 h-2.5 text-[#FF69B4]" />
+                                    <span className="text-[9px] font-black text-[#FF69B4]">{habit.streak}</span>
                               </div>
                             )}
                           </div>

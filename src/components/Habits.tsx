@@ -26,7 +26,7 @@ const TIME_PHASES = [
   { key: 'reset', label: 'Health', time: 'reset', icon: Target, color: '#34c759' },
   { key: 'growth', label: 'Growth', time: 'growth', icon: Target, color: '#bf7af0' },
   { key: 'distraction', label: 'Discipline', time: 'distraction', icon: Target, color: '#1d9bf0' },
-  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Target, color: '#ff3b30' },
+  { key: 'daily_rule', label: 'Eliminate', time: 'any', icon: Target, color: '#FF69B4' },
   { key: 'spending', label: 'Boundary', time: 'spending', icon: Target, color: '#FFD700' },
 ] as const;
 
@@ -429,9 +429,9 @@ export const Habits: React.FC<HabitsProps> = ({
                                  {habit.name.toUpperCase()}
                               </h4>
                               <div className="flex items-center gap-3 mt-2">
-                                <div className="flex items-center gap-1 bg-[#ff3b30]/10 px-2 py-0.5 rounded-full">
-                                  <Flame className="w-3.5 h-3.5 text-[#ff3b30]" />
-                                  <span className="text-[11px] font-black text-[#ff3b30]">{habit.streak}</span>
+                                <div className="flex items-center gap-1 bg-[#FF69B4]/10 px-2 py-0.5 rounded-full">
+                                  <Flame className="w-3.5 h-3.5 text-[#FF69B4]" />
+                                  <span className="text-[11px] font-black text-[#FF69B4]">{habit.streak}</span>
                                 </div>
                                 <span className="text-[11px] font-bold text-[#71767b] uppercase tracking-widest">{totalMonthly}/{target} Days</span>
                               </div>
