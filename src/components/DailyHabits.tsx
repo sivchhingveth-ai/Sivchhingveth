@@ -514,10 +514,11 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                         }}
                         className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-all duration-300 group border-2 bit-click-spring touch-manipulation ${isDone
                           ? 'border-[#4a4d54] hover:border-[#5a5d64]'
-                          : 'bg-transparent border-[#4a4d54] hover:bg-white/[0.02] hover:border-[#5a5d64]'
+                          : 'bg-transparent border-[#2f3336] hover:bg-white/[0.02] hover:border-[#71767b]'
                           }`}
                         style={{
                           backgroundColor: isDone ? `${phase.color}15` : 'transparent',
+                          borderColor: isDone ? '#4a4d54' : `${phase.color}60`,
                           touchAction: 'manipulation'
                         } as React.CSSProperties}
                       >
