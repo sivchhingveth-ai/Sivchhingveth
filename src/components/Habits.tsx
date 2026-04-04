@@ -178,6 +178,9 @@ export const Habits: React.FC<HabitsProps> = ({
     return currentMonth.getFullYear() <= start.getFullYear() && currentMonth.getMonth() <= start.getMonth();
   }, [currentMonth, startDate]);
 
+  // Animation delay counter for card entry animations
+  let globalIdx = 0;
+
   return (
     <div className="flex flex-col relative w-full h-full">
 
@@ -371,10 +374,16 @@ export const Habits: React.FC<HabitsProps> = ({
                     const target = habit.monthlyTarget || daysInCurrentMonth;
                     const completionRate = Math.min(Math.round((totalMonthly / target) * 100), 100);
                     const isExpanded = String(showActionsId) === String(habit.id);
+                    // Cap animation delay at 10 items to prevent mobile performance issues
+                    const animationDelay = `${Math.min(globalIdx++, 10) * 50}ms`;
 
                     return (
                       <div
                         key={habit.id}
+                        className="animate-pop-in fill-mode-backwards"
+                        style={{ animationDelay, willChange: 'transform, opacity' }}
+                      >
+                      <div
                         data-habit-id={String(habit.id)}
                         onClick={() => setShowActionsId(isExpanded ? null : habit.id)}
                         className={`w-full flex flex-col rounded-[24px] transition-all duration-500 group relative overflow-hidden cursor-pointer border-2 touch-manipulation ${
@@ -500,6 +509,7 @@ export const Habits: React.FC<HabitsProps> = ({
                             </div>
                           </div>
                         )}
+                      </div>
                       </div>
                     );
                   })}
