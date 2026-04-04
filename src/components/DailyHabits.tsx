@@ -434,7 +434,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                     const isExpanded = String(expandedHistoryHabit) === String(habit.id);
                     
                     return (
-                      <div key={habit.id} data-history-habit={String(habit.id)} className="animate-pop-in fill-mode-backwards" style={{ animationDelay, willChange: 'transform, opacity' }}>
+                      <div key={habit.id} data-history-habit={String(habit.id)}>
                         {/* Unified Card Container */}
                         <div className={`overflow-hidden transition-all ${
                           isExpanded 
