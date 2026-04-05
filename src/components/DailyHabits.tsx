@@ -576,7 +576,8 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                     >
                       <div
                         id={`habit-${habit.id}`}
-                        onPointerDown={() => {
+                        onClick={(e) => {
+                          // Only toggle on actual click, not scroll
                           if (!isHistory) onToggleHabit(habit.id, todayStr);
                         }}
                         className={`w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-2xl transition-transform duration-100 group border-2 cursor-pointer select-none touch-manipulation active:scale-[0.98] ${isDone
@@ -585,7 +586,7 @@ export const DailyHabits: React.FC<DailyHabitsProps> = ({
                           }`}
                         style={{
                           borderColor: isDone ? undefined : `${phase.color}60`,
-                          touchAction: 'manipulation',
+                          touchAction: 'pan-y', // Allow vertical scroll, prevent horizontal
                           WebkitTapHighlightColor: 'transparent'
                         } as React.CSSProperties}
                       >
